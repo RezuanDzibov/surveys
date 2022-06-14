@@ -24,7 +24,7 @@ SQL_DATABASE = os.getenv("SQL_DATABASE")
 
 EMAILS_FROM_NAME = PROJECT_NAME
 EMAIL_RESET_TOKEN_EXPIRE = 48
-EMAIL_TEMPLATES_DIR = "email-templates/build"
+EMAIL_TEMPLATES_DIR = "email-templates/htmls"
 
 SMTP_TLS = bool(os.getenv("SMTP_TLS"))
 SMTP_PORT = os.getenv("SMTP_PORT")
