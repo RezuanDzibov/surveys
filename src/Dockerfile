@@ -6,7 +6,7 @@ RUN mkdir -p $WEB_HOME
 
 WORKDIR $WEB_HOME
 
-RUN apt update && apt install python3 -y
+RUN apt update && apt install python3 netcat -y
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -16,3 +16,6 @@ RUN pip install --upgrade pip
 COPY . $WEB_HOME
 
 RUN pip install -r requirements.txt
+
+RUN chmod +x /home/app/web/entrypoint.sh
+ENTRYPOINT ["/home/app/web/entrypoint.sh"]
