@@ -18,7 +18,7 @@ auth_router = APIRouter()
 @auth_router.post("/registration", response_model=Message)
 def user_registration(new_user: UserRegistrationIn, task: BackgroundTasks, session: Session = Depends(get_session)):
     user_services.create_user(session=session, new_user=new_user, task=task)
-    return Message(message="A verification email has just sent")
+    return Message(message="A verification email has just been sent")
 
 
 @auth_router.post("/login/access-token", response_model=Token)
