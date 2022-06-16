@@ -7,10 +7,12 @@ from starlette.status import HTTP_403_FORBIDDEN
 
 from auth.jwt import ALGORITHM
 from auth.schemas import TokenPayload
-from config import settings
+from settings import get_settings
 from db.models.user import User
 from db.session import get_session
 from user import services as user_services
+
+settings = get_settings()
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/login/access-token")
 

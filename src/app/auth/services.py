@@ -10,11 +10,12 @@ import crud
 from auth.jwt import ALGORITHM
 from auth.security import get_password_hash, verify_password
 from auth.send_email import send_reset_password_email
-from config import settings
+from settings import get_settings
 from db.models.auth import Verification
 from db.models.user import User
 from user import services as user_services
 
+settings = get_settings()
 
 password_reset_jwt_subject = "preset"
 

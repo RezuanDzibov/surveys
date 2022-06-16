@@ -4,8 +4,9 @@ from smtplib import SMTP
 
 from jinja2 import Environment, FileSystemLoader
 
-from config import settings
+from settings import get_settings
 
+settings = get_settings()
 
 password_reset_jwt_subject = "preset"
 

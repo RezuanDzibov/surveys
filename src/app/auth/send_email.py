@@ -1,5 +1,7 @@
-from config import settings
+from settings import get_settings
 from emails import send_email
+
+settings = get_settings()
 
 
 def send_new_account_email(email_to: str, username: str, password: str, uuid: str) -> None:
