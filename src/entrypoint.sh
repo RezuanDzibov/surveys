@@ -5,4 +5,5 @@ while ! nc -z db 5432; do
 done
 
 bash -c "cd app && alembic revision --autogenerate && alembic upgrade head"
+bash -c "cd app && python fixtures.py"
 exec "$@"
