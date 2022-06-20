@@ -31,6 +31,16 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
+    ADMIN_FIXTURE_USERNAME: str
+    ADMIN_FIXTURE_EMAIL: str
+    ADMIN_FIXTURE_PASSWORD: str
+    ADMIN_FIXTURE_FIRST_NAME: str
+    ADMIN_FIXTURE_LAST_NAME: str
+    ADMIN_FIXTURE_BIRTH_DATE: str
+    ADMIN_FIXTURE_IS_ACTIVE: bool = True
+    ADMIN_FIXTURE_IS_STUFF: bool = True
+    ADMIN_FIXTURE_IS_SUPERUSER: bool = True
+
     @property
     def EMAILS_ENABLED(self) -> str:
         return f"{self.SMTP_HOST}{self.SMTP_PORT}{self.EMAILS_FROM_EMAIL}"
