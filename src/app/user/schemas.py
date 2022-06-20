@@ -1,4 +1,4 @@
-from pydantic import BaseModel, constr, EmailStr, PastDate
+from pydantic import BaseModel, constr, EmailStr, PastDate, UUID4
 
 
 class BaseUser(BaseModel):
@@ -18,4 +18,5 @@ class UserRegistrationIn(BaseUser):
 
 
 class UserRetrieve(BaseUser):
+    id: UUID4
     email: EmailStr
