@@ -4,9 +4,9 @@ from auth.permissions import get_current_active_user
 from db.models.user import User
 from user.schemas import BaseUser
 
-user_router = APIRouter()
+router = APIRouter()
 
 
-@user_router.get("/me", response_model=BaseUser)
+@router.get("/me", response_model=BaseUser)
 def get_current_user(user: User = Depends(get_current_active_user)):
     return BaseUser.from_orm(user)
