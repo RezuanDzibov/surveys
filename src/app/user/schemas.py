@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, constr, EmailStr, PastDate, UUID4
 
 
@@ -20,3 +22,10 @@ class UserRegistrationIn(BaseUser):
 class UserRetrieve(BaseUser):
     id: UUID4
     email: EmailStr
+
+
+class UserUpdate(BaseUser):
+    username: Optional[constr(max_length=255)]
+    first_name: Optional[constr(max_length=100)]
+    last_name: Optional[constr(max_length=100)]
+    birth_date: Optional[PastDate]
