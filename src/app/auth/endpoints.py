@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 
 from auth import services as auth_services
 from auth.jwt import create_token
-from auth.schemas import Token, Message, OAuth2TokenRequestForm, PasswordResetForm
+from auth.schemas import Token, OAuth2TokenRequestForm, PasswordResetForm
 from db.session import get_session
 from user import services as user_services
 from user.schemas import UserRegistrationIn
+from schemas import Message
 
 router = APIRouter()
 
