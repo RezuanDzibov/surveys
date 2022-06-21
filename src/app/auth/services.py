@@ -44,7 +44,7 @@ def create_verification(session: Session, user_id: str) -> Verification:
         session=session,
         model=Verification,
         to_insert={"user_id": user_id},
-        returning=[Verification.id],
+        to_return=[Verification.id],
     )
     return verification
 

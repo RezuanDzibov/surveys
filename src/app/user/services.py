@@ -22,7 +22,12 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
     raw_password = new_user.dict().pop("password")
     hash_password = get_password_hash(raw_password)
     new_user.password = hash_password
-    user = crud.insert_object(session=session, model=User, to_insert=new_user.dict(), returning=[User.id])
+    user = crud.insert_object(
+        session=session,
+        model=User,
+        to_insert=new_user.dict(),
+        to_return=[User.id],
+    )
     verification = auth_services.create_verification(session=session, user_id=str(user))
     task.add_task(
         send_new_account_email, new_user.email, new_user.username, raw_password, verification,
@@ -41,6 +46,5 @@ def update_user(session: Session, where_statements: list, to_update: dict) -> Us
         model=User,
         where_statements=where_statements,
         to_update=to_update,
-        returning=[],
     )
     return user

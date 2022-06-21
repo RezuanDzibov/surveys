@@ -23,7 +23,6 @@ def create_admin_user() -> None:
             "is_staff": settings.ADMIN_FIXTURE_IS_STUFF,
             "is_superuser": settings.ADMIN_FIXTURE_IS_SUPERUSER,
         },
-        returning=[],
     )
 
 

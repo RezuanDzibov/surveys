@@ -18,31 +18,31 @@ def update_model_instance(session: Session, object_, to_update: dict):
     session.commit()
 
 
-def update_object(session: Session, model, where_statements: list, to_update: dict, returning: list):
-    statement = update(model).where(*where_statements).values(**to_update).returning(*returning)
+def update_object(session: Session, model, where_statements: list, to_update: dict, to_return: list = list()):
+    statement = update(model).where(*where_statements).values(**to_update).returning(*to_return)
     result = session.execute(statement)
     session.commit()
-    if returning:
+    if to_return:
         object_ = result.scalar()
         return object_
     return None
 
 
-def insert_object(session: Session, model, to_insert: dict, returning: list):
-    statement = insert(model).values(**to_insert).returning(*returning)
+def insert_object(session: Session, model, to_insert: dict, to_return: list = list()):
+    statement = insert(model).values(**to_insert).returning(*to_return)
     result = session.execute(statement)
     session.commit()
-    if returning:
+    if to_return:
         object_ = result.scalar()
         return object_
     return None
 
 
-def delete_object(session: Session, model, where_statements: list, returning: list=[]):
-    statement = delete(model).where(*where_statements).returning(*returning)
+def delete_object(session: Session, model, where_statements: list, to_return: list = list()):
+    statement = delete(model).where(*where_statements).returning(*to_return)
     result = session.execute(statement)
     session.commit()
-    if returning:
+    if to_return:
         object_ = result.scalar()
         return object_
     return None
