@@ -41,7 +41,7 @@ def get_user(session: Session, where_statements: list) -> User:
 
 
 def update_user(session: Session, where_statements: list, to_update: dict) -> User:
-    user = crud.update_object(
+    user = crud.update_object_in_db(
         session=session,
         model=User,
         where_statements=where_statements,

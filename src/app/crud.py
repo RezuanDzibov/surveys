@@ -18,7 +18,7 @@ def update_model_instance(session: Session, object_, to_update: dict):
     session.commit()
 
 
-def update_object(session: Session, model, where_statements: list, to_update: dict, to_return: list = list()):
+def update_object_in_db(session: Session, model, where_statements: list, to_update: dict, to_return: list = list()):
     statement = update(model).where(*where_statements).values(**to_update).returning(*to_return)
     result = session.execute(statement)
     session.commit()
