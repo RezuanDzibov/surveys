@@ -115,7 +115,7 @@ def reset_password(session: Session, token: str, new_password: str) -> None:
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     password_hash = get_password_hash(new_password)
-    crud.update_model_instance(
+    crud.update_object(
         session=session,
         object_=user,
         to_update={"password": password_hash},

@@ -22,7 +22,7 @@ def update_current_user(
     current_user: User = Depends(get_current_active_user),
     session: Session = Depends(get_session)
 ):
-    crud.update_model_instance(
+    crud.update_object(
         session=session,
         object_=current_user,
         to_update=user_to_update.dict(exclude_none=True),

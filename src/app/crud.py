@@ -9,7 +9,7 @@ def is_object_exists(session: Session, statement):
     return is_object_exists
 
 
-def update_model_instance(session: Session, object_, to_update: dict):
+def update_object(session: Session, object_, to_update: dict):
     for column_name, column_value in to_update.items():
         if not hasattr(object_, column_name):
             raise AttributeError(f"The object has no column {column_name}")
