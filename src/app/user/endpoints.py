@@ -16,15 +16,17 @@ def get_current_user(user: User = Depends(get_current_active_user)):
     return UserRetrieve.from_orm(user)
 
 
-@router.patch("/me/update", response_model=Message)
+@router.patch("/me/update", response_model=UserRetrieve)
 def update_current_user(
     user_to_update: UserUpdate,
     current_user: User = Depends(get_current_active_user),
     session: Session = Depends(get_session)
 ):
-    crud.update_object(
+    user = crud.update_object(
         session=session,
         object_=current_user,
         to_update=user_to_update.dict(exclude_none=True),
     )
-    return Message(message="You've updated your user details.")
+    # return Message(message="You've updated your user details.")
+    return user
+
