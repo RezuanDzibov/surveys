@@ -16,6 +16,8 @@ def update_object(session: Session, object_, to_update: dict):
         setattr(object_, column_name, column_value)
     session.add(object_)
     session.commit()
+    session.refresh(object_)
+    return object_
 
 
 def update_object_in_db(session: Session, model, where_statements: list, to_update: dict, to_return: list = list()):
