@@ -48,12 +48,6 @@ def update_user(
     user_object_to_update: Optional[User] = None,
     where_statements: Optional[list] = None,
 ) -> User:
-    # user = crud.update_object_in_db(
-    #     session=session,
-    #     model=User,
-    #     where_statements=where_statements,
-    #     to_update=to_update,
-    # )
     if user_object_to_update:
         if isinstance(user_object_to_update, User):
             user = crud.update_object(
