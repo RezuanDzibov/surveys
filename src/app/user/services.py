@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
@@ -40,11 +42,33 @@ def get_user(session: Session, where_statements: list) -> User:
     return user
 
 
-def update_user(session: Session, where_statements: list, to_update: dict) -> User:
-    user = crud.update_object_in_db(
-        session=session,
-        model=User,
-        where_statements=where_statements,
-        to_update=to_update,
-    )
-    return user
+def update_user(
+    session: Session,
+    to_update: dict,
+    user_object_to_update: Optional[User] = None,
+    where_statements: Optional[list] = None,
+) -> User:
+    # user = crud.update_object_in_db(
+    #     session=session,
+    #     model=User,
+    #     where_statements=where_statements,
+    #     to_update=to_update,
+    # )
+    if user_object_to_update:
+        if isinstance(user_object_to_update, User):
+            user = crud.update_object(
+                session=session,
+                object_=user_object_to_update,
+                to_update=to_update,
+            )
+            return user
+        raise TypeError("You've provided not an User instance.")
+    if where_statements:
+        user = crud.update_object_in_db(
+            session=session,
+            model=User,
+            where_statements=where_statements,
+            to_update=to_update,
+        )
+        return user
+    raise AttributeError("You haven't provided user_to_update or where_statements,")
