@@ -1,15 +1,19 @@
+from typing import Optional
+
 from sqlalchemy import delete, exists, insert, update
 from sqlalchemy.orm import Session
 
+from db.models import Base
 
-def is_object_exists(session: Session, statement):
+
+def is_object_exists(session: Session, statement) -> Base:
     statement = exists(statement).select()
     result = session.execute(statement)
     is_object_exists = result.scalar()
     return is_object_exists
 
 
-def update_object(session: Session, object_, to_update: dict):
+def update_object(session: Session, object_: Base, to_update: dict) -> Base:
     for column_name, column_value in to_update.items():
         if not hasattr(object_, column_name):
             raise AttributeError(f"The object has no column {column_name}")
@@ -20,7 +24,13 @@ def update_object(session: Session, object_, to_update: dict):
     return object_
 
 
-def update_object_in_db(session: Session, model, where_statements: list, to_update: dict, to_return: list = list()):
+def update_object_in_db(
+    session: Session,
+    model: Base,
+    where_statements: list,
+    to_update: dict,
+    to_return: Optional[list] = None,
+) -> Base:
     statement = update(model).where(*where_statements).values(**to_update).returning(*to_return)
     result = session.execute(statement)
     session.commit()
@@ -30,7 +40,12 @@ def update_object_in_db(session: Session, model, where_statements: list, to_upda
     return None
 
 
-def insert_object(session: Session, model, to_insert: dict, to_return: list = list()):
+def insert_object(
+    session: Session,
+    model: Base,
+    to_insert: dict,
+    to_return: Optional[list] = None,
+) -> Base:
     statement = insert(model).values(**to_insert).returning(*to_return)
     result = session.execute(statement)
     session.commit()
@@ -40,7 +55,12 @@ def insert_object(session: Session, model, to_insert: dict, to_return: list = li
     return None
 
 
-def delete_object(session: Session, model, where_statements: list, to_return: list = list()):
+def delete_object(
+    session: Session,
+    model: Base,
+    where_statements: list,
+    to_return: list = None,
+) -> Base:
     statement = delete(model).where(*where_statements).returning(*to_return)
     result = session.execute(statement)
     session.commit()
@@ -50,7 +70,7 @@ def delete_object(session: Session, model, where_statements: list, to_return: li
     return None
 
 
-def get_object(session: Session, statement):
+def get_object(session: Session, statement) -> Base:
     result = session.execute(statement)
     object_ = result.scalar()
     return object_
