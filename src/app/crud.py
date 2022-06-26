@@ -3,10 +3,10 @@ from typing import Optional
 from sqlalchemy import delete, exists, insert, update
 from sqlalchemy.orm import Session
 
-from db.models import Base
+from db.models.base import Base
 
 
-def is_object_exists(session: Session, statement) -> Base:
+def is_object_exists(session: Session, statement) -> bool:
     statement = exists(statement).select()
     result = session.execute(statement)
     is_object_exists = result.scalar()
@@ -30,8 +30,10 @@ def update_object_in_db(
     where_statements: list,
     to_update: dict,
     to_return: Optional[list] = None,
-) -> Base:
-    statement = update(model).where(*where_statements).values(**to_update).returning(*to_return)
+) -> Optional[Base]:
+    statement = update(model).where(*where_statements).values(**to_update)
+    if to_return:
+        statement = statement.returning(*to_return)
     result = session.execute(statement)
     session.commit()
     if to_return:
@@ -45,8 +47,10 @@ def insert_object(
     model: Base,
     to_insert: dict,
     to_return: Optional[list] = None,
-) -> Base:
-    statement = insert(model).values(**to_insert).returning(*to_return)
+) -> Optional[Base]:
+    statement = insert(model).values(**to_insert)
+    if to_return:
+        statement = statement.returning(*to_return)
     result = session.execute(statement)
     session.commit()
     if to_return:
@@ -60,7 +64,7 @@ def delete_object(
     model: Base,
     where_statements: list,
     to_return: list = None,
-) -> Base:
+) -> Optional[Base]:
     statement = delete(model).where(*where_statements).returning(*to_return)
     result = session.execute(statement)
     session.commit()
