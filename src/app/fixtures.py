@@ -7,9 +7,9 @@ from settings import get_settings
 settings = get_settings()
 
 
-def create_admin_user() -> None:
+def create_admin_user() -> User:
     session = next(get_session())
-    crud.insert_object(
+    user = crud.insert_object(
         session=session,
         model=User,
         to_insert={
@@ -24,6 +24,7 @@ def create_admin_user() -> None:
             "is_superuser": settings.ADMIN_FIXTURE_IS_SUPERUSER,
         },
     )
+    return user
 
 
 if __name__ == "__main__":
