@@ -3,7 +3,7 @@ from functools import lru_cache
 
 from pydantic import BaseSettings, PostgresDsn, EmailStr
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
