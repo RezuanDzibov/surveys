@@ -18,7 +18,7 @@ router = APIRouter()
 @router.post("/registration", response_model=Message)
 def user_registration(new_user: UserRegistrationIn, task: BackgroundTasks, session: Session = Depends(get_session)):
     user_services.create_user(session=session, new_user=new_user, task=task)
-    return Message(message="A verification email has just sent")
+    return Message(message="Verification email has just been sent.")
 
 
 @router.post("/login/access-token", response_model=Token)
@@ -27,9 +27,9 @@ def user_access_token(
     session: Session = Depends(get_session),
 ):
     user = auth_services.authenticate(session=session, login=form_data.login, password=form_data.password)
-    if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return create_token(user.id.hex)
+    if not user.get("is_active"):
+        raise HTTPException(status_code=400, detail="Inactive user.")
+    return Token(**create_token(user.get("id").hex))
 
 
 @router.get("/confirm-email/{verification_uuid}", response_model=Message)
@@ -41,7 +41,7 @@ def confirm_email(verification_uuid: UUID, session: Session = Depends(get_sessio
 @router.post("/password-recovery/{email}", response_model=Message)
 def recover_password(email: str, task: BackgroundTasks, session: Session = Depends(get_session)):
     auth_services.password_recover(session=session, task=task, email=email)
-    return Message(message="The recovery email has been sent.")
+    return Message(message="Recovery email has been sent.")
 
 
 @router.post("/reset-password", response_model=Message)

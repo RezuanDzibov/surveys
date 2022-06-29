@@ -5,9 +5,6 @@ from settings import get_settings
 
 settings = get_settings()
 
-ALGORITHM = "HS256"
-access_token_jwt_subject = "access"
-
 
 def create_token(user_id: int) -> dict:
     access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -15,7 +12,7 @@ def create_token(user_id: int) -> dict:
         "access_token": create_access_token(
             data={"user_id": user_id}, expires_delta=access_token_expires
         ),
-        "token_type": "bearer",
+        "token_type": "Bearer",
     }
 
 
@@ -25,6 +22,6 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None) -> str:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire, "sub": access_token_jwt_subject})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    to_encode.update({"exp": expire, "sub": settings.ACCESS_TOKEN_JWT_SUBJECT})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.TOKEN_ENCODE_ALGORITHM)
     return encoded_jwt

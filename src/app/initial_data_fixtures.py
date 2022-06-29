@@ -7,7 +7,7 @@ from settings import get_settings
 settings = get_settings()
 
 
-def create_admin_user() -> User:
+def create_admin_user() -> dict:
     session = next(get_session())
     user = crud.insert_object(
         session=session,

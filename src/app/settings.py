@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     SECRET_KEY: str
     SERVER_HOST: str
+    TOKEN_ENCODE_ALGORITHM = "HS256"
+    ACCESS_TOKEN_JWT_SUBJECT = "access"
+    PASSWORD_RESET_JWT_SUBJECT = "preset"
 
     SQL_ENGINE: str
     SQL_USER: str

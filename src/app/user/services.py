@@ -28,15 +28,15 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
         session=session,
         model=User,
         to_insert=new_user.dict(),
-        to_return=[User.id],
+        return_object=[User.id],
     )
-    verification = auth_services.create_verification(session=session, user_id=str(user))
+    verification = auth_services.create_verification(session=session, user_id=str(user.get("id")))
     task.add_task(
-        send_new_account_email, new_user.email, new_user.username, raw_password, verification,
+        send_new_account_email, new_user.email, new_user.username, raw_password, verification.get("id").hex,
     )
 
 
-def get_user(session: Session, where_statements: list) -> User:
+def get_user(session: Session, where_statements: list) -> dict:
     statement = select(User).where(*where_statements)
     user = crud.get_object(session=session, statement=statement)
     return user
@@ -45,24 +45,12 @@ def get_user(session: Session, where_statements: list) -> User:
 def update_user(
     session: Session,
     to_update: dict,
-    user_object_to_update: Optional[User] = None,
     where_statements: Optional[list] = None,
-) -> User:
-    if user_object_to_update:
-        if isinstance(user_object_to_update, User):
-            user = crud.update_object(
-                session=session,
-                object_=user_object_to_update,
-                to_update=to_update,
-            )
-            return user
-        raise TypeError("You've provided not an User instance.")
-    if where_statements:
-        user = crud.update_object_in_db(
-            session=session,
-            model=User,
-            where_statements=where_statements,
-            to_update=to_update,
-        )
-        return user
-    raise AttributeError("You haven't provided user_to_update or where_statements,")
+) -> dict:
+    user = crud.update_object(
+        session=session,
+        model=User,
+        where_statements=where_statements,
+        to_update=to_update,
+    )
+    return user

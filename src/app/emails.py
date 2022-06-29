@@ -8,8 +8,6 @@ from settings import get_settings
 
 settings = get_settings()
 
-password_reset_jwt_subject = "preset"
-
 
 def send_email(email_to: str, subject: str, template_name: str, environment: dict) -> None:
     env = Environment(loader=FileSystemLoader(settings.EMAIL_TEMPLATES_DIR))

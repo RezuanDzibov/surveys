@@ -6,7 +6,7 @@ settings = get_settings()
 
 def send_new_account_email(email_to: str, username: str, password: str, uuid: str) -> None:
     verification_link = f"http://{settings.SERVER_HOST}/auth/confirm-email/{uuid}"
-    subject = "A new user"
+    subject = "New user."
     send_email(
         email_to=email_to,
         template_name="new_account.html",
@@ -26,7 +26,7 @@ def send_reset_password_email(username: str, email: str, token: str) -> None:
         use_token = token.decode()
     else:
         use_token = token
-    subject = f"Password recovery for user {username}"
+    subject = f"Password recovery for user {username}."
     send_email(
         email_to=email,
         template_name="reset_password.html",
