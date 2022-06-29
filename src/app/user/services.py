@@ -28,7 +28,6 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
         session=session,
         model=User,
         to_insert=new_user.dict(),
-        return_object=[User.id],
     )
     verification = auth_services.create_verification(session=session, user_id=str(user.get("id")))
     task.add_task(
