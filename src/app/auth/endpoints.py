@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from auth import services as auth_services
 from auth.jwt import create_token
-from auth.schemas import Token, OAuth2TokenRequestForm, PasswordResetForm
+from auth.schemas import Token, OAuth2TokenRequestForm, PasswordResetForm, PasswordChange
 from db.session import get_session
 from user import services as user_services
+from user.deps import get_current_active_user
 from user.schemas import UserRegistrationIn
 from schemas import Message
 
@@ -51,3 +52,13 @@ def reset_password(
 ):
     auth_services.reset_password(session=session, token=form.token, new_password=form.new_password)
     return Message(message="Successfully recovered password.")
+
+
+@router.patch("/change-password", response_model=Message)
+def change_password(
+        password_change: PasswordChange,
+        session: Session = Depends(get_session),
+        user: dict = Depends(get_current_active_user)
+):
+    auth_services.change_user_password(session=session, password_change=password_change, user=user)
+    return Message(message="Updated user password.")

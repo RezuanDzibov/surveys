@@ -37,3 +37,9 @@ class PasswordResetForm(BaseModel):
         new_password: constr(max_length=255, min_length=8) = Form(...),
     ):
         return cls(token=token, new_password=new_password)
+
+
+class PasswordChange(BaseModel):
+    current_password: constr(max_length=255, min_length=8)
+    new_password: constr(max_length=255, min_length=8)
+    new_password_repeated: constr(max_length=255, min_length=8)
