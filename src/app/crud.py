@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Optional, Type, Union
 
 from sqlalchemy import delete, exists, insert, update
 from sqlalchemy.exc import NoResultFound
@@ -21,15 +21,18 @@ def update_object(
     where_statements: list,
     to_update: dict,
     return_object: Optional[dict] = True,
-) -> Optional[dict]:
+) -> Optional[Union[dict, bool]]:
     statement = update(model).where(*where_statements).values(**to_update)
     if return_object:
         statement = statement.returning(model)
     result = session.execute(statement)
     session.commit()
     if return_object:
-        object_ = dict(result.one())
-        return object_
+        try:
+            object_ = dict(result.one())
+            return object_
+        except NoResultFound:
+            return False
     return None
 
 
