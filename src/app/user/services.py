@@ -13,7 +13,7 @@ from db.models.user import User
 from user.schemas import UserRegistrationIn
 
 
-def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> None:
+def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> dict:
     statement = select(User).where(or_(User.username == new_user.username, User.email == new_user.email))
     is_object_exists = crud.is_object_exists(session=session, statement=statement)
     if is_object_exists:
@@ -33,6 +33,7 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
     task.add_task(
         send_new_account_email, new_user.email, new_user.username, raw_password, verification.get("id").hex,
     )
+    return user
 
 
 def get_user(session: Session, where_statements: list) -> dict:
