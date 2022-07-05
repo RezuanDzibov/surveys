@@ -71,8 +71,7 @@ def delete_object(
 def get_object(session: Session, statement) -> Optional[dict]:
     result = session.execute(statement)
     try:
-        object_ = result.one()
-        object_ = orm_row_to_dict(object_)
+        object_ = orm_row_to_dict(result.one())
         return object_
     except NoResultFound:
         return None
