@@ -11,7 +11,7 @@ from db.models.base import Base
 def is_object_exists(session: Session, statement) -> bool:
     statement = exists(statement).select()
     result = session.execute(statement)
-    is_object_exists = result.scalar()
+    is_object_exists = result.one()[0]
     return is_object_exists
 
 
@@ -63,7 +63,7 @@ def delete_object(
     result = session.execute(statement)
     session.commit()
     if return_object:
-        object_ = orm_row_to_dict(result.one())
+        object_ = dict(result.one())
         return object_
     return None
 
