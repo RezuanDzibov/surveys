@@ -1,7 +1,8 @@
 from typing import Optional, Type, Union
 
+from fastapi import HTTPException
 from sqlalchemy import delete, exists, insert, update
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.orm import Session
 
 from db.utils import orm_row_to_dict
@@ -32,7 +33,7 @@ def update_object(
             object_ = dict(result.one())
             return object_
         except NoResultFound:
-            return False
+            raise HTTPException(status_code=404, detail="Not found")
     return None
 
 
@@ -45,12 +46,15 @@ def insert_object(
     statement = insert(model).values(**to_insert)
     if return_object:
         statement = statement.returning(model)
-    result = session.execute(statement)
-    session.commit()
-    if return_object:
-        object_ = dict(result.one())
-        return object_
-    return None
+    try:
+        result = session.execute(statement)
+        session.commit()
+        if return_object:
+            object_ = dict(result.one())
+            return object_
+        return None
+    except IntegrityError:
+        raise HTTPException(status_code=409, detail="Already exists")
 
 
 def delete_object(
@@ -58,13 +62,16 @@ def delete_object(
     model: Type[Base],
     where_statements: list,
     return_object: bool = True,
-) -> Optional[dict]:
+) -> Optional[Union[dict, bool]]:
     statement = delete(model).where(*where_statements).returning(model)
     result = session.execute(statement)
     session.commit()
     if return_object:
-        object_ = dict(result.one())
-        return object_
+        try:
+            object_ = dict(result.one())
+            return object_
+        except NoResultFound:
+            raise HTTPException(status_code=404, detail="Not found")
     return None
 
 
@@ -74,4 +81,4 @@ def get_object(session: Session, statement) -> Optional[dict]:
         object_ = orm_row_to_dict(result.one())
         return object_
     except NoResultFound:
-        return None
+        raise HTTPException(status_code=404, detail="Not found")

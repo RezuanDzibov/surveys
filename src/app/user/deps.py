@@ -25,8 +25,6 @@ def get_current_user(token: str = Security(reusable_oauth2), session: Session = 
             status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials.",
         )
     user = user_services.get_user(session=session, where_statements=[User.id == token_data.user_id])
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
     return user
 
 

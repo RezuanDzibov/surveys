@@ -50,29 +50,21 @@ def create_verification(session: Session, user_id: str) -> dict:
 def verify_registration_user(session: Session, verification_id: UUID) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
     verification = crud.get_object(session=session, statement=statement)
-    if verification:
-        user_services.update_user(
-            session=session,
-            where_statements=[User.id == verification.get("user_id")],
-            to_update={"is_active": True},
-        )
-        crud.delete_object(
-            session=session,
-            model=Verification,
-            where_statements=[Verification.id == verification_id],
-            return_object=False,
-        )
-    else:
-        raise HTTPException(status_code=404, detail="Not found.")
+    user_services.update_user(
+        session=session,
+        where_statements=[User.id == verification.get("user_id")],
+        to_update={"is_active": True},
+    )
+    crud.delete_object(
+        session=session,
+        model=Verification,
+        where_statements=[Verification.id == verification_id],
+        return_object=False,
+    )
 
 
 def password_recover(session: Session, task: BackgroundTasks, email: str) -> None:
     user = user_services.get_user(session=session, where_statements=[User.email == email])
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail=f"The user with this email: {email} doesn't exist.",
-        )
     password_reset_token = generate_password_reset_token(email)
     task.add_task(
         send_reset_password_email, username=user.get("username"), email=email, token=password_reset_token
@@ -106,12 +98,7 @@ def reset_password(session: Session, token: str, new_password: str) -> None:
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token.")
     user = user_services.get_user(session=session, where_statements=[User.email == email])
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail=f"The user with this email: {email} does not exist in the system.",
-        )
-    elif not user.get("is_active"):
+    if not user.get("is_active"):
         raise HTTPException(status_code=400, detail="Inactive user")
     password_hash = get_password_hash(new_password)
     crud.update_object(
