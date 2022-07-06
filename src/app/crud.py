@@ -1,15 +1,16 @@
-from typing import Optional, Type, Union
+from typing import Optional, Type, Union, List
 
 from fastapi import HTTPException
 from sqlalchemy import delete, exists, insert, update
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import Executable
 
 from db.utils import orm_row_to_dict
 from db.models.base import Base
 
 
-def is_object_exists(session: Session, statement) -> bool:
+def is_object_exists(session: Session, statement: Executable) -> bool:
     statement = exists(statement).select()
     result = session.execute(statement)
     is_object_exists = result.one()[0]
@@ -19,7 +20,7 @@ def is_object_exists(session: Session, statement) -> bool:
 def update_object(
     session: Session,
     model: Type[Base],
-    where_statements: list,
+    where_statements: List[Executable],
     to_update: dict,
     return_object: Optional[dict] = True,
 ) -> Optional[Union[dict, bool]]:
@@ -60,7 +61,7 @@ def insert_object(
 def delete_object(
     session: Session,
     model: Type[Base],
-    where_statements: list,
+    where_statements: List[Executable],
     return_object: bool = True,
 ) -> Optional[Union[dict, bool]]:
     statement = delete(model).where(*where_statements).returning(model)
@@ -75,7 +76,7 @@ def delete_object(
     return None
 
 
-def get_object(session: Session, statement) -> Optional[dict]:
+def get_object(session: Session, statement: Executable) -> Optional[dict]:
     result = session.execute(statement)
     try:
         object_ = orm_row_to_dict(result.one())
