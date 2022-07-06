@@ -73,5 +73,25 @@ class TestGetUser:
 
     def test_not_exists_search_by_email(self, db_session):
         with pytest.raises(HTTPException) as exception_info:
-            services.get_user(session=db_session, where_statements=[User.id == "someemail@gmail.com"])
+            services.get_user(session=db_session, where_statements=[User.email == "someemail@gmail.com"])
+            assert exception_info.value.status_code == 404
+
+
+class TestUpdateUser:
+    def test_update_exists_user(self, db_session, admin_user):
+        admin_user["username"] = "some_another_username"
+        user_in_db = services.update_user(
+            session=db_session,
+            where_statements=[User.id == admin_user.get("id")],
+            to_update={"username": "some_another_username"},
+        )
+        assert admin_user == user_in_db
+
+    def test_update_not_exists_object(self, db_session):
+        with pytest.raises(HTTPException) as exception_info:
+            services.update_user(
+                session=db_session,
+                to_update={"username": "some"},
+                where_statements=[User.username == "some0"],
+            )
             assert exception_info.value.status_code == 404
