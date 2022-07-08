@@ -25,11 +25,6 @@ def authenticate(session: Session, login: str, password: str) -> dict:
     )
     statement = statement.where(or_(User.username == login, User.email == login))
     user = crud.get_object(session=session, statement=statement)
-    if user is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"User with username or email: {login}. Not found.",
-        )
     if not verify_password(password, user.get("password")):
         raise HTTPException(
             status_code=400,
