@@ -1,6 +1,7 @@
 from typing import Optional, Type, Union, List
 
 from fastapi import HTTPException
+from psycopg2.errors import ForeignKeyViolation, UniqueViolation
 from sqlalchemy import delete, exists, insert, update
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.orm import Session
@@ -54,8 +55,11 @@ def insert_object(
             object_ = dict(result.one())
             return object_
         return None
-    except IntegrityError:
-        raise HTTPException(status_code=409, detail="Already exists")
+    except IntegrityError as exception:
+        if isinstance(exception.orig, ForeignKeyViolation):
+            raise ForeignKeyViolation from exception
+        elif isinstance(exception.orig, UniqueViolation):
+            raise HTTPException(status_code=409, detail="Already exists")
 
 
 def delete_object(
