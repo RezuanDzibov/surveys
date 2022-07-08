@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from app.db.models import Base
 from app.initial_data_fixtures import create_admin_user
 from app.settings import get_settings
-from auth.security import get_password_hash
 
 settings = get_settings()
 
@@ -45,7 +44,7 @@ def admin_user_data():
     return {
         "username": settings.ADMIN_FIXTURE_USERNAME,
         "email": settings.ADMIN_FIXTURE_EMAIL,
-        "password": get_password_hash(settings.ADMIN_FIXTURE_PASSWORD),
+        "password": settings.ADMIN_FIXTURE_PASSWORD,
         "first_name": settings.ADMIN_FIXTURE_FIRST_NAME,
         "last_name": settings.ADMIN_FIXTURE_LAST_NAME,
         "birth_date": settings.ADMIN_FIXTURE_BIRTH_DATE,
