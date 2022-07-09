@@ -42,7 +42,7 @@ def create_verification(session: Session, user_id: str) -> dict:
     return verification
 
 
-def verify_registration_user(session: Session, verification_id: UUID) -> None:
+def verify_registration_user(session: Session, verification_id: str) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
     verification = crud.get_object(session=session, statement=statement)
     user_services.update_user(
