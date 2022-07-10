@@ -54,3 +54,22 @@ def update_user(
         to_update=to_update,
     )
     return user
+
+
+def change_user_password(session: Session, password_change: PasswordChange, user: dict) -> None:
+    if not verify_password(password_change.current_password, user.get("password")):
+        raise HTTPException(
+            status_code=400,
+            detail="Provided password is incorrect",
+        )
+    if password_change.new_password == password_change.current_password:
+        raise HTTPException(status_code=400, detail="New password can't be the same as current password.")
+    if password_change.new_password != password_change.new_password_repeated:
+        raise HTTPException(status_code=401, detail="new_password and new_password_repeated doesn't match.")
+    user_services.update_user(
+        session=session,
+        to_update={
+            "password": get_password_hash(password=password_change.new_password)
+        },
+        where_statements=[User.id == user.get("id")]
+    )

@@ -60,5 +60,5 @@ def change_password(
         session: Session = Depends(get_session),
         user: dict = Depends(get_current_active_user)
 ):
-    auth_services.change_user_password(session=session, password_change=password_change, user=user)
+    user_services.change_user_password(session=session, password_change=password_change, user=user)
     return Message(message="Updated user password.")
