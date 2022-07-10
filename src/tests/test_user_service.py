@@ -10,10 +10,8 @@ from db.models import User
 
 
 class TestCreateUser:
-    def test_create_user(self, db_session, admin_user_data):
+    def test_create_user(self, db_session, admin_user_data, task):
         user_to_insert = UserRegistrationIn(**admin_user_data)
-        task = mock.MagicMock()
-        task.add_task = mock.Mock(return_value=None)
         user = services.create_user(
             session=db_session,
             new_user=user_to_insert,
@@ -21,11 +19,9 @@ class TestCreateUser:
         )
         assert user
 
-    def test_create_user_with_exists_username(self, db_session, admin_user, admin_user_data):
+    def test_create_user_with_exists_username(self, db_session, admin_user, admin_user_data, task):
         admin_user_data["email"] = "someanotheremail@gmail.com"
         user_to_insert = UserRegistrationIn(**admin_user_data)
-        task = mock.MagicMock()
-        task.add_task = mock.Mock(return_value=None)
         with pytest.raises(HTTPException) as exception_info:
             services.create_user(
                 session=db_session,
@@ -34,11 +30,9 @@ class TestCreateUser:
             )
         assert exception_info.value.status_code == 409
 
-    def test_create_user_with_exists_email(self, db_session, admin_user, admin_user_data):
+    def test_create_user_with_exists_email(self, db_session, admin_user, admin_user_data, task):
         admin_user_data["username"] = "someanotherusername"
         user_to_insert = UserRegistrationIn(**admin_user_data)
-        task = mock.MagicMock()
-        task.add_task = mock.Mock(return_value=None)
         with pytest.raises(HTTPException) as exception_info:
             services.create_user(
                 session=db_session,

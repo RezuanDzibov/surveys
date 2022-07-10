@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -52,3 +54,10 @@ def admin_user_data():
         "is_staff": settings.ADMIN_FIXTURE_IS_STUFF,
         "is_superuser": settings.ADMIN_FIXTURE_IS_SUPERUSER,
     }
+
+
+@pytest.fixture(scope="function")
+def task():
+    task = mock.Mock()
+    task.add_task = mock.MagicMock()
+    return task
