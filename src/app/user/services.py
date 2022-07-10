@@ -7,7 +7,8 @@ from starlette.background import BackgroundTasks
 
 import crud
 from auth import services as auth_services
-from auth.security import get_password_hash
+from auth.schemas import PasswordChange
+from auth.security import get_password_hash, verify_password
 from auth.send_email import send_new_account_email
 from db.models.user import User
 from user.schemas import UserRegistrationIn
@@ -54,3 +55,22 @@ def update_user(
         to_update=to_update,
     )
     return user
+
+
+def change_user_password(session: Session, password_change: PasswordChange, user: dict) -> None:
+    if not verify_password(password_change.current_password, user.get("password")):
+        raise HTTPException(
+            status_code=400,
+            detail="Provided password is incorrect",
+        )
+    if password_change.new_password == password_change.current_password:
+        raise HTTPException(status_code=400, detail="New password can't be the same as current password.")
+    if password_change.new_password != password_change.new_password_repeated:
+        raise HTTPException(status_code=401, detail="new_password and new_password_repeated doesn't match.")
+    update_user(
+        session=session,
+        to_update={
+            "password": get_password_hash(password=password_change.new_password)
+        },
+        where_statements=[User.id == user.get("id")]
+    )
