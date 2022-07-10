@@ -57,12 +57,13 @@ def verify_registration_user(session: Session, verification_id: str) -> None:
     )
 
 
-def password_recover(session: Session, task: BackgroundTasks, email: str) -> None:
+def password_recover(session: Session, task: BackgroundTasks, email: str) -> str:
     user = user_services.get_user(session=session, where_statements=[User.email == email])
     password_reset_token = generate_password_reset_token(email)
     task.add_task(
         send_reset_password_email, username=user.get("username"), email=email, token=password_reset_token
     )
+    return password_reset_token
 
 
 def generate_password_reset_token(email: str) -> str:
@@ -87,20 +88,21 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return None
 
 
-def reset_password(session: Session, token: str, new_password: str) -> None:
+def reset_password(session: Session, token: str, new_password: str) -> dict:
     email = verify_password_reset_token(token)
     if not email:
-        raise HTTPException(status_code=400, detail="Invalid token.")
+        raise HTTPException(status_code=400, detail="Invalid token")
     user = user_services.get_user(session=session, where_statements=[User.email == email])
     if not user.get("is_active"):
         raise HTTPException(status_code=400, detail="Inactive user")
     password_hash = get_password_hash(new_password)
-    crud.update_object(
+    user = crud.update_object(
         session=session,
         where_statements=[User.id == user.get("id")],
         model=User,
         to_update={"password": password_hash},
     )
+    return user
 
 
 def change_user_password(session: Session, password_change: PasswordChange, user: dict) -> None:
