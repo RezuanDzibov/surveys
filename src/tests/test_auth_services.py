@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation
 
-from auth import services as auth_services
+from app.auth import services as auth_services
 
 
 class TestAuthenticate:

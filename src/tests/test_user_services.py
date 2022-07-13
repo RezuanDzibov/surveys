@@ -1,12 +1,11 @@
-from unittest import mock
 from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
 
-from user import services
-from user.schemas import UserRegistrationIn
-from db.models import User
+from app.db.models import User
+from app.user import services
+from app.user.schemas import UserRegistrationIn
 
 
 class TestCreateUser:

@@ -7,8 +7,8 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Executable
 
-from db.utils import orm_row_to_dict
-from db.models.base import Base
+from app.db.utils import orm_row_to_dict
+from app.db.models.base import Base
 
 
 def is_object_exists(session: Session, statement: Executable) -> bool:

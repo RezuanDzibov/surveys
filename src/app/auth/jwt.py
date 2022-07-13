@@ -1,7 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
 
-from settings import get_settings
+from app.settings import get_settings
 
 settings = get_settings()
 
