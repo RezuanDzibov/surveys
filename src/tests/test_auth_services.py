@@ -3,8 +3,11 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation
+from sqlalchemy import select
 
+from app import crud
 from app.auth import services as auth_services
+from app.db.models import Verification
 
 
 class TestAuthenticate:
@@ -75,3 +78,29 @@ class TestCreateVerification:
                 session=db_session,
                 user_id=str(uuid4())
             )
+
+
+class TestVerifyRegistrationUser:
+    def test_for_exists_verification(self, db_session, admin_user):
+        verification = auth_services.create_verification(
+            session=db_session,
+            user_id=str(admin_user.get("id")),
+        )
+        auth_services.verify_registration_user(
+            session=db_session,
+            verification_id=verification.get("id"),
+        )
+        statement = select(Verification).where(Verification.id == verification.get("id"))
+        assert not crud.is_object_exists(
+            session=db_session,
+            statement=statement,
+        )
+
+    def test_for_not_exists_verification(self, db_session):
+        with pytest.raises(HTTPException) as exception_info:
+            auth_services.verify_registration_user(
+                session=db_session,
+                verification_id=str(uuid4())
+            )
+            assert exception_info.value.status_code == 404
+    
