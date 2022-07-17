@@ -105,6 +105,21 @@ class TestVerifyRegistrationUser:
             assert exception_info.value.status_code == 404
 
 
+class TestVerifyPasswordResetToken:
+    def test_for_valid_reset_token(self, db_session, admin_user, task):
+        reset_token = auth_services.recover_password(
+            session=db_session,
+            task=task,
+            email=admin_user.get("email"),
+        )
+        email = auth_services.verify_password_reset_token(token=reset_token)
+        assert email == admin_user.get("email")
+
+    def test_for_invalid_reset_token(self, db_session):
+        email = auth_services.verify_password_reset_token(token="some_token")
+        assert not email
+
+
 class TestRecoverPassword:
     def test_for_exists_user(self, db_session, task, admin_user):
         reset_token = auth_services.recover_password(
