@@ -41,7 +41,7 @@ def confirm_email(verification_uuid: UUID, session: Session = Depends(get_sessio
 
 @router.post("/password-recovery/{email}", response_model=Message)
 def recover_password(email: str, task: BackgroundTasks, session: Session = Depends(get_session)):
-    auth_services.password_recover(session=session, task=task, email=email)
+    auth_services.recover_password(session=session, task=task, email=email)
     return Message(message="Recovery email has been sent.")
 
 

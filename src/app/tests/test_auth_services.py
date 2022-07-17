@@ -107,7 +107,7 @@ class TestVerifyRegistrationUser:
 
 class TestRecoverPassword:
     def test_for_exists_user(self, db_session, task, admin_user):
-        reset_token = auth_services.password_recover(
+        reset_token = auth_services.recover_password(
             session=db_session,
             task=task,
             email=admin_user.get("email"),
@@ -116,7 +116,7 @@ class TestRecoverPassword:
 
     def test_for_not_exists_user(self, db_session, task):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.password_recover(
+            auth_services.recover_password(
                 session=db_session,
                 task=task,
                 email="some_email@gmail.com",

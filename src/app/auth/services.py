@@ -56,7 +56,7 @@ def verify_registration_user(session: Session, verification_id: str) -> None:
     )
 
 
-def password_recover(session: Session, task: BackgroundTasks, email: str) -> str:
+def recover_password(session: Session, task: BackgroundTasks, email: str) -> str:
     user = user_services.get_user(session=session, where_statements=[User.email == email])
     password_reset_token = generate_password_reset_token(email)
     task.add_task(
