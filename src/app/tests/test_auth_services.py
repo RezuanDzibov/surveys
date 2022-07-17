@@ -7,7 +7,8 @@ from sqlalchemy import select
 
 import crud
 from auth import services as auth_services
-from db.models import Verification
+from auth.security import verify_password
+from db.models import Verification, User
 
 
 class TestAuthenticate:
@@ -137,3 +138,48 @@ class TestRecoverPassword:
                 email="some_email@gmail.com",
             )
             assert exception_info.value.status_code == 404
+
+
+class TestResetPassword:
+    def test_for_valid_reset_token(self, db_session, task, admin_user):
+        reset_token = auth_services.recover_password(
+            session=db_session,
+            task=task,
+            email=admin_user.get("email"),
+        )
+        updated_user = auth_services.reset_password(
+            session=db_session,
+            token=reset_token,
+            new_password="some_new_pass"
+        )
+        assert verify_password("some_new_pass", updated_user.get("password"))
+
+    def test_for_invalid_reset_token(self, db_session):
+        with pytest.raises(HTTPException) as exception_info:
+            auth_services.reset_password(
+                session=db_session,
+                token="some_token",
+                new_password="some_new_pass"
+            )
+        assert exception_info.value.status_code == 400
+
+    def test_for_inactive_user(self, db_session, task, admin_user_data):
+        admin_user_data["is_active"] = False
+        crud.insert_object(
+            session=db_session,
+            model=User,
+            to_insert=admin_user_data,
+            return_object=False
+        )
+        reset_token = auth_services.recover_password(
+            session=db_session,
+            task=task,
+            email=admin_user_data.get("email"),
+        )
+        with pytest.raises(HTTPException) as exception_info:
+            auth_services.reset_password(
+                session=db_session,
+                token=reset_token,
+                new_password="some_new_pass"
+            )
+            assert exception_info.value.status_code == 400
