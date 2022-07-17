@@ -103,4 +103,22 @@ class TestVerifyRegistrationUser:
                 verification_id=str(uuid4())
             )
             assert exception_info.value.status_code == 404
-    
+
+
+class TestRecoverPassword:
+    def test_for_exists_user(self, db_session, task, admin_user):
+        reset_token = auth_services.password_recover(
+            session=db_session,
+            task=task,
+            email=admin_user.get("email"),
+        )
+        assert auth_services.verify_password_reset_token(token=reset_token)
+
+    def test_for_not_exists_user(self, db_session, task):
+        with pytest.raises(HTTPException) as exception_info:
+            auth_services.password_recover(
+                session=db_session,
+                task=task,
+                email="some_email@gmail.com",
+            )
+            assert exception_info.value.status_code == 404
