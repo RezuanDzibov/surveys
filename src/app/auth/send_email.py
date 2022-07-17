@@ -1,5 +1,5 @@
-from app.settings import get_settings
-from app.emails import send_email
+from emails import send_email
+from settings import get_settings
 
 settings = get_settings()
 

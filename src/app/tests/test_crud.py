@@ -2,10 +2,10 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app import crud
-from app.db.models import User
-from app.initial_data_fixtures import create_admin_user
-from app.settings import get_settings
+import crud
+from db.models import User
+from initial_data_fixtures import create_admin_user
+from settings import get_settings
 
 settings = get_settings()
 

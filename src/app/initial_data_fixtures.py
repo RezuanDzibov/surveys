@@ -1,8 +1,8 @@
-from app import crud
-from app.auth.security import get_password_hash
-from app.db.models import User
-from app.db.session import get_session
-from app.settings import get_settings
+import crud
+from auth.security import get_password_hash
+from db.models import User
+from db.session import get_session
+from settings import get_settings
 
 settings = get_settings()
 

@@ -4,9 +4,9 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.db.models import Base
-from app.initial_data_fixtures import create_admin_user
-from app.settings import get_settings
+from db.models import Base
+from initial_data_fixtures import create_admin_user
+from settings import get_settings
 
 settings = get_settings()
 

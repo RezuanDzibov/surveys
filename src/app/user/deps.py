@@ -5,11 +5,11 @@ from jwt import PyJWTError
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_403_FORBIDDEN
 
-from app.auth.schemas import TokenPayload
-from app.settings import get_settings
-from app.db.models.user import User
-from app.db.session import get_session
-from app.user import services as user_services
+from auth.schemas import TokenPayload
+from db.models.user import User
+from db.session import get_session
+from settings import get_settings
+from user import services as user_services
 
 settings = get_settings()
 

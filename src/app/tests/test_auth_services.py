@@ -5,9 +5,9 @@ from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy import select
 
-from app import crud
-from app.auth import services as auth_services
-from app.db.models import Verification
+import crud
+from auth import services as auth_services
+from db.models import Verification
 
 
 class TestAuthenticate:
