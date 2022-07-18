@@ -1,5 +1,5 @@
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import BaseSettings, PostgresDsn, EmailStr
 
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     SQL_DATABASE: str
 
     EMAIL_RESET_TOKEN_EXPIRE = 48
-    EMAIL_TEMPLATES_DIR = "email-templates/htmls"
+    EMAIL_TEMPLATES_DIR: str
     EMAILS_FROM_EMAIL: EmailStr
     EMAIL_TEST_USER: EmailStr
 
@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     ADMIN_FIXTURE_IS_ACTIVE: bool = True
     ADMIN_FIXTURE_IS_STUFF: bool = True
     ADMIN_FIXTURE_IS_SUPERUSER: bool = True
+
+    @property
+    def EMAIL_TEMPLATES_DIR(self) -> str:
+        return str(Path(__file__).parent / "email-templates/htmls")
 
     @property
     def EMAILS_ENABLED(self) -> str:
