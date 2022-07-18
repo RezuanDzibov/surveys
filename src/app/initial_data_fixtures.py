@@ -1,3 +1,5 @@
+from typing import Optional
+
 import crud
 from auth.security import get_password_hash
 from db.models import User
@@ -7,12 +9,12 @@ from settings import get_settings
 settings = get_settings()
 
 
-def create_admin_user() -> dict:
+def create_admin_user(to_insert: Optional[dict] = None) -> dict:
     session = next(get_session())
     user = crud.insert_object(
         session=session,
         model=User,
-        to_insert={
+        to_insert=to_insert if to_insert else {
             "username": settings.ADMIN_FIXTURE_USERNAME,
             "email": settings.ADMIN_FIXTURE_EMAIL,
             "password": get_password_hash(settings.ADMIN_FIXTURE_PASSWORD),

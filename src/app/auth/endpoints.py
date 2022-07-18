@@ -6,7 +6,7 @@ from starlette.background import BackgroundTasks
 
 from auth import services as auth_services
 from auth.jwt import create_token
-from auth.schemas import Token, OAuth2TokenRequestForm, PasswordResetForm, PasswordChange
+from auth.schemas import Token, Login, PasswordReset, PasswordChange
 from db.session import get_session
 from schemas import Message
 from user import services as user_services
@@ -24,10 +24,10 @@ def user_registration(new_user: UserRegistrationIn, task: BackgroundTasks, sessi
 
 @router.post("/login/access-token", response_model=Token)
 def user_access_token(
-    form_data: OAuth2TokenRequestForm = Depends(OAuth2TokenRequestForm.as_form),
+    login_data: Login,
     session: Session = Depends(get_session),
 ):
-    user = auth_services.authenticate(session=session, login=form_data.login, password=form_data.password)
+    user = auth_services.authenticate(session=session, login=login_data.login, password=login_data.password)
     if not user.get("is_active"):
         raise HTTPException(status_code=400, detail="Inactive user.")
     return Token(**create_token(user.get("id").hex))
@@ -47,10 +47,10 @@ def recover_password(email: str, task: BackgroundTasks, session: Session = Depen
 
 @router.post("/reset-password", response_model=Message)
 def reset_password(
-    form: PasswordResetForm = Depends(PasswordResetForm.as_form),
+    password_reset_data: PasswordReset,
     session: Session = Depends(get_session),
 ):
-    auth_services.reset_password(session=session, token=form.token, new_password=form.new_password)
+    auth_services.reset_password(session=session, token=password_reset_data.token, new_password=password_reset_data.new_password)
     return Message(message="Successfully recovered password.")
 
 
