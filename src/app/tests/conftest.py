@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 from db.models import Base
 from initial_data_fixtures import create_admin_user
@@ -25,15 +25,18 @@ def tables(engine):
         Base.metadata.drop_all(engine)
 
 
-@pytest.fixture
-def db_session(engine, tables):
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(bind=connection)
-    yield session
-    session.close()
-    transaction.rollback()
-    connection.close()
+@pytest.fixture(scope="function")
+def session_maker(engine):
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+@pytest.fixture(scope="function")
+def db_session(tables, session_maker):
+    session = session_maker()
+    try:
+        yield session
+    finally:
+        session.close()
 
 
 @pytest.fixture(scope="function")
