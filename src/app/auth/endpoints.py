@@ -17,13 +17,13 @@ router = APIRouter()
 
 
 @router.post("/registration", response_model=Message)
-def user_registration(new_user: UserRegistrationIn, task: BackgroundTasks, session: Session = Depends(get_session)):
+def registration(new_user: UserRegistrationIn, task: BackgroundTasks, session: Session = Depends(get_session)):
     user_services.create_user(session=session, new_user=new_user, task=task)
     return Message(message="Verification email has just been sent.")
 
 
 @router.post("/login/access-token", response_model=Token)
-def user_access_token(
+def access_token(
     login_data: Login,
     session: Session = Depends(get_session),
 ):
@@ -33,13 +33,13 @@ def user_access_token(
     return Token(**create_token(user.get("id").hex))
 
 
-@router.get("/confirm-email/{verification_uuid}", response_model=Message)
-def confirm_email(verification_uuid: UUID, session: Session = Depends(get_session)):
-    auth_services.verify_registration_user(session=session, verification_id=verification_uuid)
+@router.get("/confirm-registration/{verification_id}", response_model=Message)
+def confirm_registration(verification_id: UUID, session: Session = Depends(get_session)):
+    auth_services.verify_registration_user(session=session, verification_id=str(verification_id))
     return Message(message="Successfully verify email")
 
 
-@router.post("/password-recovery/{email}", response_model=Message)
+@router.get("/recover-password/{email}", response_model=Message)
 def recover_password(email: str, task: BackgroundTasks, session: Session = Depends(get_session)):
     auth_services.recover_password(session=session, task=task, email=email)
     return Message(message="Recovery email has been sent.")
@@ -50,7 +50,11 @@ def reset_password(
     password_reset_data: PasswordReset,
     session: Session = Depends(get_session),
 ):
-    auth_services.reset_password(session=session, token=password_reset_data.token, new_password=password_reset_data.new_password)
+    auth_services.reset_password(
+        session=session,
+        token=password_reset_data.token,
+        new_password=password_reset_data.new_password
+    )
     return Message(message="Successfully recovered password.")
 
 
