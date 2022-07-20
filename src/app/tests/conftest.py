@@ -1,11 +1,13 @@
 from unittest import mock
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from db.models import Base
 from initial_data_fixtures import create_admin_user
+from main import app
 from settings import get_settings
 
 settings = get_settings()
@@ -64,3 +66,8 @@ def task():
     task = mock.Mock()
     task.add_task = mock.MagicMock()
     return task
+
+
+@pytest.fixture(scope="function")
+def test_client():
+    return TestClient(app)
