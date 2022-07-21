@@ -7,17 +7,17 @@ from settings import get_settings
 settings = get_settings()
 
 
-def create_token(user_id: int) -> dict:
+def create_acess_token(user_id: str) -> dict:
     access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
-        "access_token": create_access_token(
+        "access_token": create_jwt_token(
             data={"user_id": user_id}, expires_delta=access_token_expires
         ),
         "token_type": "Bearer",
     }
 
 
-def create_access_token(*, data: dict, expires_delta: timedelta = None) -> str:
+def create_jwt_token(*, data: dict, expires_delta: timedelta = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
