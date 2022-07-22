@@ -1,3 +1,4 @@
+from functools import partial
 from unittest import mock
 
 import pytest
@@ -42,8 +43,9 @@ def session(tables, session_maker):
 
 
 @pytest.fixture(scope="function")
-def admin_user(request, tables):
-    return create_admin_user(data_to_replace=request.param) if hasattr(request, "param") else create_admin_user()
+def admin_user(request, session):
+    create_admin_user_ = partial(create_admin_user, session)
+    return create_admin_user_(data_to_replace=request.param) if hasattr(request, "param") else create_admin_user_()
 
 
 @pytest.fixture(scope="function")
