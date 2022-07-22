@@ -18,7 +18,7 @@ class Login(BaseModel):
 
 
 class PasswordReset(BaseModel):
-    token: str
+    reset_token: str
     new_password: constr(max_length=255, min_length=8)
 
 

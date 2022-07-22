@@ -52,7 +52,7 @@ def reset_password(
 ):
     auth_services.reset_password(
         session=session,
-        token=password_reset_data.token,
+        token=password_reset_data.reset_token,
         new_password=password_reset_data.new_password
     )
     return Message(message="Successfully recovered password.")
