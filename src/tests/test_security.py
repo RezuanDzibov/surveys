@@ -1,4 +1,4 @@
-from auth import security
+from app.auth import security
 
 
 def test_password_hashing():

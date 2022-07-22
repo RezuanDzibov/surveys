@@ -1,12 +1,12 @@
 import json
 
-from user.schemas import UserRetrieve
+from app.user.schemas import UserRetrieve
 
 
 class TestGetCurrentUser:
     def test_for_exists_user(self, test_client, access_token_and_admin_user):
         response = test_client.get(
-            "user/me",
+            "users/me",
             headers={
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
             }
@@ -17,14 +17,14 @@ class TestGetCurrentUser:
         assert admin_user == response_user
 
     def test_for_invalid_access_token(self, test_client):
-        response = test_client.get("user/me", headers={"Authorization": f"Bearer token"})
+        response = test_client.get("users/me", headers={"Authorization": f"Bearer token"})
         assert response.status_code == 403
 
 
 class TestUpdateCurrentUser:
     def test_for_exists_user(self, test_client, access_token_and_admin_user):
         response = test_client.patch(
-            "user/me/update",
+            "users/me/update",
             headers={
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
             },
@@ -43,7 +43,7 @@ class TestUpdateCurrentUser:
 
     def test_for_invalid_token(self, test_client):
         response = test_client.patch(
-            "user/me/update",
+            "users/me/update",
             headers={"Authorization": f"Bearer token"},
             json={"username": "some_another_username"}
         )

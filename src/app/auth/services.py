@@ -6,13 +6,13 @@ from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Load, Session
 
-import crud
-from auth.security import get_password_hash, verify_password
-from auth.send_email import send_reset_password_email
-from db.models.auth import Verification
-from db.models.user import User
-from settings import get_settings
-from user import services as user_services
+from app import crud
+from app.auth.security import get_password_hash, verify_password
+from app.auth.send_email import send_reset_password_email
+from app.db.models.auth import Verification
+from app.db.models.user import User
+from app.settings import get_settings
+from app.user import services as user_services
 
 settings = get_settings()
 

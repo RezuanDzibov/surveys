@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, String, DATE, DateTime, Boolean
 
-from db.models.base import UUIDMixin, Base
+from app.db.models.base import UUIDMixin, Base
 
 
 class User(UUIDMixin, Base):

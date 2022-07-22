@@ -2,9 +2,9 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
 
-import crud
-from db.models import User
-from settings import get_settings
+from app import crud
+from app.db.models import User
+from app.settings import get_settings
 
 settings = get_settings()
 

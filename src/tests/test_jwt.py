@@ -1,7 +1,7 @@
 import jwt
 
-from auth import jwt as auth_jwt
-from settings import get_settings
+from app.auth import jwt as auth_jwt
+from app.settings import get_settings
 
 settings = get_settings()
 
@@ -9,7 +9,7 @@ settings = get_settings()
 def test_create_token(admin_user, test_client):
     token = auth_jwt.create_acess_token(user_id=str(admin_user.get("id")))
     response = test_client.get(
-        "user/me",
+        "users/me",
         headers={
             "Authorization": f"Bearer {token.get('access_token')}"
         }
