@@ -6,4 +6,4 @@ from user.endpoints import router as user_router
 routes = APIRouter()
 
 routes.include_router(auth_router, prefix="/auth", tags=["auth"])
-routes.include_router(user_router, prefix="/user", tags=["user"])
+routes.include_router(user_router, prefix="/users", tags=["user"])
