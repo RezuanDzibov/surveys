@@ -4,24 +4,21 @@ from sqlalchemy import select
 
 import crud
 from db.models import User
-from initial_data_fixtures import create_admin_user
 from settings import get_settings
 
 settings = get_settings()
 
 
 class TestGetObject:
-    def test_get_object(self, session):
-        expected_object = create_admin_user()
-        statement = select(User).where(User.id == expected_object.get("id"))
+    def test_get_object(self, session, admin_user):
+        statement = select(User).where(User.id == admin_user.get("id"))
         object_in_db = crud.get_object(session=session, statement=statement)
-        assert expected_object == object_in_db
+        assert admin_user == object_in_db
 
-    def test_get_object_id_as_str(self, session):
-        expected_object = create_admin_user()
-        statement = select(User).where(User.id == str(expected_object.get("id")))
+    def test_get_object_id_as_str(self, session, admin_user):
+        statement = select(User).where(User.id == str(admin_user.get("id")))
         object_in_db = crud.get_object(session=session, statement=statement)
-        assert expected_object == object_in_db
+        assert admin_user == object_in_db
 
     def test_get_not_exists_object(self, session):
         with pytest.raises(HTTPException) as exception_info:
@@ -31,9 +28,8 @@ class TestGetObject:
 
 
 class TestIsObjectExists:
-    def test_exists_object(self, session):
-        object_ = create_admin_user()
-        statement = select(User).where(User.username == object_.get("username"))
+    def test_exists_object(self, session, admin_user):
+        statement = select(User).where(User.username == admin_user.get("username"))
         assert crud.is_object_exists(session=session, statement=statement)
 
     def test_not_exists_object(self, session):
@@ -42,14 +38,13 @@ class TestIsObjectExists:
 
 
 class TestUpdateObject:
-    def test_exists_object(self, session):
-        object_ = create_admin_user()
-        expected_object = object_.copy()
+    def test_exists_object(self, session, admin_user):
+        expected_object = admin_user.copy()
         expected_object["username"] = "some_another_username"
         object_in_db = crud.update_object(
             session=session,
             model=User,
-            where_statements=[User.username == object_.get("username")],
+            where_statements=[User.username == admin_user.get("username")],
             to_update={"username": "some_another_username"},
         )
         assert expected_object == object_in_db
@@ -92,7 +87,7 @@ class TestDeleteObject:
             where_statements=[User.username == admin_user.get("username")],
         )
         assert admin_user == deleted_object
-        assert not crud.is_object_exists(session=db_session, statement=User.id == admin_user.get("id"))
+        assert not crud.is_object_exists(session=session, statement=User.id == admin_user.get("id"))
 
     def test_not_exists_object(self, session):
         with pytest.raises(HTTPException) as exception_info:

@@ -42,8 +42,8 @@ def session(tables, session_maker):
 
 
 @pytest.fixture(scope="function")
-def admin_user(session):
-    return create_admin_user()
+def admin_user(request, tables):
+    return create_admin_user(data_to_replace=request.param) if hasattr(request, "param") else create_admin_user()
 
 
 @pytest.fixture(scope="function")

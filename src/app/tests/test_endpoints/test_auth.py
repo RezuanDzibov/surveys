@@ -1,6 +1,9 @@
+import pytest
+
 from auth import services as auth_services
-from auth.security import get_password_hash
-from initial_data_fixtures import create_admin_user
+from settings import get_settings
+
+settings = get_settings()
 
 
 class TestUserRegistration:
@@ -29,15 +32,13 @@ class TestUserAccessToken:
         )
         assert response.status_code == 200
 
-    def test_for_inactive_user(self, tables, admin_user_data, test_client):
-        admin_user_data["is_active"] = False
-        admin_user_data["password"] = get_password_hash(admin_user_data.get("password"))
-        create_admin_user(to_insert=admin_user_data)
+    @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
+    def test_for_inactive_user(self, tables, admin_user, test_client):
         response = test_client.post(
             "auth/login/access-token",
             json={
-                "login": admin_user_data.get("username"),
-                "password": admin_user_data.get("password"),
+                "login": admin_user.get("username"),
+                "password": settings.ADMIN_FIXTURE_PASSWORD,
             }
         )
         assert response.status_code == 400
@@ -54,12 +55,11 @@ class TestUserAccessToken:
 
 
 class TestConfirmEmail:
-    def test_for_exists_user(self, tables, admin_user_data, session, test_client):
-        admin_user_data["is_active"] = False
-        user = create_admin_user(to_insert=admin_user_data)
+    @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
+    def test_for_exists_user(self, tables, admin_user, session, test_client):
         verification = auth_services.create_verification(
             session=session,
-            user_id=str(user.get("id")),
+            user_id=str(admin_user.get("id")),
         )
         response = test_client.get(
             f"auth/confirm-registration/{verification.get('id')}"
@@ -84,20 +84,19 @@ class TestResetPassword:
             task=task,
             email=admin_user.get("email"),
         )
-        response = test_client.post("auth/reset-password", json={"token": reset_token, "new_password": "password"})
+        response = test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
         assert response.status_code == 200
 
     def test_for_invalid_token(self, test_client):
-        response = test_client.post("auth/reset-password", json={"token": "some_token", "new_password": "password"})
+        response = test_client.post("auth/reset-password", json={"reset_token": "some_token", "new_password": "password"})
         assert response.status_code == 400
 
-    def test_for_inactive_user(self, tables, admin_user_data, task, session, test_client):
-        admin_user_data["is_active"] = False
-        create_admin_user(to_insert=admin_user_data)
+    @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
+    def test_for_inactive_user(self, admin_user, task, session, test_client):
         reset_token = auth_services.recover_password(
             session=session,
             task=task,
-            email=admin_user_data.get("email"),
+            email=admin_user.get("email"),
         )
-        response = test_client.post("auth/reset-password", json={"token": reset_token, "new_password": "password"})
+        response = test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
         assert response.status_code == 400
