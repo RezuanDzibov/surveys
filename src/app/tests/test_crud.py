@@ -92,6 +92,7 @@ class TestDeleteObject:
             where_statements=[User.username == admin_user.get("username")],
         )
         assert admin_user == deleted_object
+        assert not crud.is_object_exists(session=db_session, statement=User.id == admin_user.get("id"))
 
     def test_not_exists_object(self, db_session):
         with pytest.raises(HTTPException) as exception_info:
