@@ -11,53 +11,53 @@ settings = get_settings()
 
 
 class TestGetObject:
-    def test_get_object(self, db_session):
+    def test_get_object(self, session):
         expected_object = create_admin_user()
         statement = select(User).where(User.id == expected_object.get("id"))
-        object_in_db = crud.get_object(session=db_session, statement=statement)
+        object_in_db = crud.get_object(session=session, statement=statement)
         assert expected_object == object_in_db
 
-    def test_get_object_id_as_str(self, db_session):
+    def test_get_object_id_as_str(self, session):
         expected_object = create_admin_user()
         statement = select(User).where(User.id == str(expected_object.get("id")))
-        object_in_db = crud.get_object(session=db_session, statement=statement)
+        object_in_db = crud.get_object(session=session, statement=statement)
         assert expected_object == object_in_db
 
-    def test_get_not_exists_object(self, db_session):
+    def test_get_not_exists_object(self, session):
         with pytest.raises(HTTPException) as exception_info:
             statement = select(User).where(User.username == "someusername")
-            crud.get_object(session=db_session, statement=statement)
+            crud.get_object(session=session, statement=statement)
             assert exception_info.value.status_code == 404
 
 
 class TestIsObjectExists:
-    def test_exists_object(self, db_session):
+    def test_exists_object(self, session):
         object_ = create_admin_user()
         statement = select(User).where(User.username == object_.get("username"))
-        assert crud.is_object_exists(session=db_session, statement=statement)
+        assert crud.is_object_exists(session=session, statement=statement)
 
-    def test_not_exists_object(self, db_session):
+    def test_not_exists_object(self, session):
         statement = select(User).where(User.username == "some username")
-        assert not crud.is_object_exists(session=db_session, statement=statement)
+        assert not crud.is_object_exists(session=session, statement=statement)
 
 
 class TestUpdateObject:
-    def test_exists_object(self, db_session):
+    def test_exists_object(self, session):
         object_ = create_admin_user()
         expected_object = object_.copy()
         expected_object["username"] = "some_another_username"
         object_in_db = crud.update_object(
-            session=db_session,
+            session=session,
             model=User,
             where_statements=[User.username == object_.get("username")],
             to_update={"username": "some_another_username"},
         )
         assert expected_object == object_in_db
 
-    def test_not_exists_object(self, db_session):
+    def test_not_exists_object(self, session):
         with pytest.raises(HTTPException) as exception_info:
             crud.update_object(
-                session=db_session,
+                session=session,
                 model=User,
                 where_statements=[User.username == "some_username"],
                 to_update={"username": "another_some_username"}
@@ -66,18 +66,18 @@ class TestUpdateObject:
 
 
 class TestInsertObject:
-    def test_not_exists_object(self, db_session, admin_user_data):
+    def test_not_exists_object(self, session, admin_user_data):
         inserted_object = crud.insert_object(
-            session=db_session,
+            session=session,
             model=User,
             to_insert=admin_user_data,
         )
         assert inserted_object
 
-    def test_exists_object(self, db_session, admin_user, admin_user_data):
+    def test_exists_object(self, session, admin_user, admin_user_data):
         with pytest.raises(HTTPException) as exception_info:
             crud.insert_object(
-                session=db_session,
+                session=session,
                 model=User,
                 to_insert=admin_user_data,
             )
@@ -85,18 +85,18 @@ class TestInsertObject:
 
 
 class TestDeleteObject:
-    def test_exists_object(self, db_session, admin_user):
+    def test_exists_object(self, session, admin_user):
         deleted_object = crud.delete_object(
-            session=db_session,
+            session=session,
             model=User,
             where_statements=[User.username == admin_user.get("username")],
         )
         assert admin_user == deleted_object
 
-    def test_not_exists_object(self, db_session):
+    def test_not_exists_object(self, session):
         with pytest.raises(HTTPException) as exception_info:
             crud.delete_object(
-                session=db_session,
+                session=session,
                 model=User,
                 where_statements=[User.username == "some_username"],
             )

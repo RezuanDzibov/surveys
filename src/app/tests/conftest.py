@@ -33,7 +33,7 @@ def session_maker(engine):
 
 
 @pytest.fixture(scope="function")
-def db_session(tables, session_maker):
+def session(tables, session_maker):
     session = session_maker()
     try:
         yield session
@@ -42,7 +42,7 @@ def db_session(tables, session_maker):
 
 
 @pytest.fixture(scope="function")
-def admin_user(db_session):
+def admin_user(session):
     return create_admin_user()
 
 

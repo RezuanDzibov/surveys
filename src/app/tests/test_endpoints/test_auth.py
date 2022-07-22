@@ -54,11 +54,11 @@ class TestUserAccessToken:
 
 
 class TestConfirmEmail:
-    def test_for_exists_user(self, tables, admin_user_data, db_session, test_client):
+    def test_for_exists_user(self, tables, admin_user_data, session, test_client):
         admin_user_data["is_active"] = False
         user = create_admin_user(to_insert=admin_user_data)
         verification = auth_services.create_verification(
-            session=db_session,
+            session=session,
             user_id=str(user.get("id")),
         )
         response = test_client.get(
@@ -78,9 +78,9 @@ class TestRecoverPassword:
 
 
 class TestResetPassword:
-    def test_for_exists_user(self, admin_user, db_session, task, test_client):
+    def test_for_exists_user(self, admin_user, session, task, test_client):
         reset_token = auth_services.recover_password(
-            session=db_session,
+            session=session,
             task=task,
             email=admin_user.get("email"),
         )
@@ -91,11 +91,11 @@ class TestResetPassword:
         response = test_client.post("auth/reset-password", json={"token": "some_token", "new_password": "password"})
         assert response.status_code == 400
 
-    def test_for_inactive_user(self, tables, admin_user_data, task, db_session, test_client):
+    def test_for_inactive_user(self, tables, admin_user_data, task, session, test_client):
         admin_user_data["is_active"] = False
         create_admin_user(to_insert=admin_user_data)
         reset_token = auth_services.recover_password(
-            session=db_session,
+            session=session,
             task=task,
             email=admin_user_data.get("email"),
         )
