@@ -1,5 +1,7 @@
 from typing import Optional
 
+from sqlalchemy.orm import Session
+
 import crud
 from auth.security import get_password_hash
 from db.models import User
@@ -23,14 +25,13 @@ def get_initial_admin_user() -> dict:
     }
 
 
-def create_admin_user(to_insert: Optional[dict] = None, data_to_replace: Optional[dict] = None) -> dict:
+def create_admin_user(session: Session, to_insert: Optional[dict] = None, data_to_replace: Optional[dict] = None) -> dict:
     if not to_insert:
         to_insert = get_initial_admin_user()
         if data_to_replace:
             for key, value in data_to_replace.items():
                 if key in to_insert:
                     to_insert[key] = value
-    session = next(get_session())
     user = crud.insert_object(
         session=session,
         model=User,
@@ -40,4 +41,5 @@ def create_admin_user(to_insert: Optional[dict] = None, data_to_replace: Optiona
 
 
 if __name__ == "__main__":
-    create_admin_user()
+    session = next(get_session())
+    create_admin_user(session=session)
