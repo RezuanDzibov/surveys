@@ -19,7 +19,8 @@ env:
   DATABASE: "postgres"
   PG_ADMIN_EMAIL: "admin@gmail.com"
   PG_ADMIN_PASSWORD: "adminpass"
-  EMAIL_TEST_USER: ${{ secrets.EMAIL_TEST_USER }}
+  EMAIL_TEST_USER: ${{ secrets.EMAILS_TEST_USER }}
+  EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
   SMTP_USER: ${{ secrets.SMTP_USER }}
   SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
   SMTP_TLS: "True"
