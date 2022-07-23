@@ -8,16 +8,20 @@ on:
 
 env:
   PROJECT_NAME: "Surveys"
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
   SERVER_HOST: "127.0.0.1:8000"
   SQL_ENGINE: "postgresql+psycopg2"
   SQL_USER: "postgres"
   SQL_PASSWORD: "postgres"
   SQL_DATABASE: "surveys"
-  SQL_HOST: "localhost"
+  SQL_HOST: "postgres"
   SQL_PORT: "5432"
   DATABASE: "postgres"
   PG_ADMIN_EMAIL: "admin@gmail.com"
   PG_ADMIN_PASSWORD: "adminpass"
+  EMAIL_TEST_USER: ${{ secrets.EMAIL_TEST_USER }}
+  SMTP_USER: ${{ secrets.SMTP_USER }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
   SMTP_TLS: "True"
   SMTP_PORT: "587"
   SMTP_HOST: "smtp.gmail.com"
@@ -35,7 +39,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
-      db:
+      postgres:
         image: postgres:latest
         env:
           POSTGRES_USER: ${{ env.SQL_USER }}
