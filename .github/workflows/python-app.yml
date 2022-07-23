@@ -14,7 +14,7 @@ env:
   SQL_USER: "postgres"
   SQL_PASSWORD: "postgres"
   SQL_DATABASE: "surveys"
-  SQL_HOST: "db"
+  SQL_HOST: "localhost"
   SQL_PORT: "5432"
   DATABASE: "postgres"
   PG_ADMIN_EMAIL: "admin@gmail.com"
