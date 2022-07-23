@@ -6,13 +6,44 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  PROJECT_NAME: "Surveys"
+  SERVER_HOST: "127.0.0.1:8000"
+  SQL_ENGINE: "postgresql+psycopg2"
+  SQL_USER: "postgres"
+  SQL_PASSWORD: "postgres"
+  SQL_DATABASE: "surveys"
+  SQL_HOST: "localhost"
+  SQL_PORT: "5432"
+  DATABASE: "postgres"
+  PG_ADMIN_EMAIL: "admin@gmail.com"
+  PG_ADMIN_PASSWORD: "adminpass"
+  SMTP_TLS: "True"
+  SMTP_PORT: "587"
+  SMTP_HOST: "smtp.gmail.com"
+  ADMIN_FIXTURE_USERNAME: "admin"
+  ADMIN_FIXTURE_EMAIL: "admin.admin@gmail.com"
+  ADMIN_FIXTURE_PASSWORD: "adminpass"
+  ADMIN_FIXTURE_FIRST_NAME: "Admin"
+  ADMIN_FIXTURE_LAST_NAME: "Admin"
+  ADMIN_FIXTURE_BIRTH_DATE: "1999-07-10"
+
 permissions:
   contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ env.SQL_USER }}
+          POSTGRES_PASSWORD: ${{ env.SQL_PASSWORD }}
+          POSTGRES_DB: ${{ env.DATABASE }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
     - uses: actions/checkout@v3
