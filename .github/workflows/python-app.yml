@@ -45,7 +45,7 @@ jobs:
         env:
           POSTGRES_USER: ${{ env.SQL_USER }}
           POSTGRES_PASSWORD: ${{ env.SQL_PASSWORD }}
-          POSTGRES_DB: ${{ env.DATABASE }}
+          POSTGRES_DB: ${{ env.SQL_DATABASE }}
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
