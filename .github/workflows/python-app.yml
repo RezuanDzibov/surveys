@@ -14,7 +14,7 @@ env:
   SQL_USER: "postgres"
   SQL_PASSWORD: "postgres"
   SQL_DATABASE: "surveys"
-  SQL_HOST: "postgres"
+  SQL_HOST: "db"
   SQL_PORT: "5432"
   DATABASE: "postgres"
   PG_ADMIN_EMAIL: "admin@gmail.com"
@@ -40,7 +40,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      db:
         image: postgres:latest
         env:
           POSTGRES_USER: ${{ env.SQL_USER }}
