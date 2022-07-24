@@ -97,3 +97,13 @@ class TestDeleteObject:
                 where_statements=[User.username == "some_username"],
             )
         assert exception_info.value.status_code == 404
+
+
+class TestGetObjects:
+    def test_for_exist_objects(self, session, admin_user):
+        objects = crud.get_objects(session=session, model=User)
+        assert objects == [User(**admin_user)]
+
+    def test_for_not_exists_objects(self, session):
+        objects = crud.get_objects(session=session, model=User)
+        assert objects == []
