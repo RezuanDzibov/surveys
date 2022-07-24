@@ -2,7 +2,7 @@ from typing import Optional, Type, Union, List
 
 from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation, UniqueViolation
-from sqlalchemy import delete, exists, insert, update
+from sqlalchemy import delete, exists, insert, update, select
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Executable
@@ -87,3 +87,10 @@ def get_object(session: Session, statement: Executable) -> Optional[dict]:
         return object_
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Not found")
+
+
+def get_objects(session: Session, model: Type[Base]):
+    statement = select(model).order_by(model.id)
+    result = session.execute(statement=statement)
+    objects = result.scalars().all()
+    return objects
