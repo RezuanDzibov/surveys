@@ -74,3 +74,8 @@ def change_user_password(session: Session, password_change: PasswordChange, user
         },
         where_statements=[User.id == user.get("id")]
     )
+
+
+def get_users(session: Session) -> list[User]:
+    users = crud.get_objects(session=session, model=User)
+    return users

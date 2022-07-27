@@ -88,3 +88,14 @@ class TestUpdateUser:
                 where_statements=[User.username == "some0"],
             )
             assert exception_info.value.status_code == 404
+
+
+class TestGetUsers:
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    def test_for_exists_users(self, session, factory_users):
+        users = services.get_users(session=session)
+        assert len(users) == 5
+
+    def test_for_not_exists_users(self, session):
+        users = services.get_users(session=session)
+        assert len(users) == 0

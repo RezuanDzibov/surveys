@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from app.user.schemas import UserRetrieve
 
 
@@ -48,3 +50,18 @@ class TestUpdateCurrentUser:
             json={"username": "some_another_username"}
         )
         assert response.status_code == 403
+
+
+class TestGetUsers:
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    def test_for_exists_users(self, test_client, factory_users):
+        response = test_client.get("users")
+        users = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert len(users) == 5
+
+    def test_for_not_exists_users(self, test_client, tables):
+        response = test_client.get("users")
+        users = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert len(users) == 0
