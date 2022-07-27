@@ -27,3 +27,5 @@ PyJWT
 emails
 jinja2
 pytest
+factory_boy
+pytest_factoryboy

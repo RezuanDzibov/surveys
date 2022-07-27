@@ -237,6 +237,32 @@ python-dateutil = "*"
 requests = "*"
 
 [[package]]
+name = "factory-boy"
+version = "3.2.1"
+description = "A versatile test fixtures replacement based on thoughtbot's factory_bot for Ruby."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Faker = ">=0.7.0"
+
+[package.extras]
+dev = ["coverage", "django", "flake8", "isort", "pillow", "sqlalchemy", "mongoengine", "wheel (>=0.32.0)", "tox", "zest.releaser"]
+doc = ["sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
+
+[[package]]
+name = "faker"
+version = "13.15.1"
+description = "Faker is a Python package that generates fake data for you."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+python-dateutil = ">=2.4"
+
+[[package]]
 name = "fastapi"
 version = "0.78.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -408,6 +434,14 @@ python-versions = ">=3.6"
 name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
+name = "inflection"
+version = "0.5.1"
+description = "A port of Ruby on Rails inflector to Python"
 category = "main"
 optional = false
 python-versions = ">=3.5"
@@ -677,6 +711,20 @@ tomli = ">=1.0.0"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-factoryboy"
+version = "2.5.0"
+description = "Factory Boy support for pytest."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+factory_boy = ">=2.10.0"
+inflection = "*"
+pytest = ">=5.0.0"
+typing_extensions = "*"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -848,7 +896,7 @@ standard = ["websockets (>=10.0)", "httptools (>=0.4.0)", "watchgod (>=0.6)", "p
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "59036d4d88351f5942e40008b52676750448a7f6d7974382949055c42028dfeb"
+content-hash = "f1a4d53187ad01801fca1f86c2714f5cce5aaab76c3ce9bf0fdb688462a53bd6"
 
 [metadata.files]
 alembic = [
@@ -1021,6 +1069,14 @@ emails = [
     {file = "emails-0.6-py2.py3-none-any.whl", hash = "sha256:72c1e3198075709cc35f67e1b49e2da1a2bc087e9b444073db61a379adfb7f3c"},
     {file = "emails-0.6.tar.gz", hash = "sha256:a4c2d67ea8b8831967a750d8edc6e77040d7693143fe280e6d2a367d9c36ff88"},
 ]
+factory-boy = [
+    {file = "factory_boy-3.2.1-py2.py3-none-any.whl", hash = "sha256:eb02a7dd1b577ef606b75a253b9818e6f9eaf996d94449c9d5ebb124f90dc795"},
+    {file = "factory_boy-3.2.1.tar.gz", hash = "sha256:a98d277b0c047c75eb6e4ab8508a7f81fb03d2cb21986f627913546ef7a2a55e"},
+]
+faker = [
+    {file = "Faker-13.15.1-py3-none-any.whl", hash = "sha256:172e45220b7a46743f4fb58cf380adb306d5c3ab1c0b0d97062508474cec5ff8"},
+    {file = "Faker-13.15.1.tar.gz", hash = "sha256:7c3f8ee807d3916415568169a172bf0893ea9cc3371ab55e4e5f5170d2185bea"},
+]
 fastapi = [
     {file = "fastapi-0.78.0-py3-none-any.whl", hash = "sha256:15fcabd5c78c266fa7ae7d8de9b384bfc2375ee0503463a6febbe3bab69d6f65"},
     {file = "fastapi-0.78.0.tar.gz", hash = "sha256:3233d4a789ba018578658e2af1a4bb5e38bdd122ff722b313666a9b2c6786a83"},
@@ -1132,6 +1188,10 @@ h11 = [
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
     {file = "idna-3.3.tar.gz", hash = "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"},
+]
+inflection = [
+    {file = "inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"},
+    {file = "inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
@@ -1417,6 +1477,10 @@ pyparsing = [
 pytest = [
     {file = "pytest-7.1.2-py3-none-any.whl", hash = "sha256:13d0e3ccfc2b6e26be000cb6568c832ba67ba32e719443bfe725814d3c42433c"},
     {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
+]
+pytest-factoryboy = [
+    {file = "pytest-factoryboy-2.5.0.tar.gz", hash = "sha256:8abcfe5396a2cadf0b2d6fc1ba607d05f191db915eac95733ab741cb30968a46"},
+    {file = "pytest_factoryboy-2.5.0-py3-none-any.whl", hash = "sha256:37c6b3a17689b197025260ad06047d0dd8ec54a70556995b22617e9df1fd8797"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},

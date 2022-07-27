@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union, List
+from typing import Optional, Type, Union
 
 from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation, UniqueViolation
@@ -21,7 +21,7 @@ def is_object_exists(session: Session, statement: Executable) -> bool:
 def update_object(
     session: Session,
     model: Type[Base],
-    where_statements: List[Executable],
+    where_statements: list[Executable],
     to_update: dict,
     return_object: Optional[dict] = True,
 ) -> Optional[Union[dict, bool]]:
@@ -65,7 +65,7 @@ def insert_object(
 def delete_object(
     session: Session,
     model: Type[Base],
-    where_statements: List[Executable],
+    where_statements: list[Executable],
     return_object: bool = True,
 ) -> Optional[Union[dict, bool]]:
     statement = delete(model).where(*where_statements).returning(model)
@@ -89,7 +89,7 @@ def get_object(session: Session, statement: Executable) -> Optional[dict]:
         raise HTTPException(status_code=404, detail="Not found")
 
 
-def get_objects(session: Session, model: Type[Base]):
+def get_objects(session: Session, model: Type[Base]) -> list:
     statement = select(model).order_by(model.id)
     result = session.execute(statement=statement)
     objects = result.scalars().all()
