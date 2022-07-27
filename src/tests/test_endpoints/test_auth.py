@@ -8,10 +8,12 @@ settings = get_settings()
 
 class TestUserRegistration:
     def test_for_not_exists_user(self, tables, admin_user_data, test_client):
+        admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         response = test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 200
 
     def test_for_exists_user(self, tables, admin_user, admin_user_data, test_client):
+        admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         response = test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 409
 
@@ -19,6 +21,11 @@ class TestUserRegistration:
         admin_user_data["password"] = "non"
         response = test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 422
+
+    def test_for_not_match_password_and_password_repeat(self, tables, admin_user_data, test_client):
+        admin_user_data["password_repeat"] = "not_match_password"
+        response = test_client.post("auth/registration", json=admin_user_data)
+        assert response.status_code == 400
 
 
 class TestUserAccessToken:

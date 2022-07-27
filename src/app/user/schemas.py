@@ -18,6 +18,7 @@ class UserList(BaseUser):
 
 class UserRegistrationIn(BaseUser):
     password: constr(max_length=100, min_length=8)
+    password_repeat: constr(max_length=100, min_length=8)
 
 
 class UserRetrieve(UserList, BaseUser):

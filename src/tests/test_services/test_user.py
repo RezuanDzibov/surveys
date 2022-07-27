@@ -4,12 +4,16 @@ import pytest
 from fastapi import HTTPException
 
 from app.db.models import User
+from app.settings import get_settings
 from app.user import services
 from app.user.schemas import UserRegistrationIn
+
+settings = get_settings()
 
 
 class TestCreateUser:
     def test_create_user(self, session, admin_user_data, task):
+        admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         user_to_insert = UserRegistrationIn(**admin_user_data)
         user = services.create_user(
             session=session,
@@ -19,6 +23,7 @@ class TestCreateUser:
         assert user
 
     def test_create_user_with_exists_username(self, session, admin_user, admin_user_data, task):
+        admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         admin_user_data["email"] = "someanotheremail@gmail.com"
         user_to_insert = UserRegistrationIn(**admin_user_data)
         with pytest.raises(HTTPException) as exception_info:
@@ -30,6 +35,7 @@ class TestCreateUser:
         assert exception_info.value.status_code == 409
 
     def test_create_user_with_exists_email(self, session, admin_user, admin_user_data, task):
+        admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         admin_user_data["username"] = "someanotherusername"
         user_to_insert = UserRegistrationIn(**admin_user_data)
         with pytest.raises(HTTPException) as exception_info:
