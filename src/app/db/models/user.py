@@ -14,5 +14,5 @@ class User(UUIDMixin, Base):
     birth_date = Column(DATE)
     join_date_time = Column(DateTime, default=datetime.now)
     is_active = Column(Boolean, default=False)
-    is_staff = Column(Boolean, default=False)
+    is_stuff = Column(Boolean, default=False)
     is_superuser = Column(Boolean, default=False)

@@ -20,7 +20,7 @@ def get_initial_admin_user() -> dict:
         "last_name": settings.ADMIN_FIXTURE_LAST_NAME,
         "birth_date": settings.ADMIN_FIXTURE_BIRTH_DATE,
         "is_active": settings.ADMIN_FIXTURE_IS_ACTIVE,
-        "is_staff": settings.ADMIN_FIXTURE_IS_STUFF,
+        "is_stuff": settings.ADMIN_FIXTURE_IS_STUFF,
         "is_superuser": settings.ADMIN_FIXTURE_IS_SUPERUSER,
     }
 

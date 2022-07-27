@@ -24,5 +24,5 @@ class UserFactory(factory.Factory):
     last_name = factory.LazyAttribute(lambda object_: fake.last_name())
     birth_date = factory.LazyAttribute(lambda object_: fake.date_of_birth())
     is_active = factory.LazyAttribute(lambda object_: choice([True, False]))
-    is_staff = factory.LazyAttribute(lambda object_: choice([True, False]))
+    is_stuff = factory.LazyAttribute(lambda object_: choice([True, False]))
     is_superuser = factory.LazyAttribute(lambda object_: choice([True, False]))
