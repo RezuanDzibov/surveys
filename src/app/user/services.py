@@ -15,6 +15,8 @@ from app.user.schemas import UserRegistrationIn
 
 
 def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> dict:
+    if new_user.password != new_user.password_repeat:
+        raise HTTPException(status_code=400, detail="password and password_repeat doesn't match")
     statement = select(User).where(or_(User.username == new_user.username, User.email == new_user.email))
     is_object_exists = crud.is_object_exists(session=session, statement=statement)
     if is_object_exists:
@@ -22,17 +24,21 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
             status_code=409,
             detail=f"User with username: {new_user.username} or email: {new_user.email} exists.",
         )
-    raw_password = new_user.dict().pop("password")
-    hash_password = get_password_hash(raw_password)
-    new_user.password = hash_password
+    new_user = new_user.dict()
+    raw_password = new_user.pop("password_repeat")
+    new_user["password"] = get_password_hash(raw_password)
     user = crud.insert_object(
         session=session,
         model=User,
-        to_insert=new_user.dict(),
+        to_insert=new_user,
     )
     verification = auth_services.create_verification(session=session, user_id=str(user.get("id")))
     task.add_task(
-        send_new_account_email, new_user.email, new_user.username, raw_password, verification.get("id").hex,
+        send_new_account_email,
+        new_user.get("email"),
+        new_user.get("username"),
+        raw_password,
+        verification.get("id").hex,
     )
     return user
 
