@@ -5,20 +5,20 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from app import crud
-from app.auth import services as auth_services
-from app.auth.schemas import PasswordChange
-from app.auth.security import get_password_hash, verify_password
-from app.auth.send_email import send_new_account_email
-from app.db.models.user import User
-from app.user.schemas import UserRegistrationIn
+from app.core.security import get_password_hash, verify_password
+from app.core.send_email import send_new_account_email
+from app.models import User
+from app.schemas.auth import PasswordChange
+from app.schemas.user import UserRegistrationIn
+from app.services import auth as auth_services
+from app.services import base as base_services
 
 
 def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> dict:
     if new_user.password != new_user.password_repeat:
         raise HTTPException(status_code=400, detail="password and password_repeat doesn't match")
     statement = select(User).where(or_(User.username == new_user.username, User.email == new_user.email))
-    is_object_exists = crud.is_object_exists(session=session, statement=statement)
+    is_object_exists = base_services.is_object_exists(session=session, statement=statement)
     if is_object_exists:
         raise HTTPException(
             status_code=409,
@@ -27,7 +27,7 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
     new_user = new_user.dict()
     raw_password = new_user.pop("password_repeat")
     new_user["password"] = get_password_hash(raw_password)
-    user = crud.insert_object(
+    user = base_services.insert_object(
         session=session,
         model=User,
         to_insert=new_user,
@@ -45,7 +45,7 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
 
 def get_user(session: Session, where_statements: list) -> dict:
     statement = select(User).where(*where_statements)
-    user = crud.get_object(session=session, statement=statement)
+    user = base_services.get_object(session=session, statement=statement)
     return user
 
 
@@ -54,7 +54,7 @@ def update_user(
     to_update: dict,
     where_statements: Optional[list] = None,
 ) -> dict:
-    user = crud.update_object(
+    user = base_services.update_object(
         session=session,
         model=User,
         where_statements=where_statements,
@@ -83,5 +83,5 @@ def change_user_password(session: Session, password_change: PasswordChange, user
 
 
 def get_users(session: Session) -> list[User]:
-    users = crud.get_objects(session=session, model=User)
+    users = base_services.get_objects(session=session, model=User)
     return users

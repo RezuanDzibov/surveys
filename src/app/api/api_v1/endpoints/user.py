@@ -1,23 +1,23 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.db.models.user import User
+from app.api.deps import get_current_active_user
 from app.db.session import get_session
-from app.user import schemas
-from app.user import services as user_services
-from app.user.deps import get_current_active_user
+from app.models.user import User
+from app.schemas import user as user_schemas
+from app.services import user as user_services
 
 router = APIRouter()
 
 
-@router.get("/me", response_model=schemas.UserRetrieve)
+@router.get("/me", response_model=user_schemas.UserRetrieve)
 def get_current_user(user: dict = Depends(get_current_active_user)):
     return user
 
 
-@router.patch("/me/update", response_model=schemas.UserRetrieve)
+@router.patch("/me/update", response_model=user_schemas.UserRetrieve)
 def update_current_user(
-    user_to_update: schemas.UserUpdate,
+    user_to_update: user_schemas.UserUpdate,
     current_user: dict = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
@@ -29,7 +29,7 @@ def update_current_user(
     return user
 
 
-@router.get("", response_model=list[schemas.UserList])
+@router.get("", response_model=list[user_schemas.UserList])
 def get_users(session: Session = Depends(get_session)):
     users = user_services.get_users(session=session)
     return users

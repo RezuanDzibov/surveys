@@ -2,11 +2,11 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app import crud
-from app.auth.security import get_password_hash
-from app.db.models import User
+from app.core.security import get_password_hash
+from app.core.settings import get_settings
 from app.db.session import get_session
-from app.settings import get_settings
+from app.models import User
+from app.services import base as base_services
 
 settings = get_settings()
 
@@ -32,7 +32,7 @@ def create_admin_user(session: Session, to_insert: Optional[dict] = None, data_t
             for key, value in data_to_replace.items():
                 if key in to_insert:
                     to_insert[key] = value
-    user = crud.insert_object(
+    user = base_services.insert_object(
         session=session,
         model=User,
         to_insert=to_insert,

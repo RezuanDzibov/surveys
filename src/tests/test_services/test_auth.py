@@ -5,10 +5,10 @@ from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy import select
 
-from app import crud
-from app.auth import services as auth_services
-from app.auth.security import verify_password
-from app.db.models import Verification, User
+from app.core.security import verify_password
+from app.models import Verification, User
+from app.services import auth as auth_services
+from app.services import base as base_services
 
 
 class TestAuthenticate:
@@ -92,7 +92,7 @@ class TestVerifyRegistrationUser:
             verification_id=verification.get("id"),
         )
         statement = select(Verification).where(Verification.id == verification.get("id"))
-        assert not crud.is_object_exists(
+        assert not base_services.is_object_exists(
             session=session,
             statement=statement,
         )
@@ -165,7 +165,7 @@ class TestResetPassword:
 
     def test_for_inactive_user(self, session, task, admin_user_data):
         admin_user_data["is_active"] = False
-        crud.insert_object(
+        base_services.insert_object(
             session=session,
             model=User,
             to_insert=admin_user_data,

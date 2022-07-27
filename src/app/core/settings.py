@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseSettings, PostgresDsn, EmailStr
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings):
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
 
     @property
     def EMAIL_TEMPLATES_DIR(self) -> str:
-        return str(Path(__file__).parent / "email-templates/htmls")
+        return str(Path(__file__).parent.parent / "email-templates/htmls")
 
     @property
     def EMAILS_ENABLED(self) -> str:

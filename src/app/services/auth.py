@@ -6,13 +6,13 @@ from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Load, Session
 
-from app import crud
-from app.auth.security import get_password_hash, verify_password
-from app.auth.send_email import send_reset_password_email
-from app.db.models.auth import Verification
-from app.db.models.user import User
-from app.settings import get_settings
-from app.user import services as user_services
+from app.core.security import get_password_hash, verify_password
+from app.core.send_email import send_reset_password_email
+from app.core.settings import get_settings
+from app.models.auth import Verification
+from app.models.user import User
+from app.services import base as base_services
+from app.services import user as user_services
 
 settings = get_settings()
 
@@ -22,7 +22,7 @@ def authenticate(session: Session, login: str, password: str) -> dict:
         Load(User).load_only(User.password, User.is_active),
     )
     statement = statement.where(or_(User.username == login, User.email == login))
-    user = crud.get_object(session=session, statement=statement)
+    user = base_services.get_object(session=session, statement=statement)
     if not verify_password(password, user.get("password")):
         raise HTTPException(
             status_code=400,
@@ -32,7 +32,7 @@ def authenticate(session: Session, login: str, password: str) -> dict:
 
 
 def create_verification(session: Session, user_id: str) -> dict:
-    verification = crud.insert_object(
+    verification = base_services.insert_object(
         session=session,
         model=Verification,
         to_insert={"user_id": user_id},
@@ -42,13 +42,13 @@ def create_verification(session: Session, user_id: str) -> dict:
 
 def verify_registration_user(session: Session, verification_id: str) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
-    verification = crud.get_object(session=session, statement=statement)
+    verification = base_services.get_object(session=session, statement=statement)
     user_services.update_user(
         session=session,
         where_statements=[User.id == verification.get("user_id")],
         to_update={"is_active": True},
     )
-    crud.delete_object(
+    base_services.delete_object(
         session=session,
         model=Verification,
         where_statements=[Verification.id == verification_id],
@@ -95,7 +95,7 @@ def reset_password(session: Session, token: str, new_password: str) -> dict:
     if not user.get("is_active"):
         raise HTTPException(status_code=400, detail="Inactive user")
     password_hash = get_password_hash(new_password)
-    user = crud.update_object(
+    user = base_services.update_object(
         session=session,
         where_statements=[User.id == user.get("id")],
         model=User,

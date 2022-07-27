@@ -8,11 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.db.models import Base
-from app.db.models import User
-from app.initial_data_fixtures import create_admin_user
+from app.core.settings import get_settings
+from app.initial_data import create_admin_user
 from app.main import app
-from app.settings import get_settings
+from app.models import Base, User
 from tests.factories import UserFactory
 
 settings = get_settings()
@@ -77,11 +76,6 @@ def task() -> mock.Mock:
 
 
 @pytest.fixture(scope="function")
-def test_client() -> TestClient:
-    return TestClient(app)
-
-
-@pytest.fixture(scope="function")
 def factory_users(request, session: Session, user_factory: UserFactory) -> list[User]:
     if request.param:
         users: [User] = user_factory.build_batch(request.param)
@@ -89,3 +83,8 @@ def factory_users(request, session: Session, user_factory: UserFactory) -> list[
         session.commit()
         return users
     return user_factory.create()
+
+
+@pytest.fixture(scope="function")
+def test_client() -> TestClient:
+    return TestClient(app, base_url="https://testserver/api/api_v1/")
