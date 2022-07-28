@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.status import HTTP_403_FORBIDDEN
 
 from app.core.settings import get_settings
-from app.db.session import get_session
+from app.db.base import get_session
 from app.models.user import User
 from app.schemas.auth import TokenPayload
 from app.services import user as user_services

@@ -6,7 +6,7 @@ from starlette.background import BackgroundTasks
 
 from app.api.deps import get_current_active_user
 from app.core.jwt import create_acess_token
-from app.db.session import get_session
+from app.db.base import get_session
 from app.schemas.auth import Token, Login, PasswordReset, PasswordChange
 from app.schemas.base import Message
 from app.schemas.user import UserRegistrationIn

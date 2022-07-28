@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_active_user
-from app.db.session import get_session
+from app.db.base import get_session
 from app.models.user import User
 from app.schemas import user as user_schemas
 from app.services import user as user_services

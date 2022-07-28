@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash
 from app.core.settings import get_settings
-from app.db.session import get_session
+from app.db.base import get_session
 from app.models import User
 from app.services import base as base_services
 
