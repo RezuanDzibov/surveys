@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import jwt
 
-from app.core.settings import get_settings
+from core.settings import get_settings
 
 settings = get_settings()
 

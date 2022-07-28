@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from app.schemas.user import UserRetrieve
+from schemas.user import UserRetrieve
 
 
 class TestGetCurrentUser:

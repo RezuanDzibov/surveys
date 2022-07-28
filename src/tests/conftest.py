@@ -8,10 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.core.settings import get_settings
-from app.initial_data import create_admin_user
-from app.main import app
-from app.models import Base, User
+from core.settings import get_settings
+from initial_data import create_admin_user
+from main import app
+from models import Base, User
 from tests.factories import UserFactory
 
 settings = get_settings()

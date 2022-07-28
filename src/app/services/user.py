@@ -5,14 +5,14 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from app.core.security import get_password_hash, verify_password
-from app.core.send_email import send_new_account_email
-from app.models import User
-from app.models.base import BaseModel
-from app.schemas.auth import PasswordChange
-from app.schemas.user import UserRegistrationIn
-from app.services import auth as auth_services
-from app.services import base as base_services
+from core.security import get_password_hash, verify_password
+from core.send_email import send_new_account_email
+from models import User
+from models.base import BaseModel
+from schemas.auth import PasswordChange
+from schemas.user import UserRegistrationIn
+from services import auth as auth_services
+from services import base as base_services
 
 
 def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> Type[BaseModel]:

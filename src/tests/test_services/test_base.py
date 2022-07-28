@@ -4,9 +4,9 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app.core.settings import get_settings
-from app.models import User
-from app.services import base as base_services
+from core.settings import get_settings
+from models import User
+from services import base as base_services
 
 settings = get_settings()
 

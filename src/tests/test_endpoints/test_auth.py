@@ -1,7 +1,7 @@
 import pytest
 
-from app.core.settings import get_settings
-from app.services import auth as auth_services
+from core.settings import get_settings
+from services import auth as auth_services
 
 settings = get_settings()
 

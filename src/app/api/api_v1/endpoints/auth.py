@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from app.api.deps import get_current_active_user
-from app.core.jwt import create_acess_token
-from app.db.base import get_session
-from app.schemas.auth import Token, Login, PasswordReset, PasswordChange
-from app.schemas.base import Message
-from app.schemas.user import UserRegistrationIn
-from app.services import auth as auth_services
-from app.services import user as user_services
+from api.deps import get_current_active_user
+from core.jwt import create_acess_token
+from db.base import get_session
+from schemas.auth import Token, Login, PasswordReset, PasswordChange
+from schemas.base import Message
+from schemas.user import UserRegistrationIn
+from services import auth as auth_services
+from services import user as user_services
 
 router = APIRouter()
 

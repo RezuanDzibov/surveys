@@ -3,8 +3,8 @@ from random import choice
 import factory
 from faker import Faker
 
-from app.core.security import get_password_hash
-from app.models import User
+from core.security import get_password_hash
+from models import User
 
 fake = Faker()
 

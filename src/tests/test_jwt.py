@@ -1,7 +1,7 @@
 import jwt
 
-from app.core import jwt as auth_jwt
-from app.core.settings import get_settings
+from core import jwt as auth_jwt
+from core.settings import get_settings
 
 settings = get_settings()
 

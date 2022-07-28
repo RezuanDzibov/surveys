@@ -3,10 +3,10 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 
-from app.core.settings import get_settings
-from app.models import User
-from app.schemas.user import UserRegistrationIn
-from app.services import user as user_services
+from core.settings import get_settings
+from models import User
+from schemas.user import UserRegistrationIn
+from services import user as user_services
 
 settings = get_settings()
 
