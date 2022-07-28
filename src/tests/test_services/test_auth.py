@@ -15,7 +15,7 @@ class TestAuthenticate:
     def test_for_exists_user_by_username(self, session, admin_user, admin_user_data):
         user_in_db = auth_services.authenticate(
             session=session,
-            login=admin_user.get("username"),
+            login=admin_user.username,
             password=admin_user_data.get("password"),
         )
         assert admin_user == user_in_db
@@ -23,7 +23,7 @@ class TestAuthenticate:
     def test_for_exists_user_by_email(self, session, admin_user, admin_user_data):
         user_in_db = auth_services.authenticate(
             session=session,
-            login=admin_user.get("email"),
+            login=admin_user.email,
             password=admin_user_data.get("password"),
         )
         assert admin_user == user_in_db
@@ -50,7 +50,7 @@ class TestAuthenticate:
         with pytest.raises(HTTPException) as exception_info:
             auth_services.authenticate(
                 session=session,
-                login=admin_user.get("username"),
+                login=admin_user.username,
                 password="some_invalid_pass"
             )
             assert exception_info.value.status_code == 400
@@ -59,7 +59,7 @@ class TestAuthenticate:
         with pytest.raises(HTTPException) as exception_info:
             auth_services.authenticate(
                 session=session,
-                login=admin_user.get("email"),
+                login=admin_user.email,
                 password="some_invalid_pass"
             )
             assert exception_info.value.status_code == 400
@@ -69,7 +69,7 @@ class TestCreateVerification:
     def test_for_exists_user(self, session, admin_user):
         verification = auth_services.create_verification(
             session=session,
-            user_id=str(admin_user.get("id"))
+            user_id=str(admin_user.id)
         )
         assert verification
 
@@ -85,13 +85,13 @@ class TestVerifyRegistrationUser:
     def test_for_exists_verification(self, session, admin_user):
         verification = auth_services.create_verification(
             session=session,
-            user_id=str(admin_user.get("id")),
+            user_id=str(admin_user.id),
         )
         auth_services.verify_registration_user(
             session=session,
-            verification_id=verification.get("id"),
+            verification_id=verification.id,
         )
-        statement = select(Verification).where(Verification.id == verification.get("id"))
+        statement = select(Verification).where(Verification.id == verification.id)
         assert not base_services.is_object_exists(
             session=session,
             statement=statement,
@@ -111,10 +111,10 @@ class TestVerifyPasswordResetToken:
         reset_token = auth_services.recover_password(
             session=session,
             task=task,
-            email=admin_user.get("email"),
+            email=admin_user.email,
         )
         email = auth_services.verify_password_reset_token(token=reset_token)
-        assert email == admin_user.get("email")
+        assert email == admin_user.email
 
     def test_for_invalid_reset_token(self, session):
         email = auth_services.verify_password_reset_token(token="some_token")
@@ -126,7 +126,7 @@ class TestRecoverPassword:
         reset_token = auth_services.recover_password(
             session=session,
             task=task,
-            email=admin_user.get("email"),
+            email=admin_user.email,
         )
         assert auth_services.verify_password_reset_token(token=reset_token)
 
@@ -145,14 +145,14 @@ class TestResetPassword:
         reset_token = auth_services.recover_password(
             session=session,
             task=task,
-            email=admin_user.get("email"),
+            email=admin_user.email,
         )
         updated_user = auth_services.reset_password(
             session=session,
             token=reset_token,
             new_password="some_new_pass"
         )
-        assert verify_password("some_new_pass", updated_user.get("password"))
+        assert verify_password("some_new_pass", updated_user.password)
 
     def test_for_invalid_reset_token(self, session):
         with pytest.raises(HTTPException) as exception_info:

@@ -44,7 +44,7 @@ class TestUserAccessToken:
         response = test_client.post(
             "auth/login/access-token",
             json={
-                "login": admin_user.get("username"),
+                "login": admin_user.username,
                 "password": settings.ADMIN_FIXTURE_PASSWORD,
             }
         )
@@ -66,17 +66,17 @@ class TestConfirmEmail:
     def test_for_exists_user(self, tables, admin_user, session, test_client):
         verification = auth_services.create_verification(
             session=session,
-            user_id=str(admin_user.get("id")),
+            user_id=str(admin_user.id),
         )
         response = test_client.get(
-            f"auth/confirm-registration/{verification.get('id')}"
+            f"auth/confirm-registration/{verification.id}"
         )
         assert response.status_code == 200
 
 
 class TestRecoverPassword:
     def test_for_exists_user(self, admin_user, test_client):
-        response = test_client.get(f"auth/recover-password/{admin_user.get('email')}")
+        response = test_client.get(f"auth/recover-password/{admin_user.email}")
         assert response.status_code == 200
 
     def test_for_not_exists_user(self, tables, test_client):
@@ -89,7 +89,7 @@ class TestResetPassword:
         reset_token = auth_services.recover_password(
             session=session,
             task=task,
-            email=admin_user.get("email"),
+            email=admin_user.email,
         )
         response = test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
         assert response.status_code == 200
@@ -103,7 +103,7 @@ class TestResetPassword:
         reset_token = auth_services.recover_password(
             session=session,
             task=task,
-            email=admin_user.get("email"),
+            email=admin_user.email,
         )
         response = test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
         assert response.status_code == 400

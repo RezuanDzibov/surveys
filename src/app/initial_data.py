@@ -25,7 +25,11 @@ def get_initial_admin_user() -> dict:
     }
 
 
-def create_admin_user(session: Session, to_insert: Optional[dict] = None, data_to_replace: Optional[dict] = None) -> dict:
+def create_admin_user(
+    session: Session,
+    to_insert: Optional[dict] = None,
+    data_to_replace: Optional[dict] = None
+) -> User:
     if not to_insert:
         to_insert = get_initial_admin_user()
         if data_to_replace:

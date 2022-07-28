@@ -48,7 +48,7 @@ def session(tables, session_maker) -> Session:
 
 
 @pytest.fixture(scope="function")
-def admin_user(request, session) -> dict:
+def admin_user(request, session) -> User:
     create_admin_user_ = partial(create_admin_user, session)
     return create_admin_user_(data_to_replace=request.param) if hasattr(request, "param") else create_admin_user_()
 

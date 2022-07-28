@@ -17,13 +17,13 @@ from app.services import user as user_services
 settings = get_settings()
 
 
-def authenticate(session: Session, login: str, password: str) -> dict:
+def authenticate(session: Session, login: str, password: str) -> User:
     statement = select(User).options(
         Load(User).load_only(User.password, User.is_active),
     )
     statement = statement.where(or_(User.username == login, User.email == login))
-    user = base_services.get_object(session=session, statement=statement)
-    if not verify_password(password, user.get("password")):
+    user = base_services.get_object(session=session, statement=statement, model=User)
+    if not verify_password(password, user.password):
         raise HTTPException(
             status_code=400,
             detail="Provided password is incorrect",
@@ -31,7 +31,7 @@ def authenticate(session: Session, login: str, password: str) -> dict:
     return user
 
 
-def create_verification(session: Session, user_id: str) -> dict:
+def create_verification(session: Session, user_id: str) -> Verification:
     verification = base_services.insert_object(
         session=session,
         model=Verification,
@@ -42,10 +42,10 @@ def create_verification(session: Session, user_id: str) -> dict:
 
 def verify_registration_user(session: Session, verification_id: str) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
-    verification = base_services.get_object(session=session, statement=statement)
+    verification = base_services.get_object(session=session, statement=statement, model=Verification)
     user_services.update_user(
         session=session,
-        where_statements=[User.id == verification.get("user_id")],
+        where_statements=[User.id == verification.user_id],
         to_update={"is_active": True},
     )
     base_services.delete_object(
@@ -60,7 +60,7 @@ def recover_password(session: Session, task: BackgroundTasks, email: str) -> str
     user = user_services.get_user(session=session, where_statements=[User.email == email])
     password_reset_token = generate_password_reset_token(email)
     task.add_task(
-        send_reset_password_email, username=user.get("username"), email=email, token=password_reset_token
+        send_reset_password_email, username=user.username, email=email, token=password_reset_token
     )
     return password_reset_token
 
@@ -87,17 +87,17 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return None
 
 
-def reset_password(session: Session, token: str, new_password: str) -> dict:
+def reset_password(session: Session, token: str, new_password: str) -> User:
     email = verify_password_reset_token(token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
     user = user_services.get_user(session=session, where_statements=[User.email == email])
-    if not user.get("is_active"):
+    if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     password_hash = get_password_hash(new_password)
     user = base_services.update_object(
         session=session,
-        where_statements=[User.id == user.get("id")],
+        where_statements=[User.id == user.id],
         model=User,
         to_update={"password": password_hash},
     )
