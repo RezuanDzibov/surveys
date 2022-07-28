@@ -87,4 +87,4 @@ def factory_users(request, session: Session, user_factory: UserFactory) -> list[
 
 @pytest.fixture(scope="function")
 def test_client() -> TestClient:
-    return TestClient(app, base_url="https://testserver/api/api_v1/")
+    return TestClient(app, base_url="https://testserver/api/v1/")
