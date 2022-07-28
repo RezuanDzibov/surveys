@@ -28,9 +28,9 @@ def access_token(
     session: Session = Depends(get_session),
 ):
     user = auth_services.authenticate(session=session, login=login_data.login, password=login_data.password)
-    if not user.get("is_active"):
+    if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user.")
-    return Token(**create_acess_token(user.get("id").hex))
+    return Token(**create_acess_token(str(user.id)))
 
 
 @router.get("/confirm-registration/{verification_id}", response_model=Message)

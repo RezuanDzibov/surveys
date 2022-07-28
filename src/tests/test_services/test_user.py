@@ -49,15 +49,15 @@ class TestCreateUser:
 
 class TestGetUser:
     def test_exists_user_search_by_id(self, session, admin_user):
-        user = user_services.get_user(session=session, where_statements=[User.id == admin_user.get("id")])
+        user = user_services.get_user(session=session, where_statements=[User.id == admin_user.id])
         assert user == admin_user
 
     def test_exists_user_search_by_username(self, session, admin_user):
-        user = user_services.get_user(session=session, where_statements=[User.username == admin_user.get("username")])
+        user = user_services.get_user(session=session, where_statements=[User.username == admin_user.username])
         assert user == admin_user
 
     def test_exists_user_search_by_email(self, session, admin_user):
-        user = user_services.get_user(session=session, where_statements=[User.email == admin_user.get("email")])
+        user = user_services.get_user(session=session, where_statements=[User.email == admin_user.email])
         assert user == admin_user
 
     def test_not_exists_search_by_id(self, session):
@@ -78,10 +78,10 @@ class TestGetUser:
 
 class TestUpdateUser:
     def test_update_exists_user(self, session, admin_user):
-        admin_user["username"] = "some_another_username"
+        admin_user.username = "some_another_username"
         user_in_db = user_services.update_user(
             session=session,
-            where_statements=[User.id == admin_user.get("id")],
+            where_statements=[User.id == admin_user.id],
             to_update={"username": "some_another_username"},
         )
         assert admin_user == user_in_db

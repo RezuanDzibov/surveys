@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Optional, Type, Union, List
 
 from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation, UniqueViolation
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import Executable
 
 from app.db.utils import orm_row_to_dict
-from app.models import Base
+from app.models.base import BaseModel
 
 
 def is_object_exists(session: Session, statement: Executable) -> bool:
@@ -20,11 +20,11 @@ def is_object_exists(session: Session, statement: Executable) -> bool:
 
 def update_object(
     session: Session,
-    model: Type[Base],
+    model: Type[BaseModel],
     where_statements: list[Executable],
     to_update: dict,
     return_object: Optional[dict] = True,
-) -> Optional[Union[dict, bool]]:
+) -> Optional[Union[BaseModel, bool]]:
     statement = update(model).where(*where_statements).values(**to_update)
     if return_object:
         statement = statement.returning(model)
@@ -32,7 +32,7 @@ def update_object(
     session.commit()
     if return_object:
         try:
-            object_ = dict(result.one())
+            object_ = model(**dict(result.one()))
             return object_
         except NoResultFound:
             raise HTTPException(status_code=404, detail="Not found")
@@ -41,10 +41,10 @@ def update_object(
 
 def insert_object(
     session: Session,
-    model: Type[Base],
+    model: Type[BaseModel],
     to_insert: dict,
     return_object: Optional[bool] = True,
-) -> Optional[dict]:
+) -> Optional[BaseModel]:
     statement = insert(model).values(**to_insert)
     if return_object:
         statement = statement.returning(model)
@@ -52,7 +52,7 @@ def insert_object(
         result = session.execute(statement)
         session.commit()
         if return_object:
-            object_ = dict(result.one())
+            object_ = model(**dict(result.one()))
             return object_
         return None
     except IntegrityError as exception:
@@ -64,32 +64,32 @@ def insert_object(
 
 def delete_object(
     session: Session,
-    model: Type[Base],
+    model: Type[BaseModel],
     where_statements: list[Executable],
     return_object: bool = True,
-) -> Optional[Union[dict, bool]]:
+) -> Optional[Union[BaseModel, bool]]:
     statement = delete(model).where(*where_statements).returning(model)
     result = session.execute(statement)
     session.commit()
     if return_object:
         try:
-            object_ = dict(result.one())
+            object_ = model(**dict(result.one()))
             return object_
         except NoResultFound:
             raise HTTPException(status_code=404, detail="Not found")
     return None
 
 
-def get_object(session: Session, statement: Executable) -> Optional[dict]:
+def get_object(session: Session, statement: Executable, model: Type[BaseModel]) -> BaseModel:
     result = session.execute(statement)
     try:
-        object_ = orm_row_to_dict(result.one())
+        object_ = model(**orm_row_to_dict(result.one()))
         return object_
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Not found")
 
 
-def get_objects(session: Session, model: Type[Base]) -> list:
+def get_objects(session: Session, model: Type[BaseModel]) -> List[BaseModel]:
     statement = select(model).order_by(model.id)
     result = session.execute(statement=statement)
     objects = result.scalars().all()

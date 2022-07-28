@@ -23,7 +23,7 @@ def update_current_user(
 ):
     user = user_services.update_user(
         session=session,
-        where_statements=[User.id == current_user.get("id")],
+        where_statements=[User.id == current_user.id],
         to_update=user_to_update.dict(exclude_none=True),
     )
     return user

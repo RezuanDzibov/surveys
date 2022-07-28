@@ -13,7 +13,7 @@ class TestGetCurrentUser:
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
             }
         )
-        admin_user = UserRetrieve(**access_token_and_admin_user.get("admin_user"))
+        admin_user = UserRetrieve.from_orm(access_token_and_admin_user.get("admin_user"))
         response_user = UserRetrieve(**json.loads(response.content.decode("utf-8")))
         assert response.status_code == 200
         assert admin_user == response_user
@@ -36,9 +36,9 @@ class TestUpdateCurrentUser:
             }
         )
         admin_user = access_token_and_admin_user.get("admin_user")
-        admin_user["first_name"] = "Another First Name"
-        admin_user["last_name"] = "Another Last Name"
-        admin_user = UserRetrieve(**admin_user)
+        admin_user.first_name = "Another First Name"
+        admin_user.last_name = "Another Last Name"
+        admin_user = UserRetrieve.from_orm(admin_user)
         response_user = UserRetrieve(**json.loads(response.content.decode("utf-8")))
         assert response.status_code == 200
         assert admin_user == response_user

@@ -1,5 +1,5 @@
 import uuid
-from typing import Any
+from typing import Any, TypeVar
 
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import UUID
@@ -26,3 +26,6 @@ class Base:
 
 class UUIDMixin:
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+
+BaseModel = TypeVar("BaseModel", bound=Base)
