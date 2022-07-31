@@ -1,4 +1,4 @@
-from typing import Optional, Type, List
+from typing import Optional, List
 
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_, select
@@ -8,14 +8,13 @@ from starlette.background import BackgroundTasks
 from core.security import get_password_hash, verify_password
 from core.send_email import send_new_account_email
 from models import User
-from models.base import BaseModel
 from schemas.auth import PasswordChange
 from schemas.user import UserRegistrationIn
 from services import auth as auth_services
 from services import base as base_services
 
 
-def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> Type[BaseModel]:
+def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> User:
     if new_user.password != new_user.password_repeat:
         raise HTTPException(status_code=400, detail="password and password_repeat doesn't match")
     statement = select(User).where(or_(User.username == new_user.username, User.email == new_user.email))
@@ -44,7 +43,7 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
     return user
 
 
-def get_user(session: Session, where_statements: list) -> Type[BaseModel]:
+def get_user(session: Session, where_statements: list) -> User:
     statement = select(User).where(*where_statements)
     user = base_services.get_object(session=session, statement=statement, model=User)
     return user
@@ -54,7 +53,7 @@ def update_user(
     session: Session,
     to_update: dict,
     where_statements: Optional[list] = None,
-) -> Type[BaseModel]:
+) -> User:
     user = base_services.update_object(
         session=session,
         model=User,
