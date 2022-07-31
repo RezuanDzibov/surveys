@@ -17,6 +17,9 @@ class UserList(BaseUser):
 
 
 class UserRegistrationIn(BaseUser):
+    first_name: constr(max_length=100)
+    last_name: constr(max_length=100)
+    birth_date: PastDate
     password: constr(max_length=100, min_length=8)
     password_repeat: constr(max_length=100, min_length=8)
 
