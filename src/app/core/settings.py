@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     SECRET_KEY: str
     SERVER_HOST: str
+    API_VERSION: str
+    BASE_APP_URI: str
     TOKEN_ENCODE_ALGORITHM = "HS256"
     ACCESS_TOKEN_JWT_SUBJECT = "access"
     PASSWORD_RESET_JWT_SUBJECT = "preset"
@@ -65,6 +67,9 @@ class Settings(BaseSettings):
             host=self.SQL_HOST,
             path=f"/{self.SQL_DATABASE}",
         )
+    @property
+    def BASE_APP_URI(self):
+        return f"http://{self.SERVER_HOST}"
 
     class Config:
         env_file = Path(f"{BASE_DIR}/.env")
