@@ -11,11 +11,11 @@ from services import base as base_services
 settings = get_settings()
 
 
-def get_initial_admin_user() -> dict:
+def get_admin_user_data() -> dict:
     return {
         "username": settings.ADMIN_FIXTURE_USERNAME,
         "email": settings.ADMIN_FIXTURE_EMAIL,
-        "password": get_password_hash(settings.ADMIN_FIXTURE_PASSWORD),
+        "password": settings.ADMIN_FIXTURE_PASSWORD,
         "first_name": settings.ADMIN_FIXTURE_FIRST_NAME,
         "last_name": settings.ADMIN_FIXTURE_LAST_NAME,
         "birth_date": settings.ADMIN_FIXTURE_BIRTH_DATE,
@@ -31,11 +31,12 @@ def create_admin_user(
     data_to_replace: Optional[dict] = None
 ) -> User:
     if not to_insert:
-        to_insert = get_initial_admin_user()
+        to_insert = get_admin_user_data()
         if data_to_replace:
             for key, value in data_to_replace.items():
                 if key in to_insert:
                     to_insert[key] = value
+        to_insert["password"] = get_password_hash(to_insert.get("password"))
     user = base_services.insert_object(
         session=session,
         model=User,
