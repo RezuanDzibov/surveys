@@ -5,8 +5,8 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
+from core.emails import send_new_account_email
 from core.security import get_password_hash, verify_password
-from core.send_email import send_new_account_email
 from models import User
 from schemas.auth import PasswordChange
 from schemas.user import UserRegistrationIn

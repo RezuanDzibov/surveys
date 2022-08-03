@@ -6,8 +6,8 @@ from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Load, Session
 
+from core.emails import send_reset_password_email
 from core.security import get_password_hash, verify_password
-from core.send_email import send_reset_password_email
 from core.settings import get_settings
 from models.auth import Verification
 from models.user import User
