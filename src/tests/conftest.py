@@ -9,7 +9,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from core.settings import get_settings
-from initial_data import create_admin_user
+from initial_data import create_admin_user, get_admin_user_data
 from main import app
 from models import Base, User
 from tests.factories import UserFactory
@@ -55,17 +55,7 @@ def admin_user(request, session) -> User:
 
 @pytest.fixture(scope="function")
 def admin_user_data() -> dict:
-    return {
-        "username": settings.ADMIN_FIXTURE_USERNAME,
-        "email": settings.ADMIN_FIXTURE_EMAIL,
-        "password": settings.ADMIN_FIXTURE_PASSWORD,
-        "first_name": settings.ADMIN_FIXTURE_FIRST_NAME,
-        "last_name": settings.ADMIN_FIXTURE_LAST_NAME,
-        "birth_date": settings.ADMIN_FIXTURE_BIRTH_DATE,
-        "is_active": settings.ADMIN_FIXTURE_IS_ACTIVE,
-        "is_stuff": settings.ADMIN_FIXTURE_IS_STUFF,
-        "is_superuser": settings.ADMIN_FIXTURE_IS_SUPERUSER,
-    }
+    return get_admin_user_data()
 
 
 @pytest.fixture(scope="function")
