@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
 from api.deps import get_current_active_user
-from core.jwt import create_acess_token
+from core.jwt import create_access_token
 from db.base import get_session
 from schemas.auth import Token, Login, PasswordReset, PasswordChange
 from schemas.base import Message
@@ -30,7 +30,7 @@ def access_token(
     user = auth_services.authenticate(session=session, login=login_data.login, password=login_data.password)
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user.")
-    return Token(**create_acess_token(str(user.id)))
+    return Token(**create_access_token(str(user.id)))
 
 
 @router.get("/confirm-registration/{verification_id}", response_model=Message)

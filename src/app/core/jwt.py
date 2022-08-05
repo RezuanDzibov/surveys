@@ -7,7 +7,7 @@ from core.settings import get_settings
 settings = get_settings()
 
 
-def create_acess_token(user_id: str) -> dict:
+def create_access_token(user_id: str) -> dict:
     access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": create_jwt_token(
