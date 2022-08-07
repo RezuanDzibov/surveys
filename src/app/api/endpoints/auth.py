@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
@@ -17,8 +18,8 @@ router = APIRouter()
 
 
 @router.post("/registration", response_model=Message)
-def registration(new_user: UserRegistrationIn, task: BackgroundTasks, session: Session = Depends(get_session)):
-    user_services.create_user(session=session, new_user=new_user, task=task)
+async def registration(new_user: UserRegistrationIn, task: BackgroundTasks, session: AsyncSession = Depends(get_session)):
+    await user_services.create_user(session=session, new_user=new_user, task=task)
     return Message(message="Verification email has just been sent.")
 
 

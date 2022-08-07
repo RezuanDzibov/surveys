@@ -1,30 +1,43 @@
+import json
+
 import pytest
+from httpx import AsyncClient
 
 from core.settings import get_settings
+from models import User
 from services import auth as auth_services
 
 settings = get_settings()
 
 
 class TestUserRegistration:
-    def test_for_not_exists_user(self, tables, admin_user_data, test_client):
+    async def test_for_not_exists_user(self, tables, admin_user_data: dict, test_client: AsyncClient):
         admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
-        response = test_client.post("auth/registration", json=admin_user_data)
+        admin_user_data = json.loads(json.dumps(admin_user_data, default=str))
+        response = await test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 200
 
-    def test_for_exists_user(self, tables, admin_user, admin_user_data, test_client):
+    async def test_for_exists_user(self, tables, admin_user: User, admin_user_data: dict, test_client: AsyncClient):
         admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
-        response = test_client.post("auth/registration", json=admin_user_data)
+        admin_user_data = json.loads(json.dumps(admin_user_data, default=str))
+        response = await test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 409
 
-    def test_for_invalid_data(self, tables, admin_user_data, test_client):
+    async def test_for_invalid_data(self, tables, admin_user_data: dict, test_client: AsyncClient):
         admin_user_data["password"] = "non"
-        response = test_client.post("auth/registration", json=admin_user_data)
+        admin_user_data = json.loads(json.dumps(admin_user_data, default=str))
+        response = await test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 422
 
-    def test_for_not_match_password_and_password_repeat(self, tables, admin_user_data, test_client):
+    async def test_for_not_match_password_and_password_repeat(
+            self,
+            tables,
+            admin_user_data: dict,
+            test_client: AsyncClient
+    ):
         admin_user_data["password_repeat"] = "not_match_password"
-        response = test_client.post("auth/registration", json=admin_user_data)
+        admin_user_data = json.loads(json.dumps(admin_user_data, default=str))
+        response = await test_client.post("auth/registration", json=admin_user_data)
         assert response.status_code == 400
 
 
