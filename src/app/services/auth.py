@@ -17,12 +17,9 @@ from services import user as user_services
 settings = get_settings()
 
 
-def authenticate(session: Session, login: str, password: str) -> User:
-    statement = select(User).options(
-        Load(User).load_only(User.password, User.is_active),
-    )
-    statement = statement.where(or_(User.username == login, User.email == login))
-    user = base_services.get_object(session=session, statement=statement, model=User)
+async def authenticate(session: AsyncSession, login: str, password: str) -> User:
+    statement = select(User).where(or_(User.username == login, User.email == login))
+    user = await base_services.get_object(session=session, statement=statement, model=User)
     if not verify_password(password, user.password):
         raise HTTPException(
             status_code=400,

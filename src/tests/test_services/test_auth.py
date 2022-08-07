@@ -4,6 +4,7 @@ import pytest
 from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import verify_password
 from models import Verification, User
@@ -12,55 +13,55 @@ from services import base as base_services
 
 
 class TestAuthenticate:
-    def test_for_exists_user_by_username(self, session, admin_user, admin_user_data):
-        user_in_db = auth_services.authenticate(
+    async def test_for_exists_user_by_username(self, session: AsyncSession, admin_user: User, admin_user_data: dict):
+        user_in_db = await auth_services.authenticate(
             session=session,
             login=admin_user.username,
             password=admin_user_data.get("password"),
         )
         assert admin_user == user_in_db
 
-    def test_for_exists_user_by_email(self, session, admin_user, admin_user_data):
-        user_in_db = auth_services.authenticate(
+    async def test_for_exists_user_by_email(self, session: AsyncSession, admin_user: User, admin_user_data: dict):
+        user_in_db = await auth_services.authenticate(
             session=session,
             login=admin_user.email,
             password=admin_user_data.get("password"),
         )
         assert admin_user == user_in_db
 
-    def test_for_not_exists_user_by_username(self, session):
+    async def test_for_not_exists_user_by_username(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.authenticate(
+            await auth_services.authenticate(
                 session=session,
-                login="some_username",
-                password="some_pass",
+                login="username",
+                password="password",
             )
             assert exception_info.value.status_code == 404
 
-    def test_for_not_exists_user_by_email(self, session):
+    async def test_for_not_exists_user_by_email(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.authenticate(
+            await auth_services.authenticate(
                 session=session,
-                login="someemail@gmail.com",
-                password="some_pass",
+                login="eamil@gmail.com",
+                password="password",
             )
             assert exception_info.value.status_code == 404
 
-    def test_for_invalid_password_by_username(self, session, admin_user):
+    async def test_for_invalid_password_by_username(self, session: AsyncSession, admin_user: User):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.authenticate(
+            await auth_services.authenticate(
                 session=session,
                 login=admin_user.username,
-                password="some_invalid_pass"
+                password="password"
             )
             assert exception_info.value.status_code == 400
 
-    def test_for_invalid_password_by_email(self, session, admin_user):
+    async def test_for_invalid_password_by_email(self, session: AsyncSession, admin_user: User):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.authenticate(
+            await auth_services.authenticate(
                 session=session,
                 login=admin_user.email,
-                password="some_invalid_pass"
+                password="password"
             )
             assert exception_info.value.status_code == 400
 
