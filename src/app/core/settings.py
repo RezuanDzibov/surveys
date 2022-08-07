@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     SECRET_KEY: str
     SERVER_HOST: str
-    API_VERSION: str
     BASE_APP_URI: str
     TOKEN_ENCODE_ALGORITHM = "HS256"
     ACCESS_TOKEN_JWT_SUBJECT = "access"

@@ -27,7 +27,7 @@ def send_email(email_to: str, subject: str, template_name: str, environment: dic
 
 
 def send_new_account_email(email_to: str, username: str, password: str, uuid: str) -> None:
-    verification_link = f"{settings.BASE_APP_URI}/api/{settings.API_VERSION}/auth/confirm-registration/{uuid}"
+    verification_link = f"{settings.BASE_APP_URI}/auth/confirm-registration/{uuid}"
     subject = "New user."
     send_email(
         email_to=email_to,
