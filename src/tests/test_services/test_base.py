@@ -41,24 +41,24 @@ class TestIsObjectExists:
 
 
 class TestUpdateObject:
-    def test_exists_object(self, session, admin_user):
+    async def test_exists_object(self, session: AsyncSession, admin_user: User):
         expected_object = copy(admin_user)
-        expected_object.username = "some_another_username"
-        object_in_db = base_services.update_object(
+        expected_object.username = "username"
+        object_in_db = await base_services.update_object(
             session=session,
             model=User,
             where_statements=[User.username == admin_user.username],
-            to_update={"username": "some_another_username"},
+            to_update={"username": "username"},
         )
         assert expected_object == object_in_db
 
-    def test_not_exists_object(self, session):
+    async def test_not_exists_object(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            base_services.update_object(
+            await base_services.update_object(
                 session=session,
                 model=User,
-                where_statements=[User.username == "some_username"],
-                to_update={"username": "another_some_username"}
+                where_statements=[User.username == "username"],
+                to_update={"username": "username_1"}
             )
             assert exception_info.value.status_code == 404
 

@@ -19,8 +19,8 @@ async def is_object_exists(session: AsyncSession, statement: Executable) -> bool
     return is_object_exists
 
 
-def update_object(
-    session: Session,
+async def update_object(
+    session: AsyncSession,
     model: Type[BaseModel],
     where_statements: list[Executable],
     to_update: dict,
@@ -29,8 +29,8 @@ def update_object(
     statement = update(model).where(*where_statements).values(**to_update)
     if return_object:
         statement = statement.returning(model)
-    result = session.execute(statement)
-    session.commit()
+    result = await session.execute(statement)
+    await session.commit()
     if return_object:
         try:
             object_ = model(**dict(result.one()))
