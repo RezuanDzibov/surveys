@@ -35,8 +35,8 @@ async def access_token(
 
 
 @router.get("/confirm-registration/{verification_id}", response_model=Message)
-def confirm_registration(verification_id: UUID, session: Session = Depends(get_session)):
-    auth_services.verify_registration_user(session=session, verification_id=str(verification_id))
+async def confirm_registration(verification_id: UUID, session: AsyncSession = Depends(get_session)):
+    await auth_services.verify_registration_user(session=session, verification_id=str(verification_id))
     return Message(message="Successfully verify email")
 
 

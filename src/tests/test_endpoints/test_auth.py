@@ -2,6 +2,7 @@ import json
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import get_settings
 from models import User
@@ -76,12 +77,12 @@ class TestUserAccessToken:
 
 class TestConfirmEmail:
     @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
-    def test_for_exists_user(self, tables, admin_user, session, test_client):
-        verification = auth_services.create_verification(
+    async def test_for_exists_user(self, tables, admin_user: User, session: AsyncSession, test_client: AsyncClient):
+        verification = await auth_services.create_verification(
             session=session,
             user_id=str(admin_user.id),
         )
-        response = test_client.get(
+        response = await test_client.get(
             f"auth/confirm-registration/{verification.id}"
         )
         assert response.status_code == 200
