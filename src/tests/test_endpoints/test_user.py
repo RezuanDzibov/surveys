@@ -1,8 +1,10 @@
 import json
+from typing import List
 
 import pytest
 from httpx import AsyncClient
 
+from models import User
 from schemas.user import UserRetrieve
 
 
@@ -55,14 +57,14 @@ class TestUpdateCurrentUser:
 
 class TestGetUsers:
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
-    def test_for_exists_users(self, test_client, factory_users):
-        response = test_client.get("users")
+    async def test_for_exists_users(self, test_client: AsyncClient, factory_users: List[User]):
+        response = await test_client.get("users")
         users = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
         assert len(users) == 5
 
-    def test_for_not_exists_users(self, test_client, tables):
-        response = test_client.get("users")
+    async def test_for_not_exists_users(self, test_client: AsyncClient, tables):
+        response = await test_client.get("users")
         users = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
         assert len(users) == 0

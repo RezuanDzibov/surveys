@@ -1,6 +1,7 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from api.deps import get_current_active_user
 from db.base import get_session
@@ -30,7 +31,7 @@ async def update_current_user(
     return user
 
 
-@router.get("", response_model=list[user_schemas.UserList])
-def get_users(session: Session = Depends(get_session)):
-    users = user_services.get_users(session=session)
+@router.get("", response_model=List[user_schemas.UserList])
+async def get_users(session: AsyncSession = Depends(get_session)):
+    users = await user_services.get_users(session=session)
     return users
