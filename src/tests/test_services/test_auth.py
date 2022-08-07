@@ -1,3 +1,4 @@
+from unittest import mock
 from uuid import uuid4
 
 import pytest
@@ -108,8 +109,8 @@ class TestVerifyRegistrationUser:
 
 
 class TestVerifyPasswordResetToken:
-    def test_for_valid_reset_token(self, session, admin_user, task):
-        reset_token = auth_services.recover_password(
+    async def test_for_valid_reset_token(self, session: AsyncSession, admin_user: User, task: mock.Mock):
+        reset_token = await auth_services.recover_password(
             session=session,
             task=task,
             email=admin_user.email,
@@ -117,7 +118,7 @@ class TestVerifyPasswordResetToken:
         email = auth_services.verify_password_reset_token(token=reset_token)
         assert email == admin_user.email
 
-    def test_for_invalid_reset_token(self, session):
+    def test_for_invalid_reset_token(self):
         email = auth_services.verify_password_reset_token(token="some_token")
         assert not email
 
