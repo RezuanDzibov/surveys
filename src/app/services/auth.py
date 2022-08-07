@@ -38,15 +38,15 @@ async def create_verification(session: AsyncSession, user_id: str) -> Verificati
     return verification
 
 
-def verify_registration_user(session: Session, verification_id: str) -> None:
+async def verify_registration_user(session: AsyncSession, verification_id: str) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
-    verification = base_services.get_object(session=session, statement=statement, model=Verification)
-    user_services.update_user(
+    verification = await base_services.get_object(session=session, statement=statement, model=Verification)
+    await user_services.update_user(
         session=session,
         where_statements=[User.id == verification.user_id],
         to_update={"is_active": True},
     )
-    base_services.delete_object(
+    await base_services.delete_object(
         session=session,
         model=Verification,
         where_statements=[Verification.id == verification_id],

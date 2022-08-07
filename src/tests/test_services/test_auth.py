@@ -83,24 +83,24 @@ class TestCreateVerification:
 
 
 class TestVerifyRegistrationUser:
-    def test_for_exists_verification(self, session, admin_user):
-        verification = auth_services.create_verification(
+    async def test_for_exists_verification(self, session: AsyncSession, admin_user: User):
+        verification = await auth_services.create_verification(
             session=session,
             user_id=str(admin_user.id),
         )
-        auth_services.verify_registration_user(
+        await auth_services.verify_registration_user(
             session=session,
             verification_id=verification.id,
         )
         statement = select(Verification).where(Verification.id == verification.id)
-        assert not base_services.is_object_exists(
+        assert not await base_services.is_object_exists(
             session=session,
             statement=statement,
         )
 
-    def test_for_not_exists_verification(self, session):
+    async def test_for_not_exists_verification(self, session):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.verify_registration_user(
+            await auth_services.verify_registration_user(
                 session=session,
                 verification_id=str(uuid4())
             )
