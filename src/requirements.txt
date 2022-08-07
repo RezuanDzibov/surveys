@@ -29,3 +29,6 @@ jinja2
 pytest
 factory_boy
 pytest_factoryboy
+pytest-asyncio
+asyncpg
+httpx

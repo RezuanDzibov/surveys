@@ -1,12 +1,14 @@
+import asyncio
 from functools import partial
+from typing import List
 from unittest import mock
 
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from pytest_factoryboy import register
-from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from core.settings import get_settings
 from initial_data import create_admin_user, get_admin_user_data
@@ -20,37 +22,40 @@ register(UserFactory)
 
 
 @pytest.fixture(scope="session")
-def engine() -> Engine:
-    return create_engine(settings.SQLALCHEMY_DATABASE_URI)
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="session")
+async def engine() -> Engine:
+    return create_async_engine(settings.SQLALCHEMY_DATABASE_URI)
 
 
 @pytest.fixture(scope="function")
-def tables(engine) -> None:
-    Base.metadata.create_all(engine)
-    try:
-        yield
-    finally:
-        Base.metadata.drop_all(engine)
+async def tables(engine) -> None:
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
+    await engine.dispose()
 
 
 @pytest.fixture(scope="function")
-def session_maker(engine):
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
+async def session_maker(engine):
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
 
 
 @pytest.fixture(scope="function")
-def session(tables, session_maker) -> Session:
-    session = session_maker()
-    try:
+async def session(tables, session_maker) -> AsyncSession:
+    async with session_maker() as session:
         yield session
-    finally:
-        session.close()
 
 
 @pytest.fixture(scope="function")
-def admin_user(request, session) -> User:
+async def admin_user(request, session: AsyncSession) -> User:
     create_admin_user_ = partial(create_admin_user, session)
-    return create_admin_user_(data_to_replace=request.param) if hasattr(request, "param") else create_admin_user_()
+    return await create_admin_user_(data_to_replace=request.param) if hasattr(request, "param") else await create_admin_user_()
 
 
 @pytest.fixture(scope="function")
@@ -66,15 +71,16 @@ def task() -> mock.Mock:
 
 
 @pytest.fixture(scope="function")
-def factory_users(request, session: Session, user_factory: UserFactory) -> list[User]:
+async def factory_users(request, session: AsyncSession, user_factory: UserFactory) -> List[User]:
     if request.param:
         users: [User] = user_factory.build_batch(request.param)
         session.add_all(users)
-        session.commit()
+        await session.commit()
         return users
     return user_factory.create()
 
 
 @pytest.fixture(scope="function")
-def test_client() -> TestClient:
-    return TestClient(app, base_url="https://testserver/")
+async def test_client() -> AsyncClient:
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        yield client

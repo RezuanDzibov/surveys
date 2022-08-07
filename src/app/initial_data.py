@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import get_password_hash
 from core.settings import get_settings
@@ -25,8 +25,8 @@ def get_admin_user_data() -> dict:
     }
 
 
-def create_admin_user(
-    session: Session,
+async def create_admin_user(
+    session: AsyncSession,
     to_insert: Optional[dict] = None,
     data_to_replace: Optional[dict] = None
 ) -> User:
@@ -37,7 +37,7 @@ def create_admin_user(
                 if key in to_insert:
                     to_insert[key] = value
         to_insert["password"] = get_password_hash(to_insert.get("password"))
-    user = base_services.insert_object(
+    user = await base_services.insert_object(
         session=session,
         model=User,
         to_insert=to_insert,

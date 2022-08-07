@@ -1,11 +1,14 @@
 import json
 
 import pytest
+from httpx import AsyncClient
+
+from models import User
 
 
 @pytest.fixture(scope="function")
-def access_token_and_admin_user(test_client, admin_user, admin_user_data) -> dict:
-    response = test_client.post(
+async def access_token_and_admin_user(test_client: AsyncClient, admin_user: User, admin_user_data: dict) -> dict:
+    response = await test_client.post(
         "auth/login/access-token",
         json={
             "login": admin_user_data.get("username"),

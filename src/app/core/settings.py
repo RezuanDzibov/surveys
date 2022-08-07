@@ -1,3 +1,4 @@
+import datetime
 from functools import lru_cache
 from pathlib import Path
 
@@ -40,7 +41,7 @@ class Settings(BaseSettings):
     ADMIN_FIXTURE_PASSWORD: str
     ADMIN_FIXTURE_FIRST_NAME: str
     ADMIN_FIXTURE_LAST_NAME: str
-    ADMIN_FIXTURE_BIRTH_DATE: str
+    ADMIN_FIXTURE_BIRTH_DATE: datetime.date
     ADMIN_FIXTURE_IS_ACTIVE: bool = True
     ADMIN_FIXTURE_IS_STUFF: bool = True
     ADMIN_FIXTURE_IS_SUPERUSER: bool = True

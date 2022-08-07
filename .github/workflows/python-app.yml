@@ -9,9 +9,8 @@ on:
 env:
   PROJECT_NAME: "Surveys"
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  API_VERSION: "v1"
   SERVER_HOST: "127.0.0.1:8000"
-  SQL_ENGINE: "postgresql+psycopg2"
+  SQL_ENGINE: "postgresql+asyncpg"
   SQL_USER: "postgres"
   SQL_PASSWORD: "postgres"
   SQL_DATABASE: "surveys"
