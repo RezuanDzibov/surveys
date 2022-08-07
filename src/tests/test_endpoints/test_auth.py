@@ -42,8 +42,8 @@ class TestUserRegistration:
 
 
 class TestUserAccessToken:
-    def test_for_exists_user(self, tables, admin_user, admin_user_data, test_client):
-        response = test_client.post(
+    async def test_for_exists_user(self, tables, admin_user: User, admin_user_data: dict, test_client: AsyncClient):
+        response = await test_client.post(
             "auth/login/access-token",
             json={
                 "login": admin_user_data.get("username"),
@@ -53,8 +53,8 @@ class TestUserAccessToken:
         assert response.status_code == 200
 
     @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
-    def test_for_inactive_user(self, tables, admin_user, test_client):
-        response = test_client.post(
+    async def test_for_inactive_user(self, tables, admin_user: User, test_client: AsyncClient):
+        response = await test_client.post(
             "auth/login/access-token",
             json={
                 "login": admin_user.username,
@@ -63,8 +63,8 @@ class TestUserAccessToken:
         )
         assert response.status_code == 400
 
-    def test_for_not_exists_user(self, tables, test_client):
-        response = test_client.post(
+    async def test_for_not_exists_user(self, tables, test_client: AsyncClient):
+        response = await test_client.post(
             "auth/login/access-token",
             json={
                 "login": "username",

@@ -24,11 +24,11 @@ async def registration(new_user: UserRegistrationIn, task: BackgroundTasks, sess
 
 
 @router.post("/login/access-token", response_model=Token)
-def access_token(
+async def access_token(
     login_data: Login,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ):
-    user = auth_services.authenticate(session=session, login=login_data.login, password=login_data.password)
+    user = await auth_services.authenticate(session=session, login=login_data.login, password=login_data.password)
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user.")
     return Token(**create_access_token(str(user.id)))
