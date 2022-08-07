@@ -1,5 +1,6 @@
 import asyncio
 from functools import partial
+from typing import List
 from unittest import mock
 
 import pytest
@@ -7,7 +8,7 @@ from fastapi.testclient import TestClient
 from pytest_factoryboy import register
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 
 from core.settings import get_settings
 from initial_data import create_admin_user, get_admin_user_data
@@ -70,11 +71,11 @@ def task() -> mock.Mock:
 
 
 @pytest.fixture(scope="function")
-def factory_users(request, session: Session, user_factory: UserFactory) -> list[User]:
+async def factory_users(request, session: AsyncSession, user_factory: UserFactory) -> List[User]:
     if request.param:
         users: [User] = user_factory.build_batch(request.param)
         session.add_all(users)
-        session.commit()
+        await session.commit()
         return users
     return user_factory.create()
 
