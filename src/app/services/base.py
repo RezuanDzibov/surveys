@@ -63,15 +63,15 @@ async def insert_object(
             raise HTTPException(status_code=409, detail="Already exists")
 
 
-def delete_object(
-    session: Session,
+async def delete_object(
+    session: AsyncSession,
     model: Type[BaseModel],
     where_statements: list[Executable],
     return_object: bool = True,
 ) -> Optional[Union[BaseModel, bool]]:
     statement = delete(model).where(*where_statements).returning(model)
-    result = session.execute(statement)
-    session.commit()
+    result = await session.execute(statement)
+    await session.commit()
     if return_object:
         try:
             object_ = model(**dict(result.one()))

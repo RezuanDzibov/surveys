@@ -83,18 +83,18 @@ class TestInsertObject:
 
 
 class TestDeleteObject:
-    def test_exists_object(self, session, admin_user):
-        deleted_object = base_services.delete_object(
+    async def test_exists_object(self, session: AsyncSession, admin_user: User):
+        deleted_object = await base_services.delete_object(
             session=session,
             model=User,
             where_statements=[User.username == admin_user.username],
         )
         assert admin_user == deleted_object
-        assert not base_services.is_object_exists(session=session, statement=User.id == admin_user.id)
+        assert not await base_services.is_object_exists(session=session, statement=User.id == admin_user.id)
 
-    def test_not_exists_object(self, session):
+    async def test_not_exists_object(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            base_services.delete_object(
+            await base_services.delete_object(
                 session=session,
                 model=User,
                 where_statements=[User.username == "some_username"],
