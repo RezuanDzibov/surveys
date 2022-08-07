@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from psycopg2.errors import ForeignKeyViolation, UniqueViolation
 from sqlalchemy import delete, exists, insert, update, select
 from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Executable
 
@@ -11,9 +12,9 @@ from db.utils import orm_row_to_dict
 from models.base import BaseModel
 
 
-def is_object_exists(session: Session, statement: Executable) -> bool:
+async def is_object_exists(session: AsyncSession, statement: Executable) -> bool:
     statement = exists(statement).select()
-    result = session.execute(statement)
+    result = await session.execute(statement)
     is_object_exists = result.one()[0]
     return is_object_exists
 

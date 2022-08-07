@@ -3,6 +3,7 @@ from copy import copy
 import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import get_settings
 from models import User
@@ -30,13 +31,13 @@ class TestGetObject:
 
 
 class TestIsObjectExists:
-    def test_exists_object(self, session, admin_user):
+    async def test_exists_object(self, session: AsyncSession, admin_user: User):
         statement = select(User).where(User.username == admin_user.username)
-        assert base_services.is_object_exists(session=session, statement=statement)
+        assert await base_services.is_object_exists(session=session, statement=statement)
 
-    def test_not_exists_object(self, session):
+    async def test_not_exists_object(self, session):
         statement = select(User).where(User.username == "some username")
-        assert not base_services.is_object_exists(session=session, statement=statement)
+        assert not await base_services.is_object_exists(session=session, statement=statement)
 
 
 class TestUpdateObject:

@@ -1,11 +1,12 @@
+import asyncio
 from functools import partial
 from unittest import mock
 
 import pytest
 from fastapi.testclient import TestClient
 from pytest_factoryboy import register
-from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, Session
 
 from core.settings import get_settings
@@ -20,31 +21,34 @@ register(UserFactory)
 
 
 @pytest.fixture(scope="session")
-def engine() -> Engine:
-    return create_engine(settings.SQLALCHEMY_DATABASE_URI)
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="session")
+async def engine() -> Engine:
+    return create_async_engine(settings.SQLALCHEMY_DATABASE_URI, echo=True)
 
 
 @pytest.fixture(scope="function")
-def tables(engine) -> None:
-    Base.metadata.create_all(engine)
-    try:
-        yield
-    finally:
-        Base.metadata.drop_all(engine)
+async def tables(engine) -> None:
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
+    await engine.dispose()
 
 
 @pytest.fixture(scope="function")
-def session_maker(engine):
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
+async def session_maker(engine):
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
 
 
 @pytest.fixture(scope="function")
-def session(tables, session_maker) -> Session:
-    session = session_maker()
-    try:
+async def session(tables, session_maker) -> AsyncSession:
+    async with session_maker() as session:
         yield session
-    finally:
-        session.close()
 
 
 @pytest.fixture(scope="function")
