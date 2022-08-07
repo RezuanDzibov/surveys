@@ -5,7 +5,6 @@ import jwt
 from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from core.emails import send_reset_password_email
 from core.security import get_password_hash, verify_password
@@ -85,15 +84,15 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return None
 
 
-def reset_password(session: Session, token: str, new_password: str) -> User:
+async def reset_password(session: AsyncSession, token: str, new_password: str) -> User:
     email = verify_password_reset_token(token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = user_services.get_user(session=session, where_statements=[User.email == email])
+    user = await user_services.get_user(session=session, where_statements=[User.email == email])
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     password_hash = get_password_hash(new_password)
-    user = base_services.update_object(
+    user = await base_services.update_object(
         session=session,
         where_statements=[User.id == user.id],
         model=User,

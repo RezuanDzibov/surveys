@@ -143,43 +143,43 @@ class TestRecoverPassword:
 
 
 class TestResetPassword:
-    def test_for_valid_reset_token(self, session, task, admin_user):
-        reset_token = auth_services.recover_password(
+    async def test_for_valid_reset_token(self, session: AsyncSession, task: mock.Mock, admin_user: User):
+        reset_token = await auth_services.recover_password(
             session=session,
             task=task,
             email=admin_user.email,
         )
-        updated_user = auth_services.reset_password(
+        updated_user = await auth_services.reset_password(
             session=session,
             token=reset_token,
             new_password="some_new_pass"
         )
         assert verify_password("some_new_pass", updated_user.password)
 
-    def test_for_invalid_reset_token(self, session):
+    async def test_for_invalid_reset_token(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.reset_password(
+            await auth_services.reset_password(
                 session=session,
-                token="some_token",
-                new_password="some_new_pass"
+                token="token",
+                new_password="password"
             )
         assert exception_info.value.status_code == 400
 
-    def test_for_inactive_user(self, session, task, admin_user_data):
+    async def test_for_inactive_user(self, session: AsyncSession, task: mock.Mock, admin_user_data: dict):
         admin_user_data["is_active"] = False
-        base_services.insert_object(
+        await base_services.insert_object(
             session=session,
             model=User,
             to_insert=admin_user_data,
             return_object=False
         )
-        reset_token = auth_services.recover_password(
+        reset_token = await auth_services.recover_password(
             session=session,
             task=task,
             email=admin_user_data.get("email"),
         )
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.reset_password(
+            await auth_services.reset_password(
                 session=session,
                 token=reset_token,
                 new_password="some_new_pass"
