@@ -91,18 +91,18 @@ class TestGetUser:
 
 
 class TestUpdateUser:
-    def test_update_exists_user(self, session, admin_user):
-        admin_user.username = "some_another_username"
-        user_in_db = user_services.update_user(
+    async def test_update_exists_user(self, session: AsyncSession, admin_user: User):
+        admin_user.username = "username"
+        user_in_db = await user_services.update_user(
             session=session,
             where_statements=[User.id == admin_user.id],
-            to_update={"username": "some_another_username"},
+            to_update={"username": "username"},
         )
         assert admin_user == user_in_db
 
-    def test_update_not_exists_object(self, session):
+    async def test_update_not_exists_object(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            user_services.update_user(
+            await user_services.update_user(
                 session=session,
                 to_update={"username": "some"},
                 where_statements=[User.username == "some0"],

@@ -50,12 +50,12 @@ async def get_user(session: AsyncSession, where_statements: list) -> User:
     return user
 
 
-def update_user(
-    session: Session,
+async def update_user(
+    session: AsyncSession,
     to_update: dict,
     where_statements: Optional[list] = None,
 ) -> User:
-    user = base_services.update_object(
+    user = await base_services.update_object(
         session=session,
         model=User,
         where_statements=where_statements,
