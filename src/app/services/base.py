@@ -1,7 +1,7 @@
 from typing import Optional, Type, Union, List
 
+from asyncpg.exceptions import UniqueViolationError, ForeignKeyViolationError
 from fastapi import HTTPException
-from psycopg2.errors import ForeignKeyViolation, UniqueViolation
 from sqlalchemy import delete, exists, insert, update, select
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,8 +40,8 @@ def update_object(
     return None
 
 
-def insert_object(
-    session: Session,
+async def insert_object(
+    session: AsyncSession,
     model: Type[BaseModel],
     to_insert: dict,
     return_object: Optional[bool] = True,
@@ -50,16 +50,16 @@ def insert_object(
     if return_object:
         statement = statement.returning(model)
     try:
-        result = session.execute(statement)
-        session.commit()
+        result = await session.execute(statement)
+        await session.commit()
         if return_object:
             object_ = model(**dict(result.one()))
             return object_
         return None
     except IntegrityError as exception:
-        if isinstance(exception.orig, ForeignKeyViolation):
-            raise ForeignKeyViolation from exception
-        elif isinstance(exception.orig, UniqueViolation):
+        if isinstance(exception.orig.__cause__, ForeignKeyViolationError):
+            raise ForeignKeyViolationError from exception
+        elif isinstance(exception.orig.__cause__, UniqueViolationError):
             raise HTTPException(status_code=409, detail="Already exists")
 
 

@@ -52,9 +52,9 @@ async def session(tables, session_maker) -> AsyncSession:
 
 
 @pytest.fixture(scope="function")
-def admin_user(request, session) -> User:
+async def admin_user(request, session: AsyncSession) -> User:
     create_admin_user_ = partial(create_admin_user, session)
-    return create_admin_user_(data_to_replace=request.param) if hasattr(request, "param") else create_admin_user_()
+    return await create_admin_user_(data_to_replace=request.param) if hasattr(request, "param") else await create_admin_user_()
 
 
 @pytest.fixture(scope="function")

@@ -64,17 +64,17 @@ class TestUpdateObject:
 
 
 class TestInsertObject:
-    def test_not_exists_object(self, session, admin_user_data):
-        inserted_object = base_services.insert_object(
+    async def test_not_exists_object(self, session: AsyncSession, admin_user_data: dict):
+        inserted_object = await base_services.insert_object(
             session=session,
             model=User,
             to_insert=admin_user_data,
         )
         assert inserted_object
 
-    def test_exists_object(self, session, admin_user, admin_user_data):
+    async def test_exists_object(self, session: AsyncSession, admin_user: User, admin_user_data: dict):
         with pytest.raises(HTTPException) as exception_info:
-            base_services.insert_object(
+            await base_services.insert_object(
                 session=session,
                 model=User,
                 to_insert=admin_user_data,
