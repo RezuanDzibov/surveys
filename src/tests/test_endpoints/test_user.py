@@ -25,8 +25,8 @@ class TestGetCurrentUser:
 
 
 class TestUpdateCurrentUser:
-    def test_for_exists_user(self, test_client, access_token_and_admin_user):
-        response = test_client.patch(
+    async def test_for_exists_user(self, test_client: AsyncClient, access_token_and_admin_user: dict):
+        response = await test_client.patch(
             "users/me/update",
             headers={
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
@@ -44,8 +44,8 @@ class TestUpdateCurrentUser:
         assert response.status_code == 200
         assert admin_user == response_user
 
-    def test_for_invalid_token(self, test_client):
-        response = test_client.patch(
+    async def test_for_invalid_token(self, test_client: AsyncClient):
+        response = await test_client.patch(
             "users/me/update",
             headers={"Authorization": f"Bearer token"},
             json={"username": "some_another_username"}
