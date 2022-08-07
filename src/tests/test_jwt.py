@@ -1,14 +1,16 @@
 import jwt
+from httpx import AsyncClient
 
 from core import jwt as auth_jwt
 from core.settings import get_settings
+from models import User
 
 settings = get_settings()
 
 
-def test_create_token(admin_user, test_client):
+async def test_create_token(admin_user: User, test_client: AsyncClient):
     token = auth_jwt.create_access_token(user_id=str(admin_user.id))
-    response = test_client.get(
+    response = await test_client.get(
         "users/me",
         headers={
             "Authorization": f"Bearer {token.get('access_token')}"
@@ -17,7 +19,7 @@ def test_create_token(admin_user, test_client):
     assert response.status_code == 200
 
 
-def test_create_jwt_token(admin_user):
+async def test_create_jwt_token(admin_user: User):
     token = auth_jwt.create_access_token(user_id=str(admin_user.id)).get("access_token")
     decoded_access_token = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.TOKEN_ENCODE_ALGORITHM])
     assert decoded_access_token.get("user_id") == str(admin_user.id)
