@@ -7,7 +7,6 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Executable
 
-from db.utils import orm_row_to_dict
 from models.base import BaseModel
 
 
@@ -83,7 +82,7 @@ async def delete_object(
 async def get_object(session: AsyncSession, statement: Executable, model: Type[BaseModel]) -> BaseModel:
     result = await session.execute(statement)
     try:
-        object_ = model(**orm_row_to_dict(result.one()))
+        object_ = result.one()[0]
         return object_
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Not found")
