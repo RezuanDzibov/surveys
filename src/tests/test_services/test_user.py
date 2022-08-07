@@ -1,7 +1,9 @@
+from unittest import mock
 from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import get_settings
 from models import User
@@ -12,34 +14,46 @@ settings = get_settings()
 
 
 class TestCreateUser:
-    def test_create_user(self, session, admin_user_data, task):
+    async def test_create_user(self, session: AsyncSession, admin_user_data: dict, task: mock.Mock):
         admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         user_to_insert = UserRegistrationIn(**admin_user_data)
-        user = user_services.create_user(
+        user = await user_services.create_user(
             session=session,
             new_user=user_to_insert,
             task=task,
         )
         assert user
 
-    def test_create_user_with_exists_username(self, session, admin_user, admin_user_data, task):
+    async def test_create_user_with_exists_username(
+            self,
+            session: AsyncSession,
+            admin_user: User,
+            admin_user_data: dict,
+            task: mock.Mock
+    ):
         admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
         admin_user_data["email"] = "someanotheremail@gmail.com"
         user_to_insert = UserRegistrationIn(**admin_user_data)
         with pytest.raises(HTTPException) as exception_info:
-            user_services.create_user(
+            await user_services.create_user(
                 session=session,
                 new_user=user_to_insert,
                 task=task,
             )
         assert exception_info.value.status_code == 409
 
-    def test_create_user_with_exists_email(self, session, admin_user, admin_user_data, task):
+    async def test_create_user_with_exists_email(
+            self,
+            session: AsyncSession,
+            admin_user: User,
+            admin_user_data: dict,
+            task: mock.Mock
+    ):
         admin_user_data["password_repeat"] = settings.ADMIN_FIXTURE_PASSWORD
-        admin_user_data["username"] = "someanotherusername"
+        admin_user_data["username"] = "username"
         user_to_insert = UserRegistrationIn(**admin_user_data)
         with pytest.raises(HTTPException) as exception_info:
-            user_services.create_user(
+            await user_services.create_user(
                 session=session,
                 new_user=user_to_insert,
                 task=task,

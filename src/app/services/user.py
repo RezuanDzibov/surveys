@@ -2,6 +2,7 @@ from typing import Optional, List
 
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
@@ -14,11 +15,11 @@ from services import auth as auth_services
 from services import base as base_services
 
 
-def create_user(session: Session, new_user: UserRegistrationIn, task: BackgroundTasks) -> User:
+async def create_user(session: AsyncSession, new_user: UserRegistrationIn, task: BackgroundTasks) -> User:
     if new_user.password != new_user.password_repeat:
         raise HTTPException(status_code=400, detail="password and password_repeat doesn't match")
     statement = select(User).where(or_(User.username == new_user.username, User.email == new_user.email))
-    is_object_exists = base_services.is_object_exists(session=session, statement=statement)
+    is_object_exists = await base_services.is_object_exists(session=session, statement=statement)
     if is_object_exists:
         raise HTTPException(
             status_code=409,
@@ -27,12 +28,12 @@ def create_user(session: Session, new_user: UserRegistrationIn, task: Background
     new_user = new_user.dict()
     raw_password = new_user.pop("password_repeat")
     new_user["password"] = get_password_hash(raw_password)
-    user = base_services.insert_object(
+    user = await base_services.insert_object(
         session=session,
         model=User,
         to_insert=new_user,
     )
-    verification = auth_services.create_verification(session=session, user_id=str(user.id))
+    verification = await auth_services.create_verification(session=session, user_id=str(user.id))
     task.add_task(
         send_new_account_email,
         new_user.get("email"),
