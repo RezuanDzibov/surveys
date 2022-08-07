@@ -83,6 +83,6 @@ def change_user_password(session: Session, password_change: PasswordChange, user
     )
 
 
-def get_users(session: Session) -> List[User]:
-    users = base_services.get_objects(session=session, model=User)
+async def get_users(session: AsyncSession) -> List[User]:
+    users = await base_services.get_objects(session=session, model=User)
     return users

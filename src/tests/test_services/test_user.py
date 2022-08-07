@@ -1,3 +1,4 @@
+from typing import List
 from unittest import mock
 from uuid import uuid4
 
@@ -112,10 +113,10 @@ class TestUpdateUser:
 
 class TestGetUsers:
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
-    def test_for_exists_users(self, session, factory_users):
-        users = user_services.get_users(session=session)
+    async def test_for_exists_users(self, session: AsyncSession, factory_users: List[User]):
+        users = await user_services.get_users(session=session)
         assert len(users) == 5
-
-    def test_for_not_exists_users(self, session):
-        users = user_services.get_users(session=session)
+        
+    async def test_for_not_exists_users(self, session: AsyncSession):
+        users = await user_services.get_users(session=session)
         assert len(users) == 0
