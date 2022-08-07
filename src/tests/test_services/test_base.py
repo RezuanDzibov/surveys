@@ -13,20 +13,20 @@ settings = get_settings()
 
 
 class TestGetObject:
-    def test_get_object(self, session, admin_user):
+    async def test_get_object(self, session: AsyncSession, admin_user: User):
         statement = select(User).where(User.id == admin_user.id)
-        object_in_db = base_services.get_object(session=session, statement=statement, model=User)
+        object_in_db = await base_services.get_object(session=session, statement=statement, model=User)
         assert admin_user == object_in_db
 
-    def test_get_object_id_as_str(self, session, admin_user):
+    async def test_get_object_id_as_str(self, session: AsyncSession, admin_user: User):
         statement = select(User).where(User.id == str(admin_user.id))
-        object_in_db = base_services.get_object(session=session, statement=statement, model=User)
+        object_in_db = await base_services.get_object(session=session, statement=statement, model=User)
         assert admin_user == object_in_db
 
-    def test_get_not_exists_object(self, session):
+    async def test_get_not_exists_object(self, session: AsyncSession):
+        statement = select(User).where(User.username == "username")
         with pytest.raises(HTTPException) as exception_info:
-            statement = select(User).where(User.username == "someusername")
-            base_services.get_object(session=session, statement=statement, model=User)
+            await base_services.get_object(session=session, statement=statement, model=User)
             assert exception_info.value.status_code == 404
 
 

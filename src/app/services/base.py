@@ -81,8 +81,8 @@ def delete_object(
     return None
 
 
-def get_object(session: Session, statement: Executable, model: Type[BaseModel]) -> BaseModel:
-    result = session.execute(statement)
+async def get_object(session: AsyncSession, statement: Executable, model: Type[BaseModel]) -> BaseModel:
+    result = await session.execute(statement)
     try:
         object_ = model(**orm_row_to_dict(result.one()))
         return object_
