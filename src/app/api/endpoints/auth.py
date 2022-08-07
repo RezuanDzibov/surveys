@@ -2,7 +2,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
 from api.deps import get_current_active_user
@@ -60,10 +59,10 @@ async def reset_password(
 
 
 @router.patch("/change-password", response_model=Message)
-def change_password(
+async def change_password(
         password_change: PasswordChange,
-        session: Session = Depends(get_session),
+        session: AsyncSession = Depends(get_session),
         user: dict = Depends(get_current_active_user)
 ):
-    user_services.change_user_password(session=session, password_change=password_change, user=user)
+    await user_services.change_user_password(session=session, password_change=password_change, user=user)
     return Message(message="Updated user password.")
