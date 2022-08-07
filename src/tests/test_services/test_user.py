@@ -62,31 +62,31 @@ class TestCreateUser:
 
 
 class TestGetUser:
-    def test_exists_user_search_by_id(self, session, admin_user):
-        user = user_services.get_user(session=session, where_statements=[User.id == admin_user.id])
+    async def test_exists_user_search_by_id(self, session: AsyncSession, admin_user: User):
+        user = await user_services.get_user(session=session, where_statements=[User.id == admin_user.id])
         assert user == admin_user
 
-    def test_exists_user_search_by_username(self, session, admin_user):
-        user = user_services.get_user(session=session, where_statements=[User.username == admin_user.username])
+    async def test_exists_user_search_by_username(self, session: AsyncSession, admin_user: User):
+        user = await user_services.get_user(session=session, where_statements=[User.username == admin_user.username])
         assert user == admin_user
 
-    def test_exists_user_search_by_email(self, session, admin_user):
-        user = user_services.get_user(session=session, where_statements=[User.email == admin_user.email])
+    async def test_exists_user_search_by_email(self, session: AsyncSession, admin_user: User):
+        user = await user_services.get_user(session=session, where_statements=[User.email == admin_user.email])
         assert user == admin_user
 
-    def test_not_exists_search_by_id(self, session):
+    async def test_not_exists_search_by_id(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            user_services.get_user(session=session, where_statements=[User.id == uuid4()])
+            await user_services.get_user(session=session, where_statements=[User.id == uuid4()])
             assert exception_info.value.status_code == 404
 
-    def test_not_exists_search_by_username(self, session):
+    async def test_not_exists_search_by_username(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            user_services.get_user(session=session, where_statements=[User.username == "some username"])
+            await user_services.get_user(session=session, where_statements=[User.username == "some username"])
             assert exception_info.value.status_code == 404
 
-    def test_not_exists_search_by_email(self, session):
+    async def test_not_exists_search_by_email(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:
-            user_services.get_user(session=session, where_statements=[User.email == "someemail@gmail.com"])
+            await user_services.get_user(session=session, where_statements=[User.email == "someemail@gmail.com"])
             assert exception_info.value.status_code == 404
 
 

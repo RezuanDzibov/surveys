@@ -44,9 +44,9 @@ async def create_user(session: AsyncSession, new_user: UserRegistrationIn, task:
     return user
 
 
-def get_user(session: Session, where_statements: list) -> User:
+async def get_user(session: AsyncSession, where_statements: list) -> User:
     statement = select(User).where(*where_statements)
-    user = base_services.get_object(session=session, statement=statement, model=User)
+    user = await base_services.get_object(session=session, statement=statement, model=User)
     return user
 
 
