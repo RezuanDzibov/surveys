@@ -47,11 +47,11 @@ async def recover_password(email: str, task: BackgroundTasks, session: AsyncSess
 
 
 @router.post("/reset-password", response_model=Message)
-def reset_password(
+async def reset_password(
     password_reset_data: PasswordReset,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ):
-    auth_services.reset_password(
+    await auth_services.reset_password(
         session=session,
         token=password_reset_data.reset_token,
         new_password=password_reset_data.new_password

@@ -1,4 +1,5 @@
 import json
+from unittest import mock
 
 import pytest
 from httpx import AsyncClient
@@ -99,25 +100,43 @@ class TestRecoverPassword:
 
 
 class TestResetPassword:
-    def test_for_exists_user(self, admin_user, session, task, test_client):
-        reset_token = auth_services.recover_password(
+    async def test_for_exists_user(
+            self,
+            admin_user: User,
+            session: AsyncSession,
+            task: mock.Mock,
+            test_client: AsyncClient
+    ):
+        reset_token = await auth_services.recover_password(
             session=session,
             task=task,
             email=admin_user.email,
         )
-        response = test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
+        response = await test_client.post(
+            "auth/reset-password",
+            json={"reset_token": reset_token, "new_password": "password"}
+        )
         assert response.status_code == 200
 
-    def test_for_invalid_token(self, test_client):
-        response = test_client.post("auth/reset-password", json={"reset_token": "some_token", "new_password": "password"})
+    async def test_for_invalid_token(self, test_client: AsyncClient):
+        response = await test_client.post(
+            "auth/reset-password",
+            json={"reset_token": "some_token", "new_password": "password"}
+        )
         assert response.status_code == 400
 
     @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
-    def test_for_inactive_user(self, admin_user, task, session, test_client):
-        reset_token = auth_services.recover_password(
+    async def test_for_inactive_user(
+            self,
+            admin_user: User,
+            task: mock.Mock,
+            session: AsyncSession,
+            test_client: AsyncClient
+    ):
+        reset_token = await auth_services.recover_password(
             session=session,
             task=task,
             email=admin_user.email,
         )
-        response = test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
+        response = await test_client.post("auth/reset-password", json={"reset_token": reset_token, "new_password": "password"})
         assert response.status_code == 400
