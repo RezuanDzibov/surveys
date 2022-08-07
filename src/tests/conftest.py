@@ -4,7 +4,7 @@ from typing import List
 from unittest import mock
 
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from pytest_factoryboy import register
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -81,5 +81,6 @@ async def factory_users(request, session: AsyncSession, user_factory: UserFactor
 
 
 @pytest.fixture(scope="function")
-def test_client() -> TestClient:
-    return TestClient(app, base_url="https://testserver/")
+async def test_client() -> AsyncClient:
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        yield client
