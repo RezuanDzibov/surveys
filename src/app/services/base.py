@@ -5,7 +5,6 @@ from fastapi import HTTPException
 from sqlalchemy import delete, exists, insert, update, select
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from sqlalchemy.sql import Executable
 
 from db.utils import orm_row_to_dict
@@ -90,8 +89,8 @@ async def get_object(session: AsyncSession, statement: Executable, model: Type[B
         raise HTTPException(status_code=404, detail="Not found")
 
 
-def get_objects(session: Session, model: Type[BaseModel]) -> List[BaseModel]:
+async def get_objects(session: AsyncSession, model: Type[BaseModel]) -> List[BaseModel]:
     statement = select(model).order_by(model.id)
-    result = session.execute(statement=statement)
+    result = await session.execute(statement=statement)
     objects = result.scalars().all()
     return objects

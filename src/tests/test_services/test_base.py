@@ -103,10 +103,10 @@ class TestDeleteObject:
 
 
 class TestGetObjects:
-    def test_for_exist_objects(self, session, admin_user):
-        objects = base_services.get_objects(session=session, model=User)
+    async def test_for_exist_objects(self, session: AsyncSession, admin_user: User):
+        objects = await base_services.get_objects(session=session, model=User)
         assert objects == [admin_user]
 
-    def test_for_not_exists_objects(self, session):
-        objects = base_services.get_objects(session=session, model=User)
+    async def test_for_not_exists_objects(self, session: AsyncSession):
+        objects = await base_services.get_objects(session=session, model=User)
         assert objects == []
