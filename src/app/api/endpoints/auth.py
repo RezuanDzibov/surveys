@@ -41,8 +41,8 @@ async def confirm_registration(verification_id: UUID, session: AsyncSession = De
 
 
 @router.get("/recover-password/{email}", response_model=Message)
-def recover_password(email: str, task: BackgroundTasks, session: Session = Depends(get_session)):
-    auth_services.recover_password(session=session, task=task, email=email)
+async def recover_password(email: str, task: BackgroundTasks, session: AsyncSession = Depends(get_session)):
+    await auth_services.recover_password(session=session, task=task, email=email)
     return Message(message="Recovery email has been sent.")
 
 

@@ -89,12 +89,12 @@ class TestConfirmEmail:
 
 
 class TestRecoverPassword:
-    def test_for_exists_user(self, admin_user, test_client):
-        response = test_client.get(f"auth/recover-password/{admin_user.email}")
+    async def test_for_exists_user(self, admin_user: User, test_client: AsyncClient):
+        response = await test_client.get(f"auth/recover-password/{admin_user.email}")
         assert response.status_code == 200
 
-    def test_for_not_exists_user(self, tables, test_client):
-        response = test_client.get("auth/password-recovery/email@gmail.com")
+    async def test_for_not_exists_user(self, tables, test_client: AsyncClient):
+        response = await test_client.get("auth/password-recovery/email@gmail.com")
         assert response.status_code == 404
 
 
