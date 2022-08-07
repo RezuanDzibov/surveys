@@ -1,13 +1,14 @@
 import json
 
 import pytest
+from httpx import AsyncClient
 
 from schemas.user import UserRetrieve
 
 
 class TestGetCurrentUser:
-    def test_for_exists_user(self, test_client, access_token_and_admin_user):
-        response = test_client.get(
+    async def test_for_exists_user(self, test_client: AsyncClient, access_token_and_admin_user: dict):
+        response = await test_client.get(
             "users/me",
             headers={
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
@@ -18,8 +19,8 @@ class TestGetCurrentUser:
         assert response.status_code == 200
         assert admin_user == response_user
 
-    def test_for_invalid_access_token(self, test_client):
-        response = test_client.get("users/me", headers={"Authorization": f"Bearer token"})
+    async def test_for_invalid_access_token(self, test_client: AsyncClient):
+        response = await test_client.get("users/me", headers={"Authorization": f"Bearer token"})
         assert response.status_code == 403
 
 
