@@ -3,7 +3,6 @@ from typing import Optional, List
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
 from core.emails import send_new_account_email
@@ -64,7 +63,7 @@ async def update_user(
     return user
 
 
-def change_user_password(session: Session, password_change: PasswordChange, user: User) -> None:
+async def change_user_password(session: AsyncSession, password_change: PasswordChange, user: User) -> None:
     if not verify_password(password_change.current_password, user.passoword):
         raise HTTPException(
             status_code=400,
@@ -74,7 +73,7 @@ def change_user_password(session: Session, password_change: PasswordChange, user
         raise HTTPException(status_code=400, detail="New password can't be the same as current password.")
     if password_change.new_password != password_change.new_password_repeated:
         raise HTTPException(status_code=401, detail="new_password and new_password_repeated doesn't match.")
-    update_user(
+    await update_user(
         session=session,
         to_update={
             "password": get_password_hash(password=password_change.new_password)
