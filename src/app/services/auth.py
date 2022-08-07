@@ -54,8 +54,8 @@ async def verify_registration_user(session: AsyncSession, verification_id: str) 
     )
 
 
-def recover_password(session: Session, task: BackgroundTasks, email: str) -> str:
-    user = user_services.get_user(session=session, where_statements=[User.email == email])
+async def recover_password(session: AsyncSession, task: BackgroundTasks, email: str) -> str:
+    user = await user_services.get_user(session=session, where_statements=[User.email == email])
     password_reset_token = generate_password_reset_token(email)
     task.add_task(
         send_reset_password_email, username=user.username, email=email, token=password_reset_token

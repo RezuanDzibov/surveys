@@ -123,17 +123,17 @@ class TestVerifyPasswordResetToken:
 
 
 class TestRecoverPassword:
-    def test_for_exists_user(self, session, task, admin_user):
-        reset_token = auth_services.recover_password(
+    async def test_for_exists_user(self, session: AsyncSession, task: mock.Mock, admin_user: User):
+        reset_token = await auth_services.recover_password(
             session=session,
             task=task,
             email=admin_user.email,
         )
         assert auth_services.verify_password_reset_token(token=reset_token)
 
-    def test_for_not_exists_user(self, session, task):
+    async def test_for_not_exists_user(self, session: AsyncSession, task: mock.Mock):
         with pytest.raises(HTTPException) as exception_info:
-            auth_services.recover_password(
+            await auth_services.recover_password(
                 session=session,
                 task=task,
                 email="some_email@gmail.com",
