@@ -29,7 +29,7 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 async def engine() -> Engine:
-    return create_async_engine(settings.SQLALCHEMY_DATABASE_URI, echo=True)
+    return create_async_engine(settings.SQLALCHEMY_DATABASE_URI)
 
 
 @pytest.fixture(scope="function")
