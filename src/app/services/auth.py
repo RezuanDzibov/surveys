@@ -4,7 +4,8 @@ from typing import Optional
 import jwt
 from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, or_
-from sqlalchemy.orm import Load, Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from core.emails import send_reset_password_email
 from core.security import get_password_hash, verify_password
@@ -28,8 +29,8 @@ async def authenticate(session: AsyncSession, login: str, password: str) -> User
     return user
 
 
-def create_verification(session: Session, user_id: str) -> Verification:
-    verification = base_services.insert_object(
+async def create_verification(session: AsyncSession, user_id: str) -> Verification:
+    verification = await base_services.insert_object(
         session=session,
         model=Verification,
         to_insert={"user_id": user_id},

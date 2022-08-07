@@ -1,8 +1,8 @@
 from uuid import uuid4
 
 import pytest
+from asyncpg import ForeignKeyViolationError
 from fastapi import HTTPException
-from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -67,16 +67,16 @@ class TestAuthenticate:
 
 
 class TestCreateVerification:
-    def test_for_exists_user(self, session, admin_user):
-        verification = auth_services.create_verification(
+    async def test_for_exists_user(self, session: AsyncSession, admin_user: User):
+        verification = await auth_services.create_verification(
             session=session,
             user_id=str(admin_user.id)
         )
         assert verification
 
-    def test_for_not_exists_user(self, session):
-        with pytest.raises(ForeignKeyViolation):
-            auth_services.create_verification(
+    async def test_for_not_exists_user(self, session: AsyncSession):
+        with pytest.raises(ForeignKeyViolationError):
+            await auth_services.create_verification(
                 session=session,
                 user_id=str(uuid4())
             )
