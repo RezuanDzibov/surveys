@@ -45,6 +45,10 @@ async def create_admin_user(
     return user
 
 
+async def main() -> None:
+    session = anext(await get_session())
+    await create_admin_user(session=session)
+
+
 if __name__ == "__main__":
-    session = next(get_session())
-    create_admin_user(session=session)
+    asyncio.run(main())
