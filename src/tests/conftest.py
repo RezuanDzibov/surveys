@@ -77,7 +77,10 @@ async def factory_users(request, session: AsyncSession, user_factory: UserFactor
         session.add_all(users)
         await session.commit()
         return users
-    return user_factory.create()
+    user = user_factory.build()
+    session.add(user)
+    await session.commit()
+    return user
 
 
 @pytest.fixture(scope="function")
