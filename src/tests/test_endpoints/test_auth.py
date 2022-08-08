@@ -47,10 +47,10 @@ class TestUserAccessToken:
     async def test_for_exists_user(self, tables, admin_user: User, admin_user_data: dict, test_client: AsyncClient):
         response = await test_client.post(
             "auth/login/access-token",
-            json={
+            data={
                 "login": admin_user_data.get("username"),
                 "password": admin_user_data.get("password"),
-            }
+            },
         )
         assert response.status_code == 200
 
@@ -58,7 +58,7 @@ class TestUserAccessToken:
     async def test_for_inactive_user(self, tables, admin_user: User, test_client: AsyncClient):
         response = await test_client.post(
             "auth/login/access-token",
-            json={
+            data={
                 "login": admin_user.username,
                 "password": settings.ADMIN_FIXTURE_PASSWORD,
             }
@@ -68,7 +68,7 @@ class TestUserAccessToken:
     async def test_for_not_exists_user(self, tables, test_client: AsyncClient):
         response = await test_client.post(
             "auth/login/access-token",
-            json={
+            data={
                 "login": "username",
                 "password": "password",
             }
