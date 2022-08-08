@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import get_password_hash
 from core.settings import get_settings
-from db.base import get_session
+from db.base import SessionLocal
 from models import User
 from services import base as base_services
 
@@ -47,8 +47,8 @@ async def create_admin_user(
 
 
 async def main() -> None:
-    session = await anext(get_session())
-    await create_admin_user(session=session)
+    async with SessionLocal() as session:
+        await create_admin_user(session=session)
 
 
 if __name__ == "__main__":
