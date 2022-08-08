@@ -1,6 +1,4 @@
-from typing import Union
-
-from pydantic import BaseModel, UUID4, EmailStr, constr
+from pydantic import BaseModel, UUID4, constr
 
 
 class Token(BaseModel):
@@ -10,11 +8,6 @@ class Token(BaseModel):
 
 class TokenPayload(BaseModel):
     user_id: UUID4
-
-
-class Login(BaseModel):
-    login: Union[constr(max_length=255), EmailStr]
-    password: constr(max_length=255, min_length=8)
 
 
 class PasswordReset(BaseModel):

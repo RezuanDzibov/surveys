@@ -10,7 +10,7 @@ from models import User
 async def access_token_and_admin_user(test_client: AsyncClient, admin_user: User, admin_user_data: dict) -> dict:
     response = await test_client.post(
         "auth/login/access-token",
-        json={
+        data={
             "login": admin_user_data.get("username"),
             "password": admin_user_data.get("password"),
         }

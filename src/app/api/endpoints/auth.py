@@ -7,7 +7,8 @@ from starlette.background import BackgroundTasks
 from api.deps import get_current_active_user
 from core.jwt import create_access_token
 from db.base import get_session
-from schemas.auth import Token, Login, PasswordReset, PasswordChange
+from forms.auth import LoginForm
+from schemas.auth import Token, PasswordReset, PasswordChange
 from schemas.base import Message
 from schemas.user import UserRegistrationIn
 from services import auth as auth_services
@@ -24,10 +25,10 @@ async def registration(new_user: UserRegistrationIn, task: BackgroundTasks, sess
 
 @router.post("/login/access-token", response_model=Token)
 async def access_token(
-    login_data: Login,
+    login_form: LoginForm = Depends(LoginForm),
     session: AsyncSession = Depends(get_session),
 ):
-    user = await auth_services.authenticate(session=session, login=login_data.login, password=login_data.password)
+    user = await auth_services.authenticate(session=session, login=login_form.login, password=login_form.password)
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user.")
     return Token(**create_access_token(str(user.id)))
