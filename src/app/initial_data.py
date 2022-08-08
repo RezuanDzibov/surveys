@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,6 +46,10 @@ async def create_admin_user(
     return user
 
 
+async def main() -> None:
+    session = await anext(get_session())
+    await create_admin_user(session=session)
+
+
 if __name__ == "__main__":
-    session = next(get_session())
-    create_admin_user(session=session)
+    asyncio.run(main())
