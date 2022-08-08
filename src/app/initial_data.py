@@ -47,7 +47,7 @@ async def create_admin_user(
 
 
 async def main() -> None:
-    session = anext(await get_session())
+    session = await anext(get_session())
     await create_admin_user(session=session)
 
 
