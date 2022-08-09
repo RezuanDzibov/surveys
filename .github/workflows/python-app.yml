@@ -7,31 +7,11 @@ on:
     branches: [ "master" ]
 
 env:
-  PROJECT_NAME: "Surveys"
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  SERVER_HOST: "127.0.0.1:8000"
-  SQL_ENGINE: "postgresql+asyncpg"
-  SQL_USER: "postgres"
-  SQL_PASSWORD: "postgres"
-  SQL_DATABASE: "surveys"
-  SQL_HOST: "localhost"
-  SQL_PORT: "5432"
-  DATABASE: "postgres"
-  PG_ADMIN_EMAIL: "admin@gmail.com"
-  PG_ADMIN_PASSWORD: "adminpass"
   EMAIL_TEST_USER: ${{ secrets.EMAIL_TEST_USER }}
   EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
   SMTP_USER: ${{ secrets.SMTP_USER }}
   SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-  SMTP_TLS: "True"
-  SMTP_PORT: "587"
-  SMTP_HOST: "smtp.gmail.com"
-  ADMIN_FIXTURE_USERNAME: "admin"
-  ADMIN_FIXTURE_EMAIL: "admin.admin@gmail.com"
-  ADMIN_FIXTURE_PASSWORD: "adminpass"
-  ADMIN_FIXTURE_FIRST_NAME: "Admin"
-  ADMIN_FIXTURE_LAST_NAME: "Admin"
-  ADMIN_FIXTURE_BIRTH_DATE: "1999-07-10"
 
 permissions:
   contents: read
@@ -52,6 +32,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - run: cat src/.env.github >> $GITHUB_ENV
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
