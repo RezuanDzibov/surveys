@@ -15,6 +15,7 @@ env:
   SQL_USER: "postgres"
   SQL_PASSWORD: "postgres"
   SQL_DATABASE: "surveys"
+  SMTP_TLS: True
 
 
 permissions:
