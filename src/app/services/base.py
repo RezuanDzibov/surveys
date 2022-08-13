@@ -57,7 +57,7 @@ async def insert_object(
     except IntegrityError as exception:
         if isinstance(exception.orig.__cause__, ForeignKeyViolationError):
             raise ForeignKeyViolationError from exception
-        elif isinstance(exception.orig.__cause__, UniqueViolationError):
+        if isinstance(exception.orig.__cause__, UniqueViolationError):
             raise HTTPException(status_code=409, detail="Already exists")
 
 
