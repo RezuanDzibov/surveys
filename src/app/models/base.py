@@ -23,6 +23,12 @@ class Base:
                 return False
         return True
 
+    def as_dict(self) -> dict:
+        to_return = dict()
+        for column in self.__table__.columns:
+            to_return[column.name] = getattr(self, column.name)
+        return to_return
+
 
 class UUIDMixin:
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

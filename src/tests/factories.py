@@ -4,7 +4,7 @@ import factory
 from faker import Faker
 
 from core.security import get_password_hash
-from models import User
+from models import User, SurveyAttribute
 
 fake = Faker()
 
@@ -26,3 +26,12 @@ class UserFactory(factory.Factory):
     is_active = factory.LazyAttribute(lambda object_: choice([True, False]))
     is_stuff = factory.LazyAttribute(lambda object_: choice([True, False]))
     is_superuser = factory.LazyAttribute(lambda object_: choice([True, False]))
+
+
+class SurveyAttributeFactory(factory.Factory):
+    class Meta:
+        model = SurveyAttribute
+
+    name = factory.LazyAttribute(lambda object_: fake.name())
+    question = factory.LazyAttribute(lambda object_: fake.sentence())
+    required = factory.LazyAttribute(lambda object_: choice([True, False]))
