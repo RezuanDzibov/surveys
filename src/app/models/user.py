@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from sqlalchemy import Column, String, DATE, DateTime, Boolean
+from sqlalchemy.orm import relationship
 
-from models.base import UUIDMixin, Base
+from .base import UUIDMixin, Base
 
 
 class User(UUIDMixin, Base):
@@ -16,3 +17,5 @@ class User(UUIDMixin, Base):
     is_active = Column(Boolean, default=False)
     is_stuff = Column(Boolean, default=False)
     is_superuser = Column(Boolean, default=False)
+    surveys = relationship("Survey", back_populates="user")
+    answers = relationship("Answer", back_populates="user")
