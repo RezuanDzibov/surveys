@@ -2,8 +2,8 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, backref
 
-from models.base import Base, UUIDMixin
-from models.user import User
+from .base import Base, UUIDMixin
+from .user import User
 
 
 class Verification(UUIDMixin, Base):
