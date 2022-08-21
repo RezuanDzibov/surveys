@@ -1,6 +1,6 @@
 import asyncio
 from functools import partial
-from typing import List
+from typing import List, Dict
 from unittest import mock
 
 import pytest
@@ -86,4 +86,12 @@ async def factory_users(request, session: AsyncSession, user_factory: UserFactor
 @pytest.fixture(scope="function")
 async def test_client() -> AsyncClient:
     async with AsyncClient(app=app, base_url="http://testserver") as client:
+        yield client
+
+
+@pytest.fixture(scope="function")
+async def auth_test_client(access_token_and_admin_user: Dict[str, User]) -> AsyncClient:
+    async with AsyncClient(app=app, base_url="http://testserver", headers={
+        "Authorization": f"Bearer {access_token_and_admin_user['access_token']}"
+    }) as client:
         yield client
