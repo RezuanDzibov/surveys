@@ -10,12 +10,9 @@ from schemas.user import UserRetrieve
 
 
 class TestGetCurrentUser:
-    async def test_for_exists_user(self, test_client: AsyncClient, access_token_and_admin_user: dict):
-        response = await test_client.get(
+    async def test_for_exists_user(self, auth_test_client: AsyncClient, access_token_and_admin_user: dict):
+        response = await auth_test_client.get(
             "user/me",
-            headers={
-                "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
-            }
         )
         admin_user = UserRetrieve.from_orm(access_token_and_admin_user.get("admin_user"))
         response_user = UserRetrieve(**json.loads(response.content.decode("utf-8")))
@@ -28,12 +25,9 @@ class TestGetCurrentUser:
 
 
 class TestUpdateCurrentUser:
-    async def test_for_exists_user(self, test_client: AsyncClient, access_token_and_admin_user: dict):
-        response = await test_client.patch(
+    async def test_for_exists_user(self, auth_test_client: AsyncClient, access_token_and_admin_user: dict):
+        response = await auth_test_client.patch(
             "user/me/update",
-            headers={
-                "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
-            },
             json={
                 "first_name": "Another First Name",
                 "last_name": "Another Last Name"
