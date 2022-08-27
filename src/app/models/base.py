@@ -1,4 +1,5 @@
 import uuid
+from copy import copy
 from typing import Any, TypeVar
 
 from sqlalchemy import Column
@@ -24,9 +25,8 @@ class Base:
         return True
 
     def as_dict(self) -> dict:
-        to_return = dict()
-        for column in self.__table__.columns:
-            to_return[column.name] = getattr(self, column.name)
+        to_return = copy(self.__dict__)
+        to_return.pop("_sa_instance_state")
         return to_return
 
 
