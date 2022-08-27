@@ -11,7 +11,7 @@ settings = get_settings()
 async def test_create_token(admin_user: User, test_client: AsyncClient):
     token = auth_jwt.create_access_token(user_id=str(admin_user.id))
     response = await test_client.get(
-        "users/me",
+        "user/me",
         headers={
             "Authorization": f"Bearer {token.get('access_token')}"
         }

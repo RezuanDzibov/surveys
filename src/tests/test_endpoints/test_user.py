@@ -12,7 +12,7 @@ from schemas.user import UserRetrieve
 class TestGetCurrentUser:
     async def test_for_exists_user(self, test_client: AsyncClient, access_token_and_admin_user: dict):
         response = await test_client.get(
-            "users/me",
+            "user/me",
             headers={
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
             }
@@ -23,14 +23,14 @@ class TestGetCurrentUser:
         assert admin_user == response_user
 
     async def test_for_invalid_access_token(self, test_client: AsyncClient):
-        response = await test_client.get("users/me", headers={"Authorization": f"Bearer token"})
+        response = await test_client.get("user/me", headers={"Authorization": f"Bearer token"})
         assert response.status_code == 403
 
 
 class TestUpdateCurrentUser:
     async def test_for_exists_user(self, test_client: AsyncClient, access_token_and_admin_user: dict):
         response = await test_client.patch(
-            "users/me/update",
+            "user/me/update",
             headers={
                 "Authorization": f"Bearer {access_token_and_admin_user.get('access_token')}"
             },
@@ -49,7 +49,7 @@ class TestUpdateCurrentUser:
 
     async def test_for_invalid_token(self, test_client: AsyncClient):
         response = await test_client.patch(
-            "users/me/update",
+            "user/me/update",
             headers={"Authorization": f"Bearer token"},
             json={"username": "some_another_username"}
         )
@@ -59,13 +59,13 @@ class TestUpdateCurrentUser:
 class TestGetUsers:
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_for_exists_users(self, test_client: AsyncClient, factory_users: List[User]):
-        response = await test_client.get("users")
+        response = await test_client.get("user")
         users = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
         assert len(users) == 5
 
     async def test_for_not_exists_users(self, test_client: AsyncClient, tables):
-        response = await test_client.get("users")
+        response = await test_client.get("user")
         users = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
         assert len(users) == 0
@@ -80,7 +80,7 @@ class TestGetUser:
             factory_users: List[User],
             access_token_and_admin_user
     ):
-        response = await test_client.get(f"users/{admin_user.id}")
+        response = await test_client.get(f"user/{admin_user.id}")
         admin_user = UserRetrieve.from_orm(admin_user)
         response_user = UserRetrieve(**json.loads(response.content.decode("utf-8")))
         assert response.status_code == 200
@@ -88,5 +88,5 @@ class TestGetUser:
 
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_for_not_exists_user(self, test_client: AsyncClient, factory_users: List[User]):
-        response = await test_client.get(f"users/{uuid.uuid4()}")
+        response = await test_client.get(f"user/{uuid.uuid4()}")
         assert response.status_code == 404
