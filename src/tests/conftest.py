@@ -28,6 +28,16 @@ def event_loop():
     loop.close()
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def patch_send_email() -> None:
+    """
+    Patch send_email function to not send emails during tests
+    :return: None
+    """
+    with mock.patch("core.emails.send_email"):
+        yield
+
+
 @pytest.fixture(scope="session")
 async def engine() -> Engine:
     return create_async_engine(settings.SQLALCHEMY_DATABASE_URI)
