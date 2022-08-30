@@ -71,12 +71,12 @@ async def admin_user(request, session: AsyncSession) -> User:
 
 
 @pytest.fixture(scope="function")
-def admin_user_data() -> dict:
+async def admin_user_data() -> dict:
     return get_admin_user_data()
 
 
 @pytest.fixture(scope="function")
-def task() -> mock.Mock:
+async def task() -> mock.Mock:
     task = mock.Mock()
     task.add_task = mock.MagicMock()
     return task
