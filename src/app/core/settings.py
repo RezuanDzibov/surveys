@@ -59,7 +59,7 @@ class Settings(BaseSettings):
         return self.PROJECT_NAME
 
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
         return PostgresDsn.build(
             scheme=self.SQL_ENGINE,
             user=self.SQL_USER,
@@ -67,6 +67,7 @@ class Settings(BaseSettings):
             host=self.SQL_HOST,
             path=f"/{self.SQL_DATABASE}",
         )
+
     @property
     def BASE_APP_URI(self):
         return f"http://{self.SERVER_HOST}"
