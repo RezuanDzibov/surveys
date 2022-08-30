@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr
 
     SMTP_TLS: bool
-    SMTP_PORT: str
+    SMTP_PORT: int
     SMTP_HOST: str
     SMTP_USER: EmailStr
     SMTP_PASSWORD: str
