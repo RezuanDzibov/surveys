@@ -20,7 +20,7 @@ async def build_survey_attrs(
         survey_attribute_factory: SurveyAttributeFactory
 ) -> Union[SurveyAttribute, List[SurveyAttribute]]:
     if hasattr(request, "param"):
-        attrs = survey_attribute_factory.build_batch(request.param["quantity"])
+        attrs = survey_attribute_factory.build_batch(request.param)
         return attrs
     attr = survey_attribute_factory.build()
     return attr

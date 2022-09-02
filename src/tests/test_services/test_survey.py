@@ -11,6 +11,7 @@ from services import survey as survey_services
 
 
 class TestCreateSurvey:
+    @pytest.mark.parametrize("build_survey_attrs", [3], indirect=True)
     async def test_for_not_exists(
             self,
             admin_user: User,
