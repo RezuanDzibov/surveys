@@ -41,3 +41,4 @@ class SurveyFactory(factory.Factory):
         model = Survey
 
     name = factory.LazyAttribute(lambda object_: fake.name())
+    description = factory.LazyAttribute(lambda object_: fake.text())

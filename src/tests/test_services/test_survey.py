@@ -5,19 +5,20 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User, SurveyAttribute
-from schemas.survey import SurveyCreate, SurveyBase, Survey
+from models import User, SurveyAttribute, Survey
+from schemas.survey import SurveyCreate, SurveyBase
 from services import survey as survey_services
 
 
 class TestCreateSurvey:
+    @pytest.mark.parametrize("build_survey_attrs", [3], indirect=True)
     async def test_for_not_exists(
             self,
             admin_user: User,
             session: AsyncSession,
             build_survey_attrs: List[SurveyAttribute]
     ):
-        survey_data = {"name": "name"}
+        survey_data = {"name": "name", "description": "desc"}
         attrs = list(attr.as_dict() for attr in build_survey_attrs)
         survey = SurveyCreate(**survey_data, attrs=attrs)
         survey = await survey_services.create_survey(session=session, survey=survey, user_id=admin_user.id)
