@@ -9,7 +9,6 @@ from .user import User
 
 
 class BaseAttribure:
-    name = Column(String(length=255))
     question = Column(Text)
     required = Column(Boolean)
 
