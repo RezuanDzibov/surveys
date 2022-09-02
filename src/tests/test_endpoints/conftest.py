@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from pytest_factoryboy import register
 
 from models import User
-from schemas.survey import Survey
+from schemas.survey import SurveyCreate
 from tests.factories import SurveyFactory
 
 register(SurveyFactory)
@@ -33,5 +33,5 @@ async def access_token_and_admin_user(
 @pytest.fixture(scope="function")
 async def survey_data(survey_factory) -> dict:
     survey = survey_factory.build()
-    survey = Survey.from_orm(survey).dict()
+    survey = SurveyCreate.from_orm(survey).dict()
     return survey
