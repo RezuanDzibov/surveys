@@ -15,6 +15,7 @@ class BaseAttribure:
 
 class Survey(UUIDMixin, Base):
     name = Column(String(length=255))
+    description = Column(Text)
     created_at = Column(DateTime, default=datetime.now)
     user_id = Column(UUID, ForeignKey(User.id), nullable=False)
     user = relationship("User", back_populates="surveys")
