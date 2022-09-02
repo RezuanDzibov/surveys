@@ -22,3 +22,15 @@ class TestCreateSurvey:
         survey = SurveyCreate(**survey_data, attrs=attrs)
         survey = await survey_services.create_survey(session=session, survey=survey, user_id=admin_user.id)
         assert SurveyBase(**survey_data) == SurveyBase(**survey.as_dict())
+
+
+class TestGetSurvey:
+    @pytest.mark.parametrize("factory_surveys", [2], indirect=True)
+    async def test_for_exists(self, session: AsyncSession, factory_surveys: List[Survey]):
+        survey = await survey_services.get_survey(session=session, id_=str(factory_surveys[1].id))
+        assert survey
+
+    async def test_for_not_exists(self, session: AsyncSession):
+        with pytest.raises(HTTPException) as exception_info:
+            await survey_services.get_survey(session=session, id_=str(uuid.uuid4()))
+            assert exception_info.value.status_code == 404
