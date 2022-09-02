@@ -29,3 +29,7 @@ class SurveyOut(SurveyBase):
 
 class SurveyCreate(SurveyBase):
     attrs: List[SurveyAttribure]
+
+
+class SurveyRetrieve(SurveyOut, SurveyCreate):
+    pass
