@@ -13,7 +13,6 @@ class SurveyBase(BaseModel):
 
 
 class SurveyAttribure(BaseModel):
-    name: constr(max_length=255)
     question: str
     required: bool
 

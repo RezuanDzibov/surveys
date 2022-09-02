@@ -1,7 +1,9 @@
 from typing import List
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import subqueryload
 
 from models import Survey, SurveyAttribute
 from schemas.survey import SurveyCreate
@@ -17,11 +19,22 @@ async def create_survey(session: AsyncSession, user_id: UUID, survey: SurveyCrea
         model=Survey,
         to_insert=data,
     )
-    await _create_survey_attributes(session=session, attrs=attrs)
+    await _create_survey_attributes(session=session, survey_id=str(survey.id), attrs=attrs)
     return survey
 
 
-async def _create_survey_attributes(session: AsyncSession, attrs: List[dict]):
+async def _create_survey_attributes(session: AsyncSession, survey_id: str, attrs: List[dict]):
+    for attr in attrs:
+        attr["survey_id"] = survey_id
     attrs = [SurveyAttribute(**attr) for attr in attrs]
     session.add_all(attrs)
     await session.commit()
+
+
+async def get_survey(session: AsyncSession, id_: str):
+    statement = select(Survey) \
+        .options(subqueryload(Survey.attrs) \
+        .load_only(SurveyAttribute.id, SurveyAttribute.question, SurveyAttribute.required)) \
+        .where(Survey.id == id_)
+    survey = await base_services.get_object(session=session, statement=statement, model=Survey)
+    return survey

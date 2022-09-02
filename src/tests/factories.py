@@ -32,7 +32,6 @@ class SurveyAttributeFactory(factory.Factory):
     class Meta:
         model = SurveyAttribute
 
-    name = factory.LazyAttribute(lambda object_: fake.name())
     question = factory.LazyAttribute(lambda object_: fake.sentence())
     required = factory.LazyAttribute(lambda object_: choice([True, False]))
 
@@ -42,9 +41,3 @@ class SurveyFactory(factory.Factory):
         model = Survey
 
     name = factory.LazyAttribute(lambda object_: fake.name())
-    attrs = factory.List(
-        [
-            factory.SubFactory(SurveyAttributeFactory),
-            factory.SubFactory(SurveyAttributeFactory)
-        ]
-    )
