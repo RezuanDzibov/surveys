@@ -1,8 +1,11 @@
-from typing import Dict
+import random
+from typing import Dict, List
+from uuid import uuid4
 
+import pytest
 from httpx import AsyncClient
 
-from models import User
+from models import User, Survey
 
 
 class TestAddSurvey:
@@ -24,3 +27,20 @@ class TestAddSurvey:
     ):
         response = await auth_test_client.post("/survey", json={"name": "name", "attrs": [{"name": ""}]})
         assert response.status_code == 422
+
+
+class TestGetSurvey:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_exists(self, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await auth_test_client.get(
+            f"/survey/{random.choice(factory_surveys).id}"
+        )
+        assert response.status_code == 200
+
+    async def test_for_not_exists(self, auth_test_client: AsyncClient):
+        response = await auth_test_client.get(f"/survey/{uuid4()}")
+        assert response.status_code == 404
+
+    async def test_for_not_auth_user(self, test_client: AsyncClient):
+        response = await test_client.get(f"/survey/{uuid4()}")
+        assert response.status_code == 401

@@ -1,9 +1,10 @@
 import asyncio
 from functools import partial
-from typing import List, Dict
+from typing import List, Dict, Union
 from unittest import mock
 
 import pytest
+from _pytest.fixtures import SubRequest
 from httpx import AsyncClient
 from pytest_factoryboy import register
 from sqlalchemy.engine import Engine
@@ -13,12 +14,15 @@ from sqlalchemy.orm import sessionmaker
 from core.settings import get_settings
 from initial_data import create_admin_user, get_admin_user_data
 from main import app
-from models import Base, User
-from tests.factories import UserFactory
+from models import Base, User, Survey, SurveyAttribute
+from services.survey import _create_survey_attributes
+from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory
 
 settings = get_settings()
 
 register(UserFactory)
+register(SurveyAttributeFactory)
+register(SurveyFactory)
 
 
 @pytest.fixture(scope="session")
@@ -108,3 +112,48 @@ async def auth_test_client(access_token_and_admin_user: Dict[str, User]) -> Asyn
         "Authorization": f"Bearer {access_token_and_admin_user['access_token']}"
     }) as client:
         yield client
+
+
+@pytest.fixture(scope="function")
+async def build_survey_attrs(
+        request: SubRequest,
+        session: AsyncSession,
+        survey_attribute_factory: SurveyAttributeFactory
+) -> Union[SurveyAttribute, List[SurveyAttribute]]:
+    if hasattr(request, "param"):
+        attrs = survey_attribute_factory.build_batch(request.param)
+        return attrs
+    attr = survey_attribute_factory.build()
+    return attr
+
+
+@pytest.fixture(scope="function")
+async def factory_surveys(
+        request: SubRequest,
+        session: AsyncSession,
+        admin_user: User,
+        survey_factory: SurveyFactory,
+        survey_attribute_factory: SurveyAttributeFactory
+) -> Union[Survey, List[Survey]]:
+    attrs = survey_attribute_factory.build_batch(3)
+    attrs = list([attr.as_dict() for attr in attrs])
+    if hasattr(request, "param"):
+        surveys = survey_factory.build_batch(request.param)
+        for survey in surveys:
+            survey.user_id = str(admin_user.id)
+        session.add_all(surveys)
+        await session.commit()
+        for survey in surveys:
+            await session.refresh(survey)
+            await _create_survey_attributes(session=session, survey_id=str(survey.id), attrs=attrs)
+        for survey in surveys:
+            await session.refresh(survey)
+        return surveys
+    survey = survey_factory.build()
+    survey.user_id = str(admin_user.id)
+    session.add(survey)
+    await session.commit()
+    await session.refresh(survey)
+    await _create_survey_attributes(session=session, survey_id=str(survey.id), attrs=attrs)
+    await session.refresh(survey)
+    return survey
