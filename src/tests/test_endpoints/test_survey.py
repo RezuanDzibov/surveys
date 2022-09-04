@@ -40,7 +40,3 @@ class TestGetSurvey:
     async def test_for_not_exists(self, auth_test_client: AsyncClient):
         response = await auth_test_client.get(f"/survey/{uuid4()}")
         assert response.status_code == 404
-
-    async def test_for_not_auth_user(self, test_client: AsyncClient):
-        response = await test_client.get(f"/survey/{uuid4()}")
-        assert response.status_code == 401
