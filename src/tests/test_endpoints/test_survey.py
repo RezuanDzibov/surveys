@@ -1,3 +1,4 @@
+import json
 import random
 from typing import Dict, List
 from uuid import uuid4
@@ -40,3 +41,16 @@ class TestGetSurvey:
     async def test_for_not_exists(self, auth_test_client: AsyncClient):
         response = await auth_test_client.get(f"/survey/{uuid4()}")
         assert response.status_code == 404
+
+
+class TestGetSurveys:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_exists(self, test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await test_client.get("/survey")
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert surveys
+
+    async def test_for_not_exists(self, test_client: AsyncClient, tables):
+        response = await test_client.get("/survey")
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert not surveys
