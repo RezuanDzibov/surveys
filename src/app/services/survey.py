@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from uuid import UUID
 
 from sqlalchemy import select
@@ -38,3 +38,8 @@ async def get_survey(session: AsyncSession, id_: str):
         .where(Survey.id == id_)
     survey = await base_services.get_object(session=session, statement=statement, model=Survey)
     return survey
+
+
+async def get_surveys(session: AsyncSession) -> Union[List, List[Survey]]:
+    surveys = await base_services.get_objects(session=session, model=Survey)
+    return surveys

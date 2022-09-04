@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,3 +30,9 @@ async def get_survey(
 ):
     survey = await survey_services.get_survey(session=session, id_=id_)
     return survey
+
+
+@router.get("", response_model=List[SurveyOut])
+async def get_surveys(session: AsyncSession = Depends(get_session)):
+    surveys = await survey_services.get_surveys(session=session)
+    return surveys
