@@ -79,7 +79,7 @@ async def delete_object(
     return None
 
 
-async def get_object(session: AsyncSession, statement: Executable, model: Type[BaseModel]) -> BaseModel:
+async def get_object(session: AsyncSession, statement: Executable) -> BaseModel:
     result = await session.execute(statement)
     try:
         object_ = result.one()[0]

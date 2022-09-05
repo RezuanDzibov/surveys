@@ -36,7 +36,7 @@ async def get_survey(session: AsyncSession, id_: str):
         .options(subqueryload(Survey.attrs) \
         .load_only(SurveyAttribute.id, SurveyAttribute.question, SurveyAttribute.required)) \
         .where(Survey.id == id_)
-    survey = await base_services.get_object(session=session, statement=statement, model=Survey)
+    survey = await base_services.get_object(session=session, statement=statement)
     return survey
 
 

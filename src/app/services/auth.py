@@ -19,7 +19,7 @@ settings = get_settings()
 
 async def authenticate(session: AsyncSession, login: str, password: str) -> User:
     statement = select(User).where(or_(User.username == login, User.email == login))
-    user = await base_services.get_object(session=session, statement=statement, model=User)
+    user = await base_services.get_object(session=session, statement=statement)
     if not verify_password(password, user.password):
         raise HTTPException(
             status_code=400,
@@ -39,7 +39,7 @@ async def create_verification(session: AsyncSession, user_id: str) -> Verificati
 
 async def verify_registration_user(session: AsyncSession, verification_id: str) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
-    verification = await base_services.get_object(session=session, statement=statement, model=Verification)
+    verification = await base_services.get_object(session=session, statement=statement)
     await user_services.update_user(
         session=session,
         where_statements=[User.id == verification.user_id],
