@@ -16,13 +16,13 @@ class TestCreateSurvey:
             self,
             admin_user: User,
             session: AsyncSession,
+            build_surveys: Survey,
             build_survey_attrs: List[SurveyAttribute]
     ):
-        survey_data = {"name": "name", "description": "desc"}
         attrs = list(attr.as_dict() for attr in build_survey_attrs)
-        survey = SurveyCreate(**survey_data, attrs=attrs)
+        survey = SurveyCreate(**build_surveys.as_dict(), attrs=attrs)
         survey = await survey_services.create_survey(session=session, survey=survey, user_id=admin_user.id)
-        assert SurveyBase(**survey_data) == SurveyBase(**survey.as_dict())
+        assert SurveyBase(**build_surveys.as_dict()) == SurveyBase(**survey.as_dict())
 
 
 class TestGetSurvey:
