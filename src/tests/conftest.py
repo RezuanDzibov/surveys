@@ -128,6 +128,15 @@ async def build_survey_attrs(
 
 
 @pytest.fixture(scope="function")
+async def build_surveys(request: SubRequest, survey_factory: SurveyFactory) -> Union[Survey, List[Survey]]:
+    if hasattr(request, "param"):
+        surveys = survey_factory.build_batch(request.param)
+        return surveys
+    survey = survey_factory.build()
+    return survey
+
+
+@pytest.fixture(scope="function")
 async def factory_surveys(
         request: SubRequest,
         session: AsyncSession,
