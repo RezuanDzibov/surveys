@@ -19,11 +19,11 @@ async def create_survey(session: AsyncSession, user_id: UUID, survey: SurveyCrea
         model=Survey,
         to_insert=data,
     )
-    await _create_survey_attributes(session=session, survey_id=str(survey.id), attrs=attrs)
+    await create_survey_attrs(session=session, survey_id=str(survey.id), attrs=attrs)
     return survey
 
 
-async def _create_survey_attributes(session: AsyncSession, survey_id: str, attrs: List[dict]):
+async def create_survey_attrs(session: AsyncSession, survey_id: str, attrs: List[dict]):
     for attr in attrs:
         attr["survey_id"] = survey_id
     attrs = [SurveyAttribute(**attr) for attr in attrs]

@@ -15,7 +15,7 @@ from app.core.settings import get_settings
 from app.initial_data import create_admin_user, get_admin_user_data
 from app.main import app
 from app.models import Base, User, Survey, SurveyAttribute
-from app.services.survey import _create_survey_attributes
+from app.services.survey import create_survey_attrs
 from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory
 
 settings = get_settings()
@@ -154,7 +154,7 @@ async def factory_surveys(
         await session.commit()
         for survey in surveys:
             await session.refresh(survey)
-            await _create_survey_attributes(session=session, survey_id=str(survey.id), attrs=attrs)
+            await create_survey_attrs(session=session, survey_id=str(survey.id), attrs=attrs)
         for survey in surveys:
             await session.refresh(survey)
         return surveys
@@ -163,6 +163,6 @@ async def factory_surveys(
     session.add(survey)
     await session.commit()
     await session.refresh(survey)
-    await _create_survey_attributes(session=session, survey_id=str(survey.id), attrs=attrs)
+    await create_survey_attrs(session=session, survey_id=str(survey.id), attrs=attrs)
     await session.refresh(survey)
     return survey
