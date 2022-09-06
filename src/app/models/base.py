@@ -1,9 +1,9 @@
 import uuid
-from copy import copy
 from typing import Any, TypeVar
 
-from sqlalchemy import Column
+from sqlalchemy import Column, inspect
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.exc import NoInspectionAvailable
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
 
@@ -25,8 +25,19 @@ class Base:
         return True
 
     def as_dict(self) -> dict:
-        to_return = copy(self.__dict__)
-        to_return.pop("_sa_instance_state")
+        try:
+            to_return: dict = inspect(self).dict
+            for key, value in to_return.items():
+                if isinstance(value, list) and value:
+                    serialized_items = list()
+                    for item in value:
+                        if isinstance(item, Base):
+                            serialized_items.append(item.as_dict())
+                    to_return[key] = serialized_items
+        except NoInspectionAvailable:
+            to_return = self.__dict__
+        if hasattr(self, "_sa_instance_state"):
+            to_return.pop("_sa_instance_state")
         return to_return
 
 
