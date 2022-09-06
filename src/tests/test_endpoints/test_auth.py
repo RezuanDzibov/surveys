@@ -5,9 +5,9 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.settings import get_settings
-from models import User
-from services import auth as auth_services
+from app.core.settings import get_settings
+from app.models import User
+from app.services import auth as auth_services
 
 settings = get_settings()
 

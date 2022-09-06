@@ -6,13 +6,13 @@ from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.emails import send_reset_password_email
-from core.security import get_password_hash, verify_password
-from core.settings import get_settings
-from models.auth import Verification
-from models.user import User
-from services import base as base_services
-from services import user as user_services
+from app.core.emails import send_reset_password_email
+from app.core.security import get_password_hash, verify_password
+from app.core.settings import get_settings
+from app.models.auth import Verification
+from app.models.user import User
+from app.services import base as base_services
+from app.services import user as user_services
 
 settings = get_settings()
 

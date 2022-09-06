@@ -1,4 +1,4 @@
-from core import security
+from app.core import security
 
 
 def test_password_hashing():

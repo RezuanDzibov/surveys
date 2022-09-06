@@ -5,13 +5,13 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.background import BackgroundTasks
 
-from core.emails import send_new_account_email
-from core.security import get_password_hash, verify_password
-from models import User
-from schemas.auth import PasswordChange
-from schemas.user import UserRegistrationIn
-from services import auth as auth_services
-from services import base as base_services
+from app.core.emails import send_new_account_email
+from app.core.security import get_password_hash, verify_password
+from app.models import User
+from app.schemas.auth import PasswordChange
+from app.schemas.user import UserRegistrationIn
+from app.services import auth as auth_services
+from app.services import base as base_services
 
 
 async def create_user(session: AsyncSession, new_user: UserRegistrationIn, task: BackgroundTasks) -> User:

@@ -3,11 +3,11 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.security import get_password_hash
-from core.settings import get_settings
-from db.base import SessionLocal
-from models import User
-from services import base as base_services
+from app.core.security import get_password_hash
+from app.core.settings import get_settings
+from app.db.base import SessionLocal
+from app.models import User
+from app.services import base as base_services
 
 settings = get_settings()
 

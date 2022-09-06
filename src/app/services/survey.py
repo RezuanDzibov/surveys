@@ -5,9 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import subqueryload
 
-from models import Survey, SurveyAttribute
-from schemas.survey import SurveyCreate
-from services import base as base_services
+from app.models import Survey, SurveyAttribute
+from app.schemas.survey import SurveyCreate
+from app.services import base as base_services
 
 
 async def create_survey(session: AsyncSession, user_id: UUID, survey: SurveyCreate):

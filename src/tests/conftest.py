@@ -11,11 +11,11 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from core.settings import get_settings
-from initial_data import create_admin_user, get_admin_user_data
-from main import app
-from models import Base, User, Survey, SurveyAttribute
-from services.survey import _create_survey_attributes
+from app.core.settings import get_settings
+from app.initial_data import create_admin_user, get_admin_user_data
+from app.main import app
+from app.models import Base, User, Survey, SurveyAttribute
+from app.services.survey import _create_survey_attributes
 from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory
 
 settings = get_settings()
@@ -38,7 +38,7 @@ async def patch_send_email() -> None:
     Patch send_email function to not send emails during tests
     :return: None
     """
-    with mock.patch("core.emails.send_email"):
+    with mock.patch("app.core.emails.send_email"):
         yield
 
 

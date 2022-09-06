@@ -5,8 +5,8 @@ import pytest
 from httpx import AsyncClient
 from pytest_factoryboy import register
 
-from models import User
-from schemas.survey import SurveyCreate
+from app.models import User
+from app.schemas.survey import SurveyCreate
 from tests.factories import SurveyFactory
 
 register(SurveyFactory)

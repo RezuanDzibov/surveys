@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import get_current_user
-from db.base import get_session
-from models import User
-from schemas.survey import SurveyCreate, SurveyOut, SurveyRetrieve
-from services import survey as survey_services
+from app.api.deps import get_current_user
+from app.db.base import get_session
+from app.models import User
+from app.schemas.survey import SurveyCreate, SurveyOut, SurveyRetrieve
+from app.services import survey as survey_services
 
 router = APIRouter()
 

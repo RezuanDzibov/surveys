@@ -7,10 +7,10 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.security import verify_password
-from models import Verification, User
-from services import auth as auth_services
-from services import base as base_services
+from app.core.security import verify_password
+from app.models import Verification, User
+from app.services import auth as auth_services
+from app.services import base as base_services
 
 
 class TestAuthenticate:

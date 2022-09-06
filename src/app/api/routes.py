@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from api.endpoints.auth import router as auth_router
-from api.endpoints.survey import router as survey_router
-from api.endpoints.user import router as user_router
+from app.api.endpoints.auth import router as auth_router
+from app.api.endpoints.survey import router as survey_router
+from app.api.endpoints.user import router as user_router
 
 router = APIRouter()
 

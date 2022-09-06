@@ -7,7 +7,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Executable
 
-from models.base import BaseModel
+from app.models.base import BaseModel
 
 
 async def is_object_exists(session: AsyncSession, statement: Executable) -> bool:

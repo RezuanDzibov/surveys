@@ -5,9 +5,9 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User, SurveyAttribute, Survey
-from schemas.survey import SurveyCreate, SurveyBase
-from services import survey as survey_services
+from app.models import User, SurveyAttribute, Survey
+from app.schemas.survey import SurveyCreate, SurveyBase
+from app.services import survey as survey_services
 
 
 class TestCreateSurvey:

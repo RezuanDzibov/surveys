@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 from httpx import AsyncClient
 
-from models import User, Survey
+from app.models import User, Survey
 
 
 class TestAddSurvey:

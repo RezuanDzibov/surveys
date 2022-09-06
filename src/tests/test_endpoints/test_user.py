@@ -5,8 +5,8 @@ from typing import List
 import pytest
 from httpx import AsyncClient
 
-from models import User
-from schemas.user import UserRetrieve
+from app.models import User
+from app.schemas.user import UserRetrieve
 
 
 class TestGetCurrentUser:

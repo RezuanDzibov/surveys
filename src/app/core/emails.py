@@ -4,7 +4,7 @@ from smtplib import SMTP
 
 from jinja2 import Environment, FileSystemLoader
 
-from core.settings import get_settings
+from app.core.settings import get_settings
 
 settings = get_settings()
 

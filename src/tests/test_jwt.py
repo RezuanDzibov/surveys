@@ -1,9 +1,9 @@
 import jwt
 from httpx import AsyncClient
 
-from core import jwt as auth_jwt
-from core.settings import get_settings
-from models import User
+from app.core import jwt as auth_jwt
+from app.core.settings import get_settings
+from app.models import User
 
 settings = get_settings()
 
