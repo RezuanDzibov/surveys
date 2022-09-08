@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -33,6 +33,6 @@ async def get_survey(
 
 
 @router.get("", response_model=List[SurveyOut])
-async def get_surveys(session: AsyncSession = Depends(get_session)):
-    surveys = await survey_services.get_surveys(session=session)
+async def get_surveys(available: Optional[bool] = None, session: AsyncSession = Depends(get_session)):
+    surveys = await survey_services.get_surveys(session=session, available=available)
     return surveys
