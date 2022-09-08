@@ -41,7 +41,7 @@ class TestGetSurveys:
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_for_exists(self, session: AsyncSession, factory_surveys: List[Survey]):
         surveys = await survey_services.get_surveys(session=session)
-        assert surveys
+        assert len(surveys) == 5
 
     async def test_for_not_exists(self, session: AsyncSession):
         surveys = await survey_services.get_surveys(session=session)
