@@ -46,3 +46,13 @@ class TestGetSurveys:
     async def test_for_not_exists(self, session: AsyncSession):
         surveys = await survey_services.get_surveys(session=session)
         assert not surveys
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_if_available_true(self, session: AsyncSession, factory_surveys: List[Survey]):
+        surveys = await survey_services.get_surveys(session=session, available=True)
+        assert all([survey.available for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_if_available_false(self, session: AsyncSession, factory_surveys: List[Survey]):
+        surveys = await survey_services.get_surveys(session=session, available=False)
+        assert not all([survey.available for survey in surveys])
