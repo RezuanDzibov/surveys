@@ -41,4 +41,5 @@ class SurveyFactory(factory.Factory):
         model = Survey
 
     name = factory.LazyAttribute(lambda object_: fake.name())
+    available = factory.LazyAttribute(lambda object_: choice(([True, False])))
     description = factory.LazyAttribute(lambda object_: fake.text())

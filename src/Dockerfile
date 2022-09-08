@@ -17,5 +17,7 @@ COPY . $WEB_HOME
 
 RUN pip install -r requirements.txt
 
+ENV PYTHONPATH "${PYTHONPATH}:${WEB_HOME}"
+
 RUN chmod +x /home/app/web/entrypoint.sh
 ENTRYPOINT ["/home/app/web/entrypoint.sh"]

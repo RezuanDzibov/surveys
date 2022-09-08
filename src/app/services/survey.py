@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -40,6 +40,10 @@ async def get_survey(session: AsyncSession, id_: str):
     return survey
 
 
-async def get_surveys(session: AsyncSession) -> Union[List, List[Survey]]:
-    surveys = await base_services.get_objects(session=session, model=Survey)
+async def get_surveys(session: AsyncSession, available: Optional[bool] = None) -> Union[List, List[Survey]]:
+    statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id)
+    if isinstance(available, bool):
+        statement = statement.where(Survey.available == available)
+    result = await session.execute(statement=statement)
+    surveys = result.scalars().all()
     return surveys
