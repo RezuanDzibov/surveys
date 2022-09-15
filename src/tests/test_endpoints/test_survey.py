@@ -68,5 +68,5 @@ class TestGetSurveys:
         assert not all([survey["available"] for survey in surveys])
 
     async def test_for_if_available_invalid(self, test_client: AsyncClient):
-        response = await test_client.get("/survey?available=djmqwionmdiokasndinqw")
+        response = await test_client.get("/survey?available=not")
         assert response.status_code == 422
