@@ -88,7 +88,7 @@ async def task() -> mock.Mock:
 
 @pytest.fixture(scope="function")
 async def factory_users(request, session: AsyncSession, user_factory: UserFactory) -> List[User]:
-    if request.param:
+    if hasattr(request, "param"):
         users: List[User] = user_factory.build_batch(request.param)
         session.add_all(users)
         await session.commit()
