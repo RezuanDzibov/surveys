@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, constr, UUID4
 
@@ -32,5 +32,21 @@ class SurveyCreate(SurveyBase):
     attrs: List[SurveyAttribure]
 
 
-class SurveyRetrieve(SurveyOut, SurveyCreate):
-    pass
+class SurveyAttributeRetrieve(SurveyAttribure):
+    id: UUID4
+
+
+class SurveyRetrieve(SurveyOut):
+    attrs: List[SurveyAttributeRetrieve]
+
+
+class SurveyUpdate(BaseModel):
+    name: Optional[constr(max_length=255)]
+    available: Optional[bool]
+    description: Optional[bool]
+
+
+class SurveyAttributeUpdate(BaseModel):
+    question: Optional[str]
+    required: Optional[bool]
+
