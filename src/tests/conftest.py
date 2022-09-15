@@ -15,7 +15,9 @@ from app.core.settings import get_settings
 from app.initial_data import create_admin_user, get_admin_user_data
 from app.main import app
 from app.models import Base, User, Survey, SurveyAttribute
+from app.services.base import is_object_exists
 from app.services.survey import create_survey_attrs
+from app.services.user import get_user
 from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory
 
 settings = get_settings()
@@ -68,10 +70,12 @@ async def session(tables, session_maker) -> AsyncSession:
 
 @pytest.fixture(scope="function")
 async def admin_user(request, session: AsyncSession) -> User:
-    create_admin_user_ = partial(create_admin_user, session)
-    if hasattr(request, "param"):
-        return await create_admin_user_(data_to_replace=request.param)
-    return await create_admin_user_()
+    if not await is_object_exists(session=session, statement=User.email == settings.ADMIN_FIXTURE_EMAIL):
+        create_admin_user_ = partial(create_admin_user, session)
+        if hasattr(request, "param"):
+            return await create_admin_user_(data_to_replace=request.param)
+        return await create_admin_user_()
+    return await get_user(session=session, where_statements=[User.email == settings.ADMIN_FIXTURE_EMAIL])
 
 
 @pytest.fixture(scope="function")
