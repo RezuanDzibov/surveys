@@ -2,12 +2,15 @@ import uuid
 from typing import List
 
 import pytest
+from faker import Faker
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, SurveyAttribute, Survey
-from app.schemas.survey import SurveyCreate, SurveyBase
+from app.schemas.survey import SurveyCreate, SurveyBase, SurveyUpdate, SurveyAttributeUpdate
 from app.services import survey as survey_services
+
+fake = Faker()
 
 
 class TestCreateSurvey:
@@ -56,3 +59,46 @@ class TestGetSurveys:
     async def test_if_available_false(self, session: AsyncSession, factory_surveys: List[Survey]):
         surveys = await survey_services.get_surveys(session=session, available=False)
         assert not all([survey.available for survey in surveys])
+
+
+class TestUpdateSurvey:
+    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: Survey):
+        name = fake.name()
+        to_update = SurveyUpdate(name=name)
+        survey = await survey_services.update_survey(
+            session=session,
+            user=admin_user,
+            id_=factory_surveys.id,
+            to_update=to_update
+        )
+        assert survey.name == name
+
+    async def test_for_not_exists(self, session: AsyncSession, admin_user: User):
+        to_update = SurveyUpdate(name="another name")
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.update_survey(session=session, user=admin_user, id_=uuid.uuid4(), to_update=to_update)
+            assert exception.value.status_code == 404
+
+
+class TestUpdateSurveyAttribute:
+    async def test_for_exists(self, session: AsyncSession, factory_surveys: Survey, admin_user: User):
+        question = fake.text()
+        to_update = SurveyAttributeUpdate(question=question)
+        survey_attr = await survey_services.update_survey_attribute(
+            session=session,
+            id_=factory_surveys.attrs[0].id,
+            user=admin_user,
+            to_update=to_update,
+        )
+        assert survey_attr.question == question
+
+    async def test_for_not_exists(self, session: AsyncSession, admin_user: User):
+        to_update = SurveyAttributeUpdate(question="text")
+        with pytest.raises(HTTPException) as exception_info:
+            await survey_services.update_survey_attribute(
+                session=session,
+                user=admin_user,
+                id_=uuid.uuid4(),
+                to_update=to_update,
+            )
+            assert exception_info.value.status_code == 404
