@@ -92,7 +92,6 @@ async def factory_users(request, session: AsyncSession, user_factory: UserFactor
         users: List[User] = user_factory.build_batch(request.param)
         session.add_all(users)
         await session.commit()
-        [await session.refresh(user) for user in users]
         return users
     user = user_factory.build()
     session.add(user)
