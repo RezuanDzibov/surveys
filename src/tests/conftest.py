@@ -156,16 +156,12 @@ async def factory_surveys(
         session.add_all(surveys)
         await session.commit()
         for survey in surveys:
-            await session.refresh(survey)
             await create_survey_attrs(session=session, survey_id=str(survey.id), attrs=attrs)
-        for survey in surveys:
-            await session.refresh(survey)
         return surveys
     survey = survey_factory.build()
     survey.user_id = str(admin_user.id)
     session.add(survey)
     await session.commit()
-    await session.refresh(survey)
-    await create_survey_attrs(session=session, survey_id=str(survey.id), attrs=attrs)
-    await session.refresh(survey)
+    attrs = await create_survey_attrs(session=session, survey_id=str(survey.id), attrs=attrs)
+    survey.__dict__["attrs"] = attrs
     return survey
