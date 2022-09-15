@@ -57,7 +57,7 @@ async def tables(engine) -> None:
 
 @pytest.fixture(scope="function")
 async def session_maker(engine):
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False, class_=AsyncSession)
 
 
 @pytest.fixture(scope="function")
