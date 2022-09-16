@@ -71,7 +71,7 @@ class TestCreateVerification:
     async def test_for_exists_user(self, session: AsyncSession, admin_user: User):
         verification = await auth_services.create_verification(
             session=session,
-            user_id=str(admin_user.id)
+            user_id=admin_user.id
         )
         assert verification
 
@@ -79,7 +79,7 @@ class TestCreateVerification:
         with pytest.raises(ForeignKeyViolationError):
             await auth_services.create_verification(
                 session=session,
-                user_id=str(uuid4())
+                user_id=uuid4()
             )
 
 
