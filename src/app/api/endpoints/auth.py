@@ -9,12 +9,12 @@ from app.api.deps import get_current_active_user
 from app.core.jwt import create_access_token
 from app.db.base import get_session
 from app.forms.auth import LoginForm
+from app.models import User
 from app.schemas.auth import Token, PasswordReset, PasswordChange
 from app.schemas.base import Message
 from app.schemas.user import UserRegistrationIn
 from app.services import auth as auth_services
 from app.services import user as user_services
-from models import User
 
 router = APIRouter()
 
