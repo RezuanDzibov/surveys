@@ -18,7 +18,7 @@ class Survey(UUIDMixin, Base):
     available = Column(Boolean)
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.now)
-    user_id = Column(UUID, ForeignKey(User.id), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.id), nullable=False)
     user = relationship("User", back_populates="surveys")
     attrs = relationship("SurveyAttribute")
     answers = relationship("Answer", back_populates="survey")
@@ -26,15 +26,15 @@ class Survey(UUIDMixin, Base):
 
 class Answer(UUIDMixin, Base):
     created_at = Column(DateTime, default=datetime.now)
-    survey_id = Column(UUID, ForeignKey(Survey.id), nullable=False)
+    survey_id = Column(UUID(as_uuid=True), ForeignKey(Survey.id), nullable=False)
     survey = relationship("Survey", back_populates="answers")
-    user_id = Column(UUID, ForeignKey(User.id), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.id), nullable=False)
     user = relationship("User", back_populates="answers")
     attrs = relationship("AnswerAttribute")
 
 
 class SurveyAttribute(UUIDMixin, BaseAttribure, Base):
-    survey_id = Column(UUID, ForeignKey(Survey.id), nullable=False)
+    survey_id = Column(UUID(as_uuid=True), ForeignKey(Survey.id), nullable=False)
     survey = relationship("Survey", back_populates="attrs")
 
 

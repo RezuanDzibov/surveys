@@ -9,7 +9,7 @@ settings = get_settings()
 
 
 async def test_create_token(admin_user: User, test_client: AsyncClient):
-    token = auth_jwt.create_access_token(user_id=str(admin_user.id))
+    token = auth_jwt.create_access_token(user_id=admin_user.id)
     response = await test_client.get(
         "user/me",
         headers={
@@ -20,6 +20,6 @@ async def test_create_token(admin_user: User, test_client: AsyncClient):
 
 
 async def test_create_jwt_token(admin_user: User):
-    token = auth_jwt.create_access_token(user_id=str(admin_user.id)).get("access_token")
+    token = auth_jwt.create_access_token(user_id=admin_user.id).get("access_token")
     decoded_access_token = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.TOKEN_ENCODE_ALGORITHM])
     assert decoded_access_token.get("user_id") == str(admin_user.id)

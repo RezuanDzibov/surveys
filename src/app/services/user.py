@@ -32,7 +32,7 @@ async def create_user(session: AsyncSession, new_user: UserRegistrationIn, task:
         model=User,
         to_insert=new_user,
     )
-    verification = await auth_services.create_verification(session=session, user_id=str(user.id))
+    verification = await auth_services.create_verification(session=session, user_id=user.id)
     task.add_task(
         send_new_account_email,
         new_user.get("email"),

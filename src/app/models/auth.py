@@ -7,5 +7,5 @@ from .user import User
 
 
 class Verification(UUIDMixin, Base):
-    user_id = Column(UUID, ForeignKey(User.id))
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.id), nullable=False)
     user = relationship("User", backref=backref("verification_code", uselist=False))

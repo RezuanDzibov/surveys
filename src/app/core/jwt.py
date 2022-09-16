@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from uuid import UUID
 
 import jwt
 
@@ -7,11 +8,11 @@ from app.core.settings import get_settings
 settings = get_settings()
 
 
-def create_access_token(user_id: str) -> dict:
+def create_access_token(user_id: UUID) -> dict:
     access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": create_jwt_token(
-            data={"user_id": user_id}, expires_delta=access_token_expires
+            data={"user_id": str(user_id)}, expires_delta=access_token_expires
         ),
         "token_type": "Bearer",
     }

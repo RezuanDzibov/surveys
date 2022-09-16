@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional
+from uuid import UUID
 
 import jwt
 from fastapi import BackgroundTasks, HTTPException
@@ -28,7 +29,7 @@ async def authenticate(session: AsyncSession, login: str, password: str) -> User
     return user
 
 
-async def create_verification(session: AsyncSession, user_id: str) -> Verification:
+async def create_verification(session: AsyncSession, user_id: UUID) -> Verification:
     verification = await base_services.insert_object(
         session=session,
         model=Verification,
@@ -37,7 +38,7 @@ async def create_verification(session: AsyncSession, user_id: str) -> Verificati
     return verification
 
 
-async def verify_registration_user(session: AsyncSession, verification_id: str) -> None:
+async def verify_registration_user(session: AsyncSession, verification_id: UUID) -> None:
     statement = select(Verification).where(Verification.id == verification_id)
     verification = await base_services.get_object(session=session, statement=statement)
     await user_services.update_user(
