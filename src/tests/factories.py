@@ -32,6 +32,7 @@ class SurveyAttributeFactory(factory.Factory):
     class Meta:
         model = SurveyAttribute
 
+    available = factory.LazyAttribute(lambda object_: choice([True, False]))
     question = factory.LazyAttribute(lambda object_: fake.sentence())
     required = factory.LazyAttribute(lambda object_: choice([True, False]))
 

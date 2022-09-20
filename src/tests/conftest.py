@@ -1,5 +1,6 @@
 import asyncio
 from functools import partial
+from random import randint
 from typing import List, Dict, Union
 from unittest import mock
 
@@ -147,7 +148,7 @@ async def factory_surveys(
         survey_factory: SurveyFactory,
         survey_attribute_factory: SurveyAttributeFactory
 ) -> Union[Survey, List[Survey]]:
-    attrs = survey_attribute_factory.build_batch(3)
+    attrs = survey_attribute_factory.build_batch(randint(1, 10))
     attrs = list([attr.as_dict() for attr in attrs])
     if hasattr(request, "param"):
         surveys = survey_factory.build_batch(request.param)
@@ -156,7 +157,7 @@ async def factory_surveys(
         session.add_all(surveys)
         await session.commit()
         for survey in surveys:
-            await create_survey_attrs(session=session, survey_id=survey.id, attrs=attrs)
+            survey.__dict__["attrs"] = await create_survey_attrs(session=session, survey_id=survey.id, attrs=attrs)
         return surveys
     survey = survey_factory.build()
     survey.user_id = admin_user.id

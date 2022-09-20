@@ -14,9 +14,10 @@ class SurveyBase(BaseModel):
         orm_mode = True
 
 
-class SurveyAttribure(BaseModel):
+class SurveyAttribute(BaseModel):
     question: str
     required: bool
+    available: Optional[bool]
 
     class Config:
         allow_mutation = True
@@ -29,11 +30,12 @@ class SurveyOut(SurveyBase):
 
 
 class SurveyCreate(SurveyBase):
-    attrs: List[SurveyAttribure]
+    attrs: List[SurveyAttribute]
 
 
-class SurveyAttributeRetrieve(SurveyAttribure):
+class SurveyAttributeRetrieve(SurveyAttribute):
     id: UUID4
+    available: bool
 
 
 class SurveyRetrieve(SurveyOut):
