@@ -30,14 +30,33 @@ class TestCreateSurvey:
 
 class TestGetSurvey:
     @pytest.mark.parametrize("factory_surveys", [2], indirect=True)
-    async def test_for_exists(self, session: AsyncSession, factory_surveys: List[Survey]):
-        survey = await survey_services.get_survey(session=session, id_=factory_surveys[1].id)
-        assert survey
+    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        survey = await survey_services.get_survey(session=session, user=admin_user, id_=factory_surveys[1].id)
+        assert not all([attr.available for attr in survey.attrs])
 
-    async def test_for_not_exists(self, session: AsyncSession):
+    async def test_for_not_exists(self, session: AsyncSession, admin_user: User):
         with pytest.raises(HTTPException) as exception_info:
-            await survey_services.get_survey(session=session, id_=uuid.uuid4())
+            await survey_services.get_survey(session=session, user=admin_user, id_=uuid.uuid4())
             assert exception_info.value.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [3], indirect=True)
+    async def test_for_not_survey_author(
+            self,
+            session: AsyncSession,
+            factory_surveys: List[Survey],
+            factory_users: User
+    ):
+        survey = await survey_services.get_survey(session=session, user=factory_users, id_=factory_surveys[1].id)
+        assert all([attr.available for attr in survey.attrs])
+
+    @pytest.mark.parametrize("factory_surveys", [3], indirect=True)
+    async def test_without_user(
+            self,
+            session: AsyncSession,
+            factory_surveys: List[Survey],
+    ):
+        survey = await survey_services.get_survey(session=session, id_=factory_surveys[1].id)
+        assert all([attr.available for attr in survey.attrs])
 
 
 class TestGetSurveys:
