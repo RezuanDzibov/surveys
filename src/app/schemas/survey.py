@@ -17,6 +17,7 @@ class SurveyBase(BaseModel):
 class SurveyAttribure(BaseModel):
     question: str
     required: bool
+    available: Optional[bool]
 
     class Config:
         allow_mutation = True
