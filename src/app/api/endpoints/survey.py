@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_current_active_user
+from app.api.deps import get_current_user, get_current_active_user, get_current_active_user_or_none
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyRetrieve, SurveyUpdate, SurveyAttributeUpdate
@@ -27,8 +27,9 @@ async def add_survey(
 async def get_survey(
         id_: UUID4,
         session: AsyncSession = Depends(get_session),
+        current_user: Optional[User] = Depends(get_current_active_user_or_none),
 ):
-    survey = await survey_services.get_survey(session=session, id_=id_)
+    survey = await survey_services.get_survey(session=session, user=current_user, id_=id_)
     return survey
 
 

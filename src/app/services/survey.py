@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm.collections import InstrumentedList
 
 from app.models import Survey, SurveyAttribute, User
 from app.schemas.survey import SurveyCreate, SurveyUpdate, SurveyAttributeUpdate
@@ -35,12 +36,14 @@ async def create_survey_attrs(session: AsyncSession, survey_id: UUID, attrs: Lis
     return attrs
 
 
-async def get_survey(session: AsyncSession, id_: UUID):
+async def get_survey(session: AsyncSession, id_: UUID, user: Optional[User] = None):
     statement = select(Survey) \
         .options(subqueryload(Survey.attrs) \
-        .load_only(SurveyAttribute.id, SurveyAttribute.question, SurveyAttribute.required)) \
+        .load_only(SurveyAttribute.id, SurveyAttribute.question, SurveyAttribute.required, SurveyAttribute.available)) \
         .where(Survey.id == id_)
     survey = await base_services.get_object(session=session, statement=statement)
+    if not user or user.id != survey.user_id:
+        survey.__dict__["attrs"] = InstrumentedList(list(filter(lambda obj: obj.available is True, survey.attrs)))
     return survey
 
 
@@ -54,10 +57,15 @@ async def get_surveys(session: AsyncSession, available: Optional[bool] = None) -
 
 
 async def update_survey(session: AsyncSession, user: User, id_: UUID, to_update: SurveyUpdate) -> Survey:
-    survey = await get_survey(session=session, id_=id_)
+    survey = await get_survey(session=session, user=user, id_=id_)
     if user.id != survey.user_id:
         raise HTTPException(status_code=403, detail="You can't edit this survey.")
-    survey = await update_object(session=session, model=Survey, where_statements=[Survey.id == id_], to_update=to_update.dict(exclude_unset=True))
+    survey = await update_object(
+        session=session,
+        model=Survey,
+        where_statements=[Survey.id == id_],
+        to_update=to_update.dict(exclude_unset=True)
+    )
     return survey
 
 
