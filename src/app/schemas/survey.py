@@ -27,6 +27,7 @@ class SurveyAttribute(BaseModel):
 class SurveyOut(SurveyBase):
     id: UUID4
     created_at: datetime.datetime
+    user_id: UUID4
 
 
 class SurveyCreate(SurveyBase):
