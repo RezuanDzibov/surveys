@@ -157,3 +157,22 @@ class TestUpdateSurveyAttribute:
             json={"question": fake.text()},
         )
         assert response.status_code == 403
+
+
+class TestGetUserSurveys:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_exists(
+            self,
+            auth_test_client: AsyncClient,
+            admin_user: User,
+            session: AsyncSession,
+            factory_surveys: List[Survey]
+    ):
+        response = await auth_test_client.get("/survey/mine")
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert all(survey["user_id"] == str(admin_user.id) for survey in surveys)
+
+    async def test_for_not_exists(self, auth_test_client: AsyncClient, admin_user: User, session: AsyncSession):
+        response = await auth_test_client.get("/survey/mine")
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert not surveys
