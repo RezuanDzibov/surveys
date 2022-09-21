@@ -23,6 +23,15 @@ async def add_survey(
     return survey
 
 
+@router.get("/mine", response_model=List[SurveyOut])
+async def get_user_surveys(
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_user)
+):
+    surveys = await survey_services.get_user_surveys(session=session, user=current_user)
+    return surveys
+
+
 @router.get("/{id_}", response_model=SurveyRetrieve, status_code=200)
 async def get_survey(
         id_: UUID4,
