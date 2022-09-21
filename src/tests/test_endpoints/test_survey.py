@@ -87,28 +87,12 @@ class TestGetSurveys:
     async def test_for_exists(self, test_client: AsyncClient, factory_surveys: List[Survey]):
         response = await test_client.get("/survey")
         surveys = json.loads(response.content.decode("utf-8"))
-        assert surveys
+        assert filter(lambda survey: survey.available is False, [survey.as_dict() for survey in factory_surveys]) not in surveys
 
     async def test_for_not_exists(self, test_client: AsyncClient, tables):
         response = await test_client.get("/survey")
         surveys = json.loads(response.content.decode("utf-8"))
         assert not surveys
-
-    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
-    async def test_for_if_available_true(self, test_client: AsyncClient, factory_surveys: List[Survey]):
-        response = await test_client.get("/survey?available=true")
-        surveys = json.loads(response.content.decode("utf-8"))
-        assert all([survey["available"] for survey in surveys])
-
-    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
-    async def test_for_if_available_false(self, test_client: AsyncClient, factory_surveys: List[Survey]):
-        response = await test_client.get("/survey?available=false")
-        surveys = json.loads(response.content.decode("utf-8"))
-        assert not all([survey["available"] for survey in surveys])
-
-    async def test_for_if_available_invalid(self, test_client: AsyncClient):
-        response = await test_client.get("/survey?available=not")
-        assert response.status_code == 422
 
 
 class TestUpdateSurvey:

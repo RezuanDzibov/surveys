@@ -47,10 +47,8 @@ async def get_survey(session: AsyncSession, id_: UUID, user: Optional[User] = No
     return survey
 
 
-async def get_surveys(session: AsyncSession, available: Optional[bool] = None) -> Union[List, List[Survey]]:
-    statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id)
-    if isinstance(available, bool):
-        statement = statement.where(Survey.available == available)
+async def get_surveys(session: AsyncSession) -> Union[List, List[Survey]]:
+    statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id).where(Survey.available == True)
     result = await session.execute(statement=statement)
     surveys = result.scalars().all()
     return surveys
