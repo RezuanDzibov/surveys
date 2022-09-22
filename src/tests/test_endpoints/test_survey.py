@@ -159,7 +159,7 @@ class TestUpdateSurveyAttribute:
         assert response.status_code == 403
 
 
-class TestGetUserSurveys:
+class TestGetCurrentUserSurveys:
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_for_exists(
             self,
