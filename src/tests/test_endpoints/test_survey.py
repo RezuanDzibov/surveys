@@ -168,11 +168,41 @@ class TestGetCurrentUserSurveys:
             session: AsyncSession,
             factory_surveys: List[Survey]
     ):
-        response = await auth_test_client.get("/survey/mine")
+        response = await auth_test_client.get("/survey/user/me")
         surveys = json.loads(response.content.decode("utf-8"))
         assert all(survey["user_id"] == str(admin_user.id) for survey in surveys)
 
     async def test_for_not_exists(self, auth_test_client: AsyncClient, admin_user: User, session: AsyncSession):
-        response = await auth_test_client.get("/survey/mine")
+        response = await auth_test_client.get("/survey/user/me")
         surveys = json.loads(response.content.decode("utf-8"))
         assert not surveys
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_if_available_is_true(
+            self,
+            auth_test_client: AsyncClient,
+            admin_user: User,
+            session: AsyncSession,
+            factory_surveys: List[Survey]
+    ):
+        response = await auth_test_client.get(
+            "/survey/user/me?available=true",
+        )
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert all(survey["user_id"] == str(admin_user.id) for survey in surveys)
+        assert filter(lambda survey: survey["available"] is True, [survey.as_dict() for survey in factory_surveys]) not in surveys
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_if_available_is_false(
+            self,
+            auth_test_client: AsyncClient,
+            admin_user: User,
+            session: AsyncSession,
+            factory_surveys: List[Survey]
+    ):
+        response = await auth_test_client.get(
+            "/survey/user/me?available=false",
+        )
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert all(survey["user_id"] == str(admin_user.id) for survey in surveys)
+        assert filter(lambda survey: survey["available"] is False, [survey.as_dict() for survey in factory_surveys]) not in surveys
