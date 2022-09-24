@@ -205,4 +205,37 @@ class TestGetCurrentUserSurveys:
         )
         surveys = json.loads(response.content.decode("utf-8"))
         assert all(survey["user_id"] == str(admin_user.id) for survey in surveys)
-        assert filter(lambda survey: survey["available"] is False, [survey.as_dict() for survey in factory_surveys]) not in surveys
+        assert filter(
+            lambda survey: survey["available"] is False, [survey.as_dict() for survey in factory_surveys]
+        ) not in surveys
+
+
+class TestGetUserSurveys:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_exists(
+            self,
+            test_client: AsyncClient,
+            session: AsyncSession,
+            admin_user: User,
+            factory_surveys: List[Survey]
+    ):
+        response = await test_client.get(
+            f"/survey/user/{admin_user.id}",
+        )
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert all(survey["user_id"] == str(admin_user.id) for survey in surveys)
+
+    async def test_for_not_exists_user(self, test_client: AsyncClient, session: AsyncSession):
+        response = await test_client.get(f"/survey/user/{uuid4()}")
+        assert response.status_code == 404
+
+    async def test_for_not_exists_survey(
+            self,
+            test_client: AsyncClient,
+            session: AsyncSession,
+            admin_user: User
+    ):
+        response = await test_client.get(f"/survey/user/{admin_user.id}")
+        surveys = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert not surveys
