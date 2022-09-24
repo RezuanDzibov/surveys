@@ -33,6 +33,12 @@ async def get_current_user_surveys(
     return surveys
 
 
+@router.get("/user/{id_}", response_model=List[SurveyOut])
+async def get_user_surveys(id_: UUID4, session: AsyncSession = Depends(get_session)):
+    surveys = await survey_services.get_user_surveys(session=session, user_id=id_)
+    return surveys
+
+
 @router.get("/{id_}", response_model=SurveyRetrieve, status_code=200)
 async def get_survey(
         id_: UUID4,
