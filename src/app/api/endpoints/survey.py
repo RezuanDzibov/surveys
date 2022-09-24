@@ -23,12 +23,13 @@ async def add_survey(
     return survey
 
 
-@router.get("/mine", response_model=List[SurveyOut])
-async def get_user_surveys(
+@router.get("/user/me", response_model=List[SurveyOut])
+async def get_current_user_surveys(
+        available: Optional[bool] = None,
         session: AsyncSession = Depends(get_session),
-        current_user: User = Depends(get_current_user)
+        current_user: User = Depends(get_current_user),
 ):
-    surveys = await survey_services.get_user_surveys(session=session, user=current_user)
+    surveys = await survey_services.get_user_surveys(session=session, user=current_user, available=available)
     return surveys
 
 
