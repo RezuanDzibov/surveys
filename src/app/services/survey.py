@@ -96,7 +96,7 @@ async def update_survey_attribute(
     return survey_attr
 
 
-async def get_user_surveys(
+async def get_current_user_surveys(
         session: AsyncSession,
         user: User,
         available: Optional[bool] = None
