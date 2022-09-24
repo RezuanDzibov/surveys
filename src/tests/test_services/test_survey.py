@@ -130,3 +130,19 @@ class TestGetCurrentUserSurveys:
     async def test_if_available_is_false(self, session: AsyncSession, admin_user: User):
         surveys = await survey_services.get_current_user_surveys(session=session, user=admin_user, available=False)
         assert all(survey.available is False for survey in surveys)
+
+
+class TestGetUserSurveys:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        surveys = await survey_services.get_user_surveys(session=session, user_id=admin_user.id)
+        assert all(survey.user_id == admin_user.id for survey in surveys)
+
+    async def test_for_exists_user(self, session: AsyncSession):
+        with pytest.raises(HTTPException) as exception_info:
+            await survey_services.get_user_surveys(session=session, user_id=uuid.uuid4())
+            assert exception_info.value.status_code == 404
+
+    async def test_for_not_exists_survey(self, session: AsyncSession, admin_user: User):
+        surveys = await survey_services.get_user_surveys(session=session, user_id=admin_user.id)
+        assert not surveys
