@@ -96,8 +96,14 @@ async def update_survey_attribute(
     return survey_attr
 
 
-async def get_user_surveys(session: AsyncSession, user: User) -> Union[list, List[Survey]]:
+async def get_user_surveys(
+        session: AsyncSession,
+        user: User,
+        available: Optional[bool] = None
+) -> Union[list, List[Survey]]:
     statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id).where(Survey.user_id == user.id)
+    if isinstance(available, bool):
+        statement = statement.where(Survey.available == available)
     result = await session.execute(statement=statement)
     surveys = result.scalars().all()
     return surveys
