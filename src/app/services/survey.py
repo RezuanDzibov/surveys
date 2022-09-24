@@ -107,3 +107,18 @@ async def get_current_user_surveys(
     result = await session.execute(statement=statement)
     surveys = result.scalars().all()
     return surveys
+
+
+async def get_user_surveys(
+        session: AsyncSession,
+        user_id: UUID,
+) -> Union[list, List[Survey]]:
+    if not await base_services.is_object_exists(session=session, statement=select(User).where(User.id == user_id)):
+        raise HTTPException(status_code=404, detail="Not found")
+    statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id).where(
+        Survey.user_id == user_id,
+        Survey.available == True
+    )
+    result = await session.execute(statement=statement)
+    surveys = result.scalars().all()
+    return surveys
