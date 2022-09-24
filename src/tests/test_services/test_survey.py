@@ -113,7 +113,7 @@ class TestUpdateSurveyAttribute:
             assert exception_info.value.status_code == 404
 
 
-class TestGetUserSurveys:
+class TestGetCurrentUserSurveys:
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
         surveys = await survey_services.get_user_surveys(session=session, user=admin_user)
@@ -122,3 +122,11 @@ class TestGetUserSurveys:
     async def test_for_not_exists(self, session: AsyncSession, admin_user: User):
         surveys = await survey_services.get_user_surveys(session=session, user=admin_user)
         assert not surveys
+
+    async def test_if_available_is_true(self, session: AsyncSession, admin_user: User):
+        surveys = await survey_services.get_user_surveys(session=session, user=admin_user, available=True)
+        assert all(survey.available is True for survey in surveys)
+
+    async def test_if_available_is_false(self, session: AsyncSession, admin_user: User):
+        surveys = await survey_services.get_user_surveys(session=session, user=admin_user, available=False)
+        assert all(survey.available is False for survey in surveys)
