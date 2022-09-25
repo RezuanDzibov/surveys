@@ -7,6 +7,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Executable
 
+from app.core.exceptions import raise_404
 from app.models.base import BaseModel
 
 
@@ -34,7 +35,7 @@ async def update_object(
             object_ = model(**dict(result.one()))
             return object_
         except NoResultFound:
-            raise HTTPException(status_code=404, detail="Not found")
+            await raise_404()
     return None
 
 
@@ -75,7 +76,7 @@ async def delete_object(
             object_ = model(**dict(result.one()))
             return object_
         except NoResultFound:
-            raise HTTPException(status_code=404, detail="Not found")
+            await raise_404()
     return None
 
 
@@ -85,7 +86,7 @@ async def get_object(session: AsyncSession, statement: Executable) -> BaseModel:
         object_ = result.one()[0]
         return object_
     except NoResultFound:
-        raise HTTPException(status_code=404, detail="Not found")
+        await raise_404()
 
 
 async def get_objects(session: AsyncSession, model: Type[BaseModel]) -> List[BaseModel]:

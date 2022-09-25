@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.orm.collections import InstrumentedList
 
+from app.core.exceptions import raise_404
 from app.models import Survey, SurveyAttribute, User
 from app.schemas.survey import SurveyCreate, SurveyUpdate, SurveyAttributeUpdate
 from app.services import base as base_services
@@ -78,13 +79,13 @@ async def update_survey_attribute(
     try:
         survey_id = result.scalars().one()
     except NoResultFound:
-        raise HTTPException(status_code=404, detail="Not found")
+        await raise_404()
     statement = select(Survey.user_id).where(Survey.id == survey_id)
     result = await session.execute(statement=statement)
     try:
         user_id = result.scalars().one()
     except NoResultFound:
-        raise HTTPException(status_code=404, detail="Not found")
+        await raise_404()
     if user.id != user_id:
         raise HTTPException(status_code=403, detail="You can't edit this survey attr.")
     survey_attr = await base_services.update_object(
@@ -114,7 +115,7 @@ async def get_user_surveys(
         user_id: UUID,
 ) -> Union[list, List[Survey]]:
     if not await base_services.is_object_exists(session=session, statement=select(User).where(User.id == user_id)):
-        raise HTTPException(status_code=404, detail="Not found")
+        await raise_404()
     statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id).where(
         Survey.user_id == user_id,
         Survey.available == True
