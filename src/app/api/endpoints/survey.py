@@ -7,7 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, get_current_active_user, get_current_active_user_or_none
 from app.db.base import get_session
 from app.models import User
-from app.schemas.survey import SurveyCreate, SurveyOut, SurveyRetrieve, SurveyUpdate, SurveyAttributeUpdate
+from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
+    SurveyOwnerOut
 from app.services import survey as survey_services
 
 router = APIRouter()
@@ -39,14 +40,16 @@ async def get_user_surveys(id_: UUID4, session: AsyncSession = Depends(get_sessi
     return surveys
 
 
-@router.get("/{id_}", response_model=SurveyRetrieve, status_code=200)
+@router.get("/{id_}", response_model=SurveyOut | SurveyOwnerOut, status_code=200)
 async def get_survey(
         id_: UUID4,
         session: AsyncSession = Depends(get_session),
         current_user: Optional[User] = Depends(get_current_active_user_or_none),
 ):
     survey = await survey_services.get_survey(session=session, user=current_user, id_=id_)
-    return survey
+    if current_user and current_user.id == survey.user_id:
+        return SurveyOwnerOut.from_orm(survey)
+    return SurveyOut.from_orm(survey)
 
 
 @router.get("", response_model=List[SurveyOut])
