@@ -29,6 +29,10 @@ class SurveyOut(SurveyBase):
     user_id: UUID4
 
 
+class SurveyOwnerOut(SurveyOut):
+    available: bool
+
+
 class SurveyCreate(SurveyBase):
     available: bool
     attrs: List[SurveyAttribute]
