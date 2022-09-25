@@ -30,6 +30,7 @@ class SurveyOut(SurveyBase):
 
 
 class SurveyCreate(SurveyBase):
+    available: bool
     attrs: List[SurveyAttribute]
 
 
