@@ -6,7 +6,6 @@ from pydantic import BaseModel, constr, UUID4
 
 class SurveyBase(BaseModel):
     name: constr(max_length=255)
-    available: bool
     description: str
 
     class Config:
