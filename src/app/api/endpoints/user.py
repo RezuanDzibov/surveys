@@ -1,6 +1,5 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
+from fastapi_pagination import paginate, Page
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,10 +31,10 @@ async def update_current_user(
     return user
 
 
-@router.get("", response_model=List[user_schemas.UserList])
+@router.get("", response_model=Page[user_schemas.UserList])
 async def get_users(session: AsyncSession = Depends(get_session)):
     users = await user_services.get_users(session=session)
-    return users
+    return paginate(users)
 
 
 @router.get("/{user_id}", response_model=user_schemas.UserRetrieve)

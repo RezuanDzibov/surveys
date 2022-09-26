@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends
+from fastapi_pagination import Page, paginate
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,20 +25,20 @@ async def add_survey(
     return survey
 
 
-@router.get("/user/me", response_model=List[SurveyOut])
+@router.get("/user/me", response_model=Page[SurveyOut])
 async def get_current_user_surveys(
         available: Optional[bool] = None,
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user),
 ):
     surveys = await survey_services.get_current_user_surveys(session=session, user=current_user, available=available)
-    return surveys
+    return paginate(surveys)
 
 
-@router.get("/user/{id_}", response_model=List[SurveyOut])
+@router.get("/user/{id_}", response_model=Page[SurveyOut])
 async def get_user_surveys(id_: UUID4, session: AsyncSession = Depends(get_session)):
     surveys = await survey_services.get_user_surveys(session=session, user_id=id_)
-    return surveys
+    return paginate(surveys)
 
 
 @router.get("/{id_}", response_model=SurveyOut | SurveyOwnerOut, status_code=200)
@@ -52,10 +53,10 @@ async def get_survey(
     return SurveyOut.from_orm(survey)
 
 
-@router.get("", response_model=List[SurveyOut])
+@router.get("", response_model=Page[SurveyOut])
 async def get_surveys(session: AsyncSession = Depends(get_session)):
     surveys = await survey_services.get_surveys(session=session)
-    return surveys
+    return paginate(surveys)
 
 
 @router.patch("/{id_}")

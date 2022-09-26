@@ -54,15 +54,22 @@ class TestGetUsers:
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_for_exists_users(self, test_client: AsyncClient, factory_users: List[User]):
         response = await test_client.get("user")
-        users = json.loads(response.content.decode("utf-8"))
+        users = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
         assert len(users) == 5
 
     async def test_for_not_exists_users(self, test_client: AsyncClient, tables):
         response = await test_client.get("user")
-        users = json.loads(response.content.decode("utf-8"))
+        users = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
         assert len(users) == 0
+
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    async def test_with_filtering(self, test_client: AsyncClient, factory_users: List[User]):
+        response = await test_client.get("user?size=3")
+        users = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert len(users) == 3
 
 
 class TestGetUser:
