@@ -32,3 +32,4 @@ pytest_factoryboy
 pytest-asyncio
 asyncpg
 httpx
+fastapi-pagination
