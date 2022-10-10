@@ -15,7 +15,7 @@ from app.services import survey as survey_services
 router = APIRouter()
 
 
-@router.post("", response_model=SurveyOut, status_code=201)
+@router.post("", response_model=SurveyOwnerOut, status_code=201)
 async def add_survey(
         survey_create: SurveyCreate,
         session: AsyncSession = Depends(get_session),
