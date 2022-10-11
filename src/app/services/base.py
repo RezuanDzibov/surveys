@@ -14,8 +14,8 @@ from app.models.base import BaseModel
 async def is_object_exists(session: AsyncSession, statement: Executable) -> bool:
     statement = exists(statement).select()
     result = await session.execute(statement)
-    is_object_exists = result.one()[0]
-    return is_object_exists
+    is_exists = result.one()[0]
+    return is_exists
 
 
 async def update_object(
