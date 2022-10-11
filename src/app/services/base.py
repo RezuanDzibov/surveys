@@ -11,7 +11,7 @@ from app.core.exceptions import raise_404
 from app.models.base import BaseModel
 
 
-async def is_object_exists(session: AsyncSession, statement: Executable) -> bool:
+async def is_object_exists(session: AsyncSession, statement: bool) -> bool:
     statement = exists(statement).select()
     result = await session.execute(statement)
     is_exists = result.one()[0]
@@ -21,7 +21,7 @@ async def is_object_exists(session: AsyncSession, statement: Executable) -> bool
 async def update_object(
     session: AsyncSession,
     model: Type[BaseModel],
-    where_statements: list[Executable],
+    where_statements: list[bool],
     to_update: dict,
     return_object: Optional[dict] = True,
 ) -> Optional[Union[BaseModel, bool]]:
@@ -65,7 +65,7 @@ async def insert_object(
 async def delete_object(
     session: AsyncSession,
     model: Type[BaseModel],
-    where_statements: list[Executable],
+    where_statements: list[bool],
     return_object: bool = True,
 ) -> Optional[Union[BaseModel, bool]]:
     statement = delete(model).where(*where_statements).returning(model)
