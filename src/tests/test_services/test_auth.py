@@ -87,7 +87,7 @@ class TestVerifyRegistrationUser:
     async def test_for_exists_verification(self, session: AsyncSession, admin_user: User):
         verification = await auth_services.create_verification(
             session=session,
-            user_id=str(admin_user.id),
+            user_id=admin_user.id,
         )
         await auth_services.verify_registration_user(
             session=session,
@@ -103,7 +103,7 @@ class TestVerifyRegistrationUser:
         with pytest.raises(HTTPException) as exception_info:
             await auth_services.verify_registration_user(
                 session=session,
-                verification_id=str(uuid4())
+                verification_id=uuid4()
             )
             assert exception_info.value.status_code == 404
 
