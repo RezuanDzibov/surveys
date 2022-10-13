@@ -34,3 +34,10 @@ class UserUpdate(BaseModel):
     first_name: Optional[constr(max_length=100)]
     last_name: Optional[constr(max_length=100)]
     birth_date: Optional[PastDate]
+
+
+class UserFilter(BaseModel):
+    email: Optional[constr(max_length=255)]
+    username: Optional[constr(max_length=255)]
+    first_name: Optional[constr(max_length=100)]
+    last_name: Optional[constr(max_length=100)]
