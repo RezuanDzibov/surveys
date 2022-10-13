@@ -95,7 +95,7 @@ class TestGetSurveys:
         assert not surveys
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
-    async def test_with_filtering(self, test_client: AsyncClient, factory_surveys: List[Survey]):
+    async def test_pagination(self, test_client: AsyncClient, factory_surveys: List[Survey]):
         response = await test_client.get("/survey?size=2")
         surveys = json.loads(response.content.decode("utf-8"))["items"]
         assert len(surveys) == 2
@@ -216,7 +216,7 @@ class TestGetCurrentUserSurveys:
         ) not in surveys
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
-    async def test_with_filtering(
+    async def test_pagination(
             self,
             auth_test_client: AsyncClient,
             admin_user: User,
