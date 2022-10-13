@@ -91,3 +91,34 @@ class TestGetUser:
     async def test_for_not_exists_user(self, test_client: AsyncClient, factory_users: List[User]):
         response = await test_client.get(f"user/{uuid.uuid4()}")
         assert response.status_code == 404
+
+
+class TestGetUsersWithSearching:
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    async def test_searching_by_username(self, test_client: AsyncClient, factory_users: List[User]):
+        response = await test_client.get(f"user/search?username={factory_users[0].username[:5]}")
+        users = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert all([user["username"].startswith(factory_users[0].username[:5]) for user in users])
+
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    async def test_searching_by_email(self, test_client: AsyncClient, factory_users: List[User]):
+        response = await test_client.get(f"user/search?email={factory_users[0].email[:7]}")
+        users = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert all([user["email"].startswith(factory_users[0].email[:7]) for user in users])
+
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    async def test_searching_by_username_and_email(self, test_client: AsyncClient, factory_users: List[User]):
+        response = await test_client.get(f"user/search?username={factory_users[0].username[:5]}&email={factory_users[3].email[:7]}")
+        users = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert all([user["username"].startswith(factory_users[0].username[:5]) for user in users])
+        assert all([user["email"].startswith(factory_users[0].eamil[:7]) for user in users])
+
+    @pytest.mark.parametrize("factory_users", [5], indirect=True)
+    async def test_for_not_exists_user(self, test_client: AsyncClient, factory_users: List[User]):
+        response = await test_client.get(f"user/search?username=user")
+        users = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert not users
