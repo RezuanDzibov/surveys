@@ -93,7 +93,7 @@ class TestGetUser:
         assert response.status_code == 404
 
 
-class TestGetUsersWithSearching:
+class TestGetUsersWithFiltering:
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_searching_by_username(self, test_client: AsyncClient, factory_users: List[User]):
         response = await test_client.get(f"user/search?username={factory_users[0].username[:5]}")
