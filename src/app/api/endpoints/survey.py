@@ -9,8 +9,9 @@ from app.api.deps import get_current_user, get_current_active_user, get_current_
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
-    SurveyOwnerOut
+    SurveyOwnerOut, SurveyFilter
 from app.services import survey as survey_services
+from app.services.filtering.survey import filter_surveys
 
 router = APIRouter()
 
@@ -38,6 +39,12 @@ async def get_current_user_surveys(
 @router.get("/user/{id_}", response_model=Page[SurveyOut])
 async def get_user_surveys(id_: UUID4, session: AsyncSession = Depends(get_session)):
     surveys = await survey_services.get_user_surveys(session=session, user_id=id_)
+    return paginate(surveys)
+
+
+@router.get("/search", response_model=Page[SurveyOut])
+async def get_surveys_with_filtering(filter: SurveyFilter = Depends(), session: AsyncSession = Depends(get_session)):
+    surveys = await filter_surveys(session=session, filter=filter)
     return paginate(surveys)
 
 
