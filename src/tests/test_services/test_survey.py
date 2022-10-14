@@ -7,8 +7,9 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, SurveyAttribute, Survey
-from app.schemas.survey import SurveyCreate, SurveyBase, SurveyUpdate, SurveyAttributeUpdate
+from app.schemas.survey import SurveyCreate, SurveyBase, SurveyUpdate, SurveyAttributeUpdate, SurveyFilter
 from app.services import survey as survey_services
+from app.services.filtering.survey import filter_surveys
 
 fake = Faker()
 
@@ -146,3 +147,26 @@ class TestGetUserSurveys:
     async def test_for_not_exists_survey(self, session: AsyncSession, admin_user: User):
         surveys = await survey_services.get_user_surveys(session=session, user_id=admin_user.id)
         assert not surveys
+
+
+class TestGetSurveysWithFiltering:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_searching_by_name(self, session: AsyncSession, factory_surveys: List[Survey]):
+        surveys = await filter_surveys(session=session, filter=SurveyFilter(name=factory_surveys[0].name[:5]))
+        assert all([survey.name.startswith(factory_surveys[0].name[:5]) for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_searching_by_email(self, session: AsyncSession, factory_surveys: List[Survey]):
+        surveys = await filter_surveys(session=session, filter=SurveyFilter(description=factory_surveys[0].description[:30]))
+        assert all([survey.description.startswith(factory_surveys[0].description[:30]) for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_searching_by_name_and_description(self, session: AsyncSession, factory_surveys: List[Survey]):
+        surveys = await filter_surveys(session=session, filter=SurveyFilter(name=factory_surveys[0].name[:5], description=factory_surveys[0].description[:30]))
+        assert all([survey.name.startswith(factory_surveys[0].name[:5]) for survey in surveys])
+        assert all([survey.description.startswith(factory_surveys[0].description[:30]) for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_not_exists(self, session: AsyncSession, factory_surveys: List[Survey]):
+        users = await filter_surveys(session=session, filter=SurveyFilter(name="name"))
+        assert not users
