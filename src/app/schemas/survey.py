@@ -50,10 +50,14 @@ class SurveyRetrieve(SurveyOut):
 class SurveyUpdate(BaseModel):
     name: Optional[constr(max_length=255)]
     available: Optional[bool]
-    description: Optional[bool]
+    description: Optional[str]
 
 
 class SurveyAttributeUpdate(BaseModel):
     question: Optional[str]
     required: Optional[bool]
 
+
+class SurveyFilter(BaseModel):
+    name: Optional[constr(max_length=255)]
+    description: Optional[str]
