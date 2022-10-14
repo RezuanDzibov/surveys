@@ -257,3 +257,34 @@ class TestGetUserSurveys:
         surveys = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
         assert not surveys
+
+
+class TestGetUsersWithFiltering:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_searching_by_name(self, test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await test_client.get(f"survey/search?name={factory_surveys[0].name[:5]}")
+        surveys = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert all([survey["name"].startswith(factory_surveys[0].name[:5]) for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_searching_by_email(self, test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await test_client.get(f"survey/search?description={factory_surveys[0].description[:30]}")
+        surveys = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert all([survey["description"].startswith(factory_surveys[0].description[:30]) for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_searching_by_name_and_email(self, test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await test_client.get(f"survey/search?name={factory_surveys[0].name[:5]}&description={factory_surveys[0].description[:30]}")
+        surveys = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert all([survey["name"].startswith(factory_surveys[0].name[:5]) for survey in surveys])
+        assert all([survey["description"].startswith(factory_surveys[0].description[:30]) for survey in surveys])
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_for_not_exists_survey(self, test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await test_client.get(f"survey/search?name=name")
+        surveys = json.loads(response.content.decode("utf-8"))["items"]
+        assert response.status_code == 200
+        assert not surveys
