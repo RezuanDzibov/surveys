@@ -9,14 +9,14 @@ from app.api.deps import get_current_user, get_current_active_user, get_current_
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
-    SurveyOwnerOut, SurveyFilter
+    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve
 from app.services import survey as survey_services
 from app.services.filtering.survey import filter_surveys
 
 router = APIRouter()
 
 
-@router.post("", response_model=SurveyOwnerOut, status_code=201)
+@router.post("", response_model=SurveyOwnerRetrieve, status_code=201)
 async def add_survey(
         survey_create: SurveyCreate,
         session: AsyncSession = Depends(get_session),
@@ -48,7 +48,7 @@ async def get_surveys_with_filtering(filter: SurveyFilter = Depends(), session: 
     return paginate(surveys)
 
 
-@router.get("/{id_}", response_model=SurveyOut | SurveyOwnerOut, status_code=200)
+@router.get("/{id_}", response_model=SurveyRetrieve | SurveyOwnerRetrieve, status_code=200)
 async def get_survey(
         id_: UUID4,
         session: AsyncSession = Depends(get_session),
@@ -56,8 +56,8 @@ async def get_survey(
 ):
     survey = await survey_services.get_survey(session=session, user=current_user, id_=id_)
     if current_user and current_user.id == survey.user_id:
-        return SurveyOwnerOut.from_orm(survey)
-    return SurveyOut.from_orm(survey)
+        return SurveyOwnerRetrieve.from_orm(survey)
+    return SurveyRetrieve.from_orm(survey)
 
 
 @router.get("", response_model=Page[SurveyOut])
@@ -75,6 +75,15 @@ async def update_survey(
 ):
     survey = await survey_services.update_survey(session=session, user=current_user, id_=id_, to_update=to_update)
     return survey
+
+
+@router.delete("/{id_}", status_code=204)
+async def delete_survey(
+        id_: UUID4,
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_active_user)
+):
+    await survey_services.delete_survey(session=session, user=current_user, id_=id_)
 
 
 @router.patch("/attr/{id_}")

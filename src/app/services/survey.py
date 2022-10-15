@@ -2,7 +2,7 @@ from typing import List, Union, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import subqueryload
@@ -123,3 +123,13 @@ async def get_user_surveys(
     result = await session.execute(statement=statement)
     surveys = result.scalars().all()
     return surveys
+
+
+async def delete_survey(session: AsyncSession, user: User, id_: UUID) -> None:
+    statement = delete(Survey).where(Survey.id == id_, Survey.user_id == user.id).returning(Survey)
+    result = await session.execute(statement)
+    await session.commit()
+    try:
+        result.one()
+    except NoResultFound:
+        await raise_404()

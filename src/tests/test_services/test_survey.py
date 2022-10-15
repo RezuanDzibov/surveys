@@ -4,10 +4,12 @@ from typing import List
 import pytest
 from faker import Faker
 from fastapi import HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, SurveyAttribute, Survey
 from app.schemas.survey import SurveyCreate, SurveyBase, SurveyUpdate, SurveyAttributeUpdate, SurveyFilter
+from app.services import base as base_services
 from app.services import survey as survey_services
 from app.services.filtering.survey import filter_surveys
 
@@ -168,5 +170,38 @@ class TestGetSurveysWithFiltering:
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_for_not_exists(self, session: AsyncSession, factory_surveys: List[Survey]):
-        users = await filter_surveys(session=session, filter=SurveyFilter(name="name"))
-        assert not users
+        surveys = await filter_surveys(session=session, filter=SurveyFilter(name="name"))
+        assert not surveys
+
+
+class TestDeleteSurvey:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_success(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        await survey_services.delete_survey(session=session, user=admin_user, id_=factory_surveys[2].id)
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(Survey).where(Survey.id == factory_surveys[2].id)
+        )
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_cascade_deletion(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        await survey_services.delete_survey(session=session, user=admin_user, id_=factory_surveys[2].id)
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
+        )
+
+    async def test_404(self, session: AsyncSession, admin_user: User):
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.delete_survey(session=session, user=admin_user, id_=uuid.uuid4())
+            assert exception.value.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_author(self, session: AsyncSession, factory_surveys: List[Survey], user_and_its_pass: dict,):
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.delete_survey(
+                session=session,
+                user=user_and_its_pass["user"],
+                id_=factory_surveys[2].id
+                )
+            assert exception.value.status_code == 404

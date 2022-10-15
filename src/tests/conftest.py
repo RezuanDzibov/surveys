@@ -1,4 +1,5 @@
 import asyncio
+import json
 from functools import partial
 from random import randint
 from typing import List, Dict, Union
@@ -12,6 +13,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+from app.core.security import get_password_hash
 from app.core.settings import get_settings
 from app.initial_data import create_admin_user, get_admin_user_data
 from app.main import app
@@ -166,3 +168,26 @@ async def factory_surveys(
     attrs = await create_survey_attrs(session=session, survey_id=survey.id, attrs=attrs)
     survey.__dict__["attrs"] = attrs
     return survey
+
+
+@pytest.fixture(scope="function")
+async def user_and_its_pass(session: AsyncSession) -> dict:
+    password = "password"
+    user = UserFactory(is_active=True, password=get_password_hash(password))
+    session.add(user)
+    await session.commit()
+    return {"user": user, "password": password}
+
+
+@pytest.fixture(scope="function")
+async def access_token_and_user(session: AsyncSession, test_client: AsyncClient, user_and_its_pass: dict) -> dict:
+    response = await test_client.post(
+        "auth/login/access-token",
+        data={
+            "login": user_and_its_pass["user"].username,
+            "password": user_and_its_pass["password"],
+        }
+    )
+    response_content = json.loads(response.content.decode("utf-8"))
+    access_token = response_content.get("access_token")
+    return {"access_token": access_token, "user": user_and_its_pass["user"]}

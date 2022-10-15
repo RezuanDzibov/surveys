@@ -6,11 +6,13 @@ from uuid import uuid4
 import pytest
 from faker import Faker
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import get_password_hash
-from app.models import User, Survey
+from app.models import User, Survey, SurveyAttribute
 from app.schemas.survey import SurveyOut
+from app.services import base as base_services
 from tests.factories import UserFactory
 
 fake = Faker()
@@ -288,3 +290,44 @@ class TestGetUsersWithFiltering:
         surveys = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
         assert not surveys
+
+
+class TestDeleteSurvey:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_success(self, session: AsyncSession, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await auth_test_client.delete(
+            f"/survey/{factory_surveys[2].id}"
+        )
+        assert response.status_code == 204
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(Survey).where(Survey.id == factory_surveys[2].id)
+        )
+
+    async def test_404(self, auth_test_client: AsyncClient):
+        response = await auth_test_client.delete(f"/survey/{uuid4()}")
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_cascade_deletion(self, session: AsyncSession, auth_test_client, factory_surveys: List[Survey]):
+        response = await auth_test_client.delete(
+            f"/survey/{factory_surveys[2].id}"
+        )
+        assert response.status_code == 204
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
+        )
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_author(
+            self,
+            test_client: AsyncClient,
+            factory_surveys: List[Survey],
+            access_token_and_user: dict
+    ):
+        response = await test_client.delete(
+            f"/survey/{random.choice(factory_surveys).id}",
+            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
+        )
+        assert response.status_code == 404
