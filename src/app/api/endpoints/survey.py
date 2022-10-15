@@ -77,6 +77,15 @@ async def update_survey(
     return survey
 
 
+@router.delete("/{id_}", status_code=204)
+async def delete_survey(
+        id_: UUID4,
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_active_user)
+):
+    await survey_services.delete_survey(session=session, user=current_user, id_=id_)
+
+
 @router.patch("/attr/{id_}")
 async def update_survey_attr(
         id_: UUID4,
