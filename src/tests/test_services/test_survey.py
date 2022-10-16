@@ -205,3 +205,32 @@ class TestDeleteSurvey:
                 id_=factory_surveys[2].id
                 )
             assert exception.value.status_code == 404
+
+
+class TestDeleteSurveyAttribute:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_success(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        await survey_services.delete_survey_attribute(
+            session=session,
+            user=admin_user,
+            id_=factory_surveys[2].attrs[0].id
+        )
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
+        )
+
+    async def test_404(self, session: AsyncSession, admin_user: User):
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.delete_survey_attribute(session=session, user=admin_user, id_=uuid.uuid4())
+            assert exception.value.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_author(self, session: AsyncSession, factory_surveys: List[Survey], user_and_its_pass: dict,):
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.delete_survey_attribute(
+                session=session,
+                user=user_and_its_pass["user"],
+                id_=factory_surveys[2].attrs[1].id
+                )
+            assert exception.value.status_code == 404
