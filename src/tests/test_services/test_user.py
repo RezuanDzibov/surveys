@@ -4,11 +4,13 @@ from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import get_settings
 from app.models import User
 from app.schemas.user import UserRegistrationIn, UserFilter
+from app.services import base as base_services
 from app.services import user as user_services
 from app.services.filtering.user import search_users
 
@@ -144,3 +146,24 @@ class TestGetUsersWithSearching:
     async def test_for_not_exists(self, session: AsyncSession, factory_users: List[User]):
         users = await search_users(session=session, filter=UserFilter(username="user"))
         assert not users
+
+
+class TestDeleteUser:
+    async def test_success(self, session: AsyncSession, user_and_its_pass: dict):
+        await user_services.delete_user(
+            session=session,login=user_and_its_pass["user"].email,
+            password=user_and_its_pass["password"]
+        )
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(User).where(User.id == user_and_its_pass["user"].id)
+        )
+
+    async def test_404(self, session: AsyncSession):
+        with pytest.raises(HTTPException) as exception:
+            await user_services.delete_user(
+                session=session,
+                login="username",
+                password="password"
+            )
+            assert exception.value.status_code == 404
