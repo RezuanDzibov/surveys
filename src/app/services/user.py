@@ -85,3 +85,24 @@ async def change_user_password(session: AsyncSession, password_change: PasswordC
 async def get_users(session: AsyncSession) -> List[User]:
     users = await base_services.get_objects(session=session, model=User)
     return users
+
+
+async def delete_user(session: AsyncSession, login: str, password: str) -> None:
+    statement = select(User.password).where(or_(User.username == login, User.email == login))
+    user_password = await base_services.get_object(session=session, statement=statement)
+    if not verify_password(password, user_password):
+        raise HTTPException(
+            status_code=400,
+            detail="Provided password is incorrect",
+        )
+    if not await base_services.is_object_exists(
+            session=session,
+            statement=statement
+    ):
+        raise HTTPException(status_code=400, detail="login or password is incorrect")
+    await base_services.delete_object(
+        session=session,
+        model=User,
+        where_statements=[or_(User.username == login, User.email == login)],
+        return_object=False
+    )
