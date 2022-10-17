@@ -133,3 +133,22 @@ async def delete_survey(session: AsyncSession, user: User, id_: UUID) -> None:
         result.one()
     except NoResultFound:
         await raise_404()
+
+
+async def delete_survey_attribute(session: AsyncSession, user: User, id_: UUID) -> SurveyAttribute:
+    statement = select(SurveyAttribute).join(
+        SurveyAttribute.survey.and_(Survey.user_id == user.id)
+    ).where(SurveyAttribute.id == id_)
+    if not await base_services.is_object_exists(
+            session=session,
+            statement=statement
+    ):
+        await raise_404()
+    statement = delete(SurveyAttribute).where(SurveyAttribute.id == id_).returning(SurveyAttribute)
+    result = await session.execute(statement)
+    await session.commit()
+    try:
+        survey_attr = SurveyAttribute(**dict(result.one()))
+        return survey_attr
+    except NoResultFound:
+        await raise_404()

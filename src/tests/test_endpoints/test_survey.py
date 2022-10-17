@@ -331,3 +331,35 @@ class TestDeleteSurvey:
             headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
         assert response.status_code == 404
+
+
+class TestDeleteSurveyAttribute:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_success(self, session: AsyncSession, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
+        attr = factory_surveys[2].attrs[0]
+        response = await auth_test_client.delete(f"survey/attr/{attr.id}")
+        assert response.status_code == 202
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(SurveyAttribute).where(SurveyAttribute.id == attr.id)
+        )
+
+    async def test_404(self, session: AsyncSession, auth_test_client: AsyncClient):
+        response = await auth_test_client.delete(f"survey/attr/{uuid4()}")
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_author(
+            self,
+            session: AsyncSession,
+            factory_surveys: List[Survey],
+            access_token_and_user: dict,
+            auth_test_client: AsyncClient
+
+    ):
+        response = await auth_test_client.delete(
+            f"/survey/{random.choice(factory_surveys).id}",
+            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
+        )
+        assert response.status_code == 404
+

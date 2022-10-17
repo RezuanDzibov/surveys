@@ -9,7 +9,7 @@ from app.api.deps import get_current_user, get_current_active_user, get_current_
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
-    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve
+    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve, SurveyAttributeRetrieve
 from app.services import survey as survey_services
 from app.services.filtering.survey import filter_surveys
 
@@ -99,4 +99,14 @@ async def update_survey_attr(
         id_=id_,
         to_update=to_update
     )
+    return survey_attr
+
+
+@router.delete("/attr/{id_}",  response_model=SurveyAttributeRetrieve, status_code=202)
+async def delete_survey_attr(
+        id_: UUID4,
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_active_user),
+):
+    survey_attr = await survey_services.delete_survey_attribute(session=session, user=current_user, id_=id_)
     return survey_attr
