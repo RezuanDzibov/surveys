@@ -152,3 +152,16 @@ async def delete_survey_attribute(session: AsyncSession, user: User, id_: UUID) 
         return survey_attr
     except NoResultFound:
         await raise_404()
+
+
+async def get_survey_attribute(session: AsyncSession, id_: UUID, user: User = None) -> SurveyAttribute:
+    statement = select(SurveyAttribute, Survey.user_id).join(SurveyAttribute.survey).where(SurveyAttribute.id == id_)
+    result = await session.execute(statement)
+    try:
+        attr, user_id = result.one()
+        if attr.available is False:
+            if not user or user.id != user_id:
+                await raise_404()
+        return attr
+    except NoResultFound:
+        await raise_404()
