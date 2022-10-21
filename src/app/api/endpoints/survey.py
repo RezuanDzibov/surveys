@@ -110,3 +110,13 @@ async def delete_survey_attr(
 ):
     survey_attr = await survey_services.delete_survey_attribute(session=session, user=current_user, id_=id_)
     return survey_attr
+
+
+@router.get("/attr/{id_}", response_model=SurveyAttributeRetrieve, status_code=200)
+async def get_survey_attribute(
+        id_: UUID4,
+        session: AsyncSession = Depends(get_session),
+        current_user: Optional[User] = Depends(get_current_active_user_or_none)
+):
+    survey_attr = await survey_services.get_survey_attribute(session=session, id_=id_, user=current_user)
+    return survey_attr
