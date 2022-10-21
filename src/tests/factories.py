@@ -1,5 +1,3 @@
-from random import choice
-
 import factory
 from faker import Faker
 
@@ -23,18 +21,18 @@ class UserFactory(factory.Factory):
     first_name = factory.LazyAttribute(lambda object_: fake.first_name())
     last_name = factory.LazyAttribute(lambda object_: fake.last_name())
     birth_date = factory.LazyAttribute(lambda object_: fake.date_of_birth())
-    is_active = factory.LazyAttribute(lambda object_: choice([True, False]))
-    is_stuff = factory.LazyAttribute(lambda object_: choice([True, False]))
-    is_superuser = factory.LazyAttribute(lambda object_: choice([True, False]))
+    is_active = factory.LazyAttribute(lambda object_: fake.pybool())
+    is_stuff = factory.LazyAttribute(lambda object_: fake.pybool())
+    is_superuser = factory.LazyAttribute(lambda object_: fake.pybool())
 
 
 class SurveyAttributeFactory(factory.Factory):
     class Meta:
         model = SurveyAttribute
 
-    available = factory.LazyAttribute(lambda object_: choice([True, False]))
+    available = factory.LazyAttribute(lambda object_: fake.pybool())
     question = factory.LazyAttribute(lambda object_: fake.sentence())
-    required = factory.LazyAttribute(lambda object_: choice([True, False]))
+    required = factory.LazyAttribute(lambda object_: fake.pybool())
 
 
 class SurveyFactory(factory.Factory):
@@ -42,5 +40,5 @@ class SurveyFactory(factory.Factory):
         model = Survey
 
     name = factory.LazyAttribute(lambda object_: fake.name())
-    available = factory.LazyAttribute(lambda object_: choice(([True, False])))
+    available = factory.LazyAttribute(lambda object_: fake.pybool())
     description = factory.LazyAttribute(lambda object_: fake.text())
