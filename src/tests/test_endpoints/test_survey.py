@@ -354,10 +354,10 @@ class TestDeleteSurveyAttribute:
             session: AsyncSession,
             factory_surveys: List[Survey],
             access_token_and_user: dict,
-            auth_test_client: AsyncClient
+            test_client: AsyncClient
 
     ):
-        response = await auth_test_client.delete(
+        response = await test_client.delete(
             f"/survey/{random.choice(factory_surveys).id}",
             headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
