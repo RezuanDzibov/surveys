@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user
 from app.db.base import get_session
+from app.forms.auth import LoginForm
 from app.models.user import User
 from app.schemas import user as user_schemas
 from app.schemas.user import UserFilter
@@ -48,4 +49,17 @@ async def get_users_with_filtering(filter: UserFilter = Depends(), session: Asyn
 @router.get("/{user_id}", response_model=user_schemas.UserRetrieve)
 async def get_user(user_id: UUID4, session: AsyncSession = Depends(get_session)):
     user = await user_services.get_user(session=session, where_statements=[User.id == user_id])
+    return user
+
+
+@router.delete("", response_model=user_schemas.UserRetrieve)
+async def delete_user(
+    login_form: LoginForm = Depends(),
+    session: AsyncSession = Depends(get_session),
+):
+    user = await user_services.delete_user(
+        session=session,
+        login=login_form.login,
+        password=login_form.password
+    )
     return user
