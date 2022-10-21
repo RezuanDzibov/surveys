@@ -175,9 +175,12 @@ async def factory_surveys(
 
 
 @pytest.fixture(scope="function")
-async def user_and_its_pass(session: AsyncSession) -> dict:
+async def user_and_its_pass(request: SubRequest, session: AsyncSession) -> dict:
     password = "password"
-    user = UserFactory(is_active=True, password=get_password_hash(password))
+    if hasattr(request, "param") and isinstance(request.param, dict):
+        user = UserFactory(**request.param, password=get_password_hash(password))
+    else:
+        user = UserFactory(is_active=True, password=get_password_hash(password))
     session.add(user)
     await session.commit()
     return {"user": user, "password": password}
