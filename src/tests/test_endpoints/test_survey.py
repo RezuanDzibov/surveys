@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import get_password_hash
 from app.models import User, Survey, SurveyAttribute
-from app.schemas.survey import SurveyOut
+from app.schemas.survey import SurveyOut, SurveyAttributeRetrieve
 from app.services import base as base_services
 from tests.factories import UserFactory
 
@@ -363,3 +363,101 @@ class TestDeleteSurveyAttribute:
         )
         assert response.status_code == 404
 
+
+class TestGetSurveyAttribute:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_success(self, session: AsyncSession, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
+        expected_attr = random.choice(random.choice(factory_surveys).attrs)
+        response = await auth_test_client.get(f"/survey/attr/{expected_attr.id}")
+        attr_in_db = json.loads(response.content.decode("utf-8"))
+        assert SurveyAttributeRetrieve(**expected_attr.as_dict()) == SurveyAttributeRetrieve(**attr_in_db)
+
+    async def test_404(self, session: AsyncSession, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
+        response = await auth_test_client.get(f"/survey/attr/{uuid4()}")
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_author_success(
+            self,
+            session: AsyncSession,
+            auth_test_client: AsyncClient,
+            factory_surveys: List[Survey]
+    ):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is False, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        response = await auth_test_client.get(f"/survey/attr/{expected_attr.id}")
+        attr_in_db = json.loads(response.content.decode("utf-8"))
+        assert SurveyAttributeRetrieve(**expected_attr.as_dict()) == SurveyAttributeRetrieve(**attr_in_db)
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_author(
+            self,
+            session: AsyncSession,
+            test_client: AsyncClient,
+            factory_surveys: List[Survey],
+            access_token_and_user: dict
+    ):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is False, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        response = await test_client.delete(
+            f"/survey/attr/{expected_attr.id}",
+            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
+        )
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_auth_user_available_is_true(
+            self,
+            session: AsyncSession,
+            test_client: AsyncClient,
+            factory_surveys: List[Survey]
+    ):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is True, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        response = await test_client.get(f"/survey/attr/{expected_attr.id}")
+        attr_in_db = json.loads(response.content.decode("utf-8"))
+        assert SurveyAttributeRetrieve(**expected_attr.as_dict()) == SurveyAttributeRetrieve(**attr_in_db)
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_auth_user_available_is_false(
+            self,
+            session: AsyncSession,
+            test_client: AsyncClient,
+            factory_surveys: List[Survey]
+    ):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is False, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        response = await test_client.get(f"/survey/attr/{expected_attr.id}")
+        assert response.status_code == 404
