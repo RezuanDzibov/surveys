@@ -1,3 +1,4 @@
+import random
 import uuid
 from typing import List
 
@@ -231,6 +232,107 @@ class TestDeleteSurveyAttribute:
             await survey_services.delete_survey_attribute(
                 session=session,
                 user=user_and_its_pass["user"],
-                id_=factory_surveys[2].attrs[1].id
+                id_=random.choice(random.choice(factory_surveys).attrs).id
                 )
+            assert exception.value.status_code == 404
+
+
+class TestGetSurveyAttribute:
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_success(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        expected_attr = random.choice(random.choice(factory_surveys).attrs)
+        attr_in_db = await survey_services.get_survey_attribute(
+            session=session,
+            user=admin_user,
+            id_=expected_attr.id
+        )
+        assert expected_attr == attr_in_db
+
+    async def test_404(self, session: AsyncSession, admin_user: User):
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.get_survey_attribute(session=session, user=admin_user, id_=uuid.uuid4())
+            assert exception.value.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_author_success(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is False, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        attr_in_db = await survey_services.get_survey_attribute(
+            session=session,
+            user=admin_user,
+            id_=expected_attr.id
+        )
+        assert expected_attr == attr_in_db
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_author(self, session: AsyncSession, factory_surveys: List[Survey], user_and_its_pass: dict):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is False, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.get_survey_attribute(
+                session=session,
+                user=user_and_its_pass["user"],
+                id_=expected_attr.id
+                )
+            assert exception.value.status_code == 404
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_auth_user_available_is_true(
+            self,
+            session: AsyncSession,
+            factory_surveys: List[Survey]
+    ):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is True, random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        attr_in_db = await survey_services.get_survey_attribute(
+            session=session,
+            id_=expected_attr.id
+        )
+        assert expected_attr == attr_in_db
+
+    @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
+    async def test_not_auth_user_available_is_false(
+            self,
+            session: AsyncSession,
+            factory_surveys: List[Survey]
+    ):
+        expected_attr = None
+        while not expected_attr:
+            try:
+                expected_attr = random.choice(
+                    list(
+                        filter(lambda attr: attr.available is False , random.choice(factory_surveys).attrs)
+                    )
+                )
+            except IndexError:
+                continue
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.get_survey_attribute(
+                session=session,
+                id_=expected_attr.id
+            )
             assert exception.value.status_code == 404
