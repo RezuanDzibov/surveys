@@ -35,7 +35,7 @@ class TestGetSurvey:
     @pytest.mark.parametrize("factory_surveys", [2], indirect=True)
     async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
         survey = await survey_services.get_survey(session=session, user=admin_user, id_=factory_surveys[1].id)
-        assert not all([attr.available for attr in survey.attrs])
+        assert factory_surveys[1] == survey
 
     async def test_for_not_exists(self, session: AsyncSession, admin_user: User):
         with pytest.raises(HTTPException) as exception_info:
