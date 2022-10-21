@@ -178,7 +178,12 @@ class TestGetSurveysWithFiltering:
 class TestDeleteSurvey:
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_success(self, session: AsyncSession, admin_user: User, factory_surveys: List[Survey]):
-        await survey_services.delete_survey(session=session, user=admin_user, id_=factory_surveys[2].id)
+        deleted_survey = await survey_services.delete_survey(
+            session=session,
+            user=admin_user,
+            id_=factory_surveys[2].id
+        )
+        assert deleted_survey == factory_surveys[2]
         assert not await base_services.is_object_exists(
             session=session,
             statement=select(Survey).where(Survey.id == factory_surveys[2].id)

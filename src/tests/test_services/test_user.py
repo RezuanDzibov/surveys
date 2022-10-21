@@ -150,10 +150,12 @@ class TestGetUsersWithSearching:
 
 class TestDeleteUser:
     async def test_success(self, session: AsyncSession, user_and_its_pass: dict):
-        await user_services.delete_user(
-            session=session,login=user_and_its_pass["user"].email,
+        user = await user_services.delete_user(
+            session=session,
+            login=user_and_its_pass["user"].email,
             password=user_and_its_pass["password"]
         )
+        assert user == user_and_its_pass["user"]
         assert not await base_services.is_object_exists(
             session=session,
             statement=select(User).where(User.id == user_and_its_pass["user"].id)
@@ -167,3 +169,22 @@ class TestDeleteUser:
                 password="password"
             )
             assert exception.value.status_code == 404
+
+    async def test_wrong_password(self, session: AsyncSession, user_and_its_pass: dict):
+        with pytest.raises(HTTPException) as exception:
+            await user_services.delete_user(
+                session=session,
+                login=user_and_its_pass["user"].email,
+                password="wrong_password"
+            )
+            assert exception.value.status_code == 400
+
+    @pytest.mark.parametrize("user_and_its_pass", [{"is_active": False}], indirect=True)
+    async def test_not_active_user(self, session: AsyncSession, user_and_its_pass: dict):
+        with pytest.raises(HTTPException) as exception:
+            await user_services.delete_user(
+                session=session,
+                login=user_and_its_pass["user"].email,
+                password=user_and_its_pass["password"]
+            )
+            assert exception.value.status_code == 400

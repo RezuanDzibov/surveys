@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import get_password_hash
 from app.models import User, Survey, SurveyAttribute
-from app.schemas.survey import SurveyOut, SurveyAttributeRetrieve
+from app.schemas.survey import SurveyOut, SurveyAttributeRetrieve, SurveyDelete
 from app.services import base as base_services
 from tests.factories import UserFactory
 
@@ -298,7 +298,9 @@ class TestDeleteSurvey:
         response = await auth_test_client.delete(
             f"/survey/{factory_surveys[2].id}"
         )
-        assert response.status_code == 204
+        survey = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 202
+        assert SurveyDelete(**survey) == SurveyDelete.from_orm(factory_surveys[2])
         assert not await base_services.is_object_exists(
             session=session,
             statement=select(Survey).where(Survey.id == factory_surveys[2].id)
@@ -313,7 +315,7 @@ class TestDeleteSurvey:
         response = await auth_test_client.delete(
             f"/survey/{factory_surveys[2].id}"
         )
-        assert response.status_code == 204
+        assert response.status_code == 202
         assert not await base_services.is_object_exists(
             session=session,
             statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)

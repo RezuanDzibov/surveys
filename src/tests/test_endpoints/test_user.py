@@ -4,9 +4,12 @@ from typing import List
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
 from app.schemas.user import UserRetrieve
+from app.services import base as base_services
 
 
 class TestGetCurrentUser:
@@ -122,3 +125,43 @@ class TestGetUsersWithFiltering:
         users = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
         assert not users
+
+
+class TestDeleteUser:
+    async def test_success(self, session: AsyncSession, test_client: AsyncClient, user_and_its_pass: dict):
+        response = await test_client.request(
+            "DELETE",
+            "user",
+            data={"login": user_and_its_pass["user"].username, "password": user_and_its_pass["password"]}
+        )
+        survey = json.loads(response.content.decode("utf-8"))
+        assert UserRetrieve(**survey) == UserRetrieve.from_orm(user_and_its_pass["user"])
+        assert not await base_services.is_object_exists(
+            session=session,
+            statement=select(User).where(User.id == user_and_its_pass["user"].id)
+        )
+
+    async def test_404(self, session: AsyncSession, test_client: AsyncClient):
+        response = await test_client.request(
+            "DELETE",
+            "user",
+            data={"login": "user", "password": "password"}
+        )
+        assert response.status_code == 404
+
+    async def test_wrong_password(self, session: AsyncSession, test_client: AsyncClient, user_and_its_pass: dict):
+        response = await test_client.request(
+            "DELETE",
+            "user",
+            data={"login": user_and_its_pass["user"].username, "password": "wrong_password"}
+        )
+        assert response.status_code == 400
+
+    @pytest.mark.parametrize("user_and_its_pass", [{"is_active": False}], indirect=True)
+    async def test_not_active_user(self, session: AsyncSession, test_client: AsyncClient, user_and_its_pass: dict):
+        response = await test_client.request(
+            "DELETE",
+            "user",
+            data={"login": user_and_its_pass["user"].username, "password": user_and_its_pass["password"]}
+        )
+        assert response.status_code == 400

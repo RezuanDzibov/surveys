@@ -61,3 +61,7 @@ class SurveyAttributeUpdate(BaseModel):
 class SurveyFilter(BaseModel):
     name: Optional[constr(max_length=255)]
     description: Optional[str]
+
+
+class SurveyDelete(SurveyOut):
+    available: bool

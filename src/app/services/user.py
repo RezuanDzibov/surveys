@@ -2,10 +2,12 @@ from typing import Optional, List
 
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_, select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.background import BackgroundTasks
 
 from app.core.emails import send_new_account_email
+from app.core.exceptions import raise_404
 from app.core.security import get_password_hash, verify_password
 from app.models import User
 from app.schemas.auth import PasswordChange
@@ -87,22 +89,27 @@ async def get_users(session: AsyncSession) -> List[User]:
     return users
 
 
-async def delete_user(session: AsyncSession, login: str, password: str) -> None:
-    statement = select(User.password).where(or_(User.username == login, User.email == login))
-    user_password = await base_services.get_object(session=session, statement=statement)
-    if not verify_password(password, user_password):
-        raise HTTPException(
-            status_code=400,
-            detail="Provided password is incorrect",
-        )
-    if not await base_services.is_object_exists(
+async def delete_user(session: AsyncSession, login: str, password: str) -> User:
+    statement = select(User.is_active, User.password).where(or_(User.username == login, User.email == login))
+    result = await session.execute(statement)
+    try:
+        is_active, user_password = result.one()
+        if not is_active:
+            raise HTTPException(
+                status_code=400,
+                detail="The user is not active",
+            )
+        if not verify_password(password, user_password):
+            raise HTTPException(
+                status_code=400,
+                detail="Provided password is incorrect",
+            )
+        user = await base_services.delete_object(
             session=session,
-            statement=statement
-    ):
-        raise HTTPException(status_code=400, detail="login or password is incorrect")
-    await base_services.delete_object(
-        session=session,
-        model=User,
-        where_statements=[or_(User.username == login, User.email == login)],
-        return_object=False
-    )
+            model=User,
+            where_statements=[or_(User.username == login, User.email == login)],
+            return_object=True
+        )
+        return user
+    except NoResultFound:
+        await raise_404()

@@ -118,19 +118,20 @@ async def get_user_surveys(
         await raise_404()
     statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id).where(
         Survey.user_id == user_id,
-        Survey.available == True
+        Survey.available is True
     )
     result = await session.execute(statement=statement)
     surveys = result.scalars().all()
     return surveys
 
 
-async def delete_survey(session: AsyncSession, user: User, id_: UUID) -> None:
+async def delete_survey(session: AsyncSession, user: User, id_: UUID) -> Survey:
     statement = delete(Survey).where(Survey.id == id_, Survey.user_id == user.id).returning(Survey)
     result = await session.execute(statement)
     await session.commit()
     try:
-        result.one()
+        survey = Survey(**dict(result.one()))
+        return survey
     except NoResultFound:
         await raise_404()
 
