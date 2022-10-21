@@ -150,10 +150,12 @@ class TestGetUsersWithSearching:
 
 class TestDeleteUser:
     async def test_success(self, session: AsyncSession, user_and_its_pass: dict):
-        await user_services.delete_user(
-            session=session,login=user_and_its_pass["user"].email,
+        user = await user_services.delete_user(
+            session=session,
+            login=user_and_its_pass["user"].email,
             password=user_and_its_pass["password"]
         )
+        assert user == user_and_its_pass["user"]
         assert not await base_services.is_object_exists(
             session=session,
             statement=select(User).where(User.id == user_and_its_pass["user"].id)
