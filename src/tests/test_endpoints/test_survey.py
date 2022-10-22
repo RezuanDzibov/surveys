@@ -9,11 +9,9 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import get_password_hash
 from app.models import User, Survey, SurveyAttribute
 from app.schemas.survey import SurveyOut, SurveyAttributeRetrieve, SurveyDelete
 from app.services import base as base_services
-from tests.factories import UserFactory
 
 fake = Faker()
 
@@ -52,23 +50,16 @@ class TestGetSurvey:
         assert response.status_code == 404
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
-    async def test_for_not_author(self, test_client: AsyncClient, session: AsyncSession, factory_surveys: List[Survey]):
-        password = "password"
-        user = UserFactory(password=get_password_hash(password))
-        session.add(user)
-        await session.commit()
-        response = await test_client.post(
-            "auth/login/access-token",
-            data={
-                "login": user.username,
-                "password": password,
-            }
-        )
-        response_content = json.loads(response.content.decode("utf-8"))
-        access_token = response_content.get("access_token")
+    async def test_for_not_author(
+            self,
+            test_client: AsyncClient,
+            session: AsyncSession,
+            factory_surveys: List[Survey],
+            access_token_and_user: dict
+    ):
         response = await test_client.get(
             f"/survey/{random.choice(factory_surveys).id}",
-            headers={"Authorization": f"Bearer {access_token}"}
+            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
         surveys = json.loads(response.content.decode("utf-8"))
         factory_surveys = [SurveyOut.from_orm(survey).dict() for survey in factory_surveys]
@@ -114,22 +105,16 @@ class TestUpdateSurvey:
         response = await auth_test_client.patch(f"/survey/{uuid4()}", json={"name": fake.name()})
         assert response.status_code == 404
 
-    async def test_for_not_owner_user(self, test_client: AsyncClient, session: AsyncSession, factory_survey: Survey):
-        user = UserFactory.build()
-        session.add(user)
-        await session.commit()
-        response = await test_client.post(
-            "auth/login/access-token",
-            data={
-                "login": user.username,
-                "password": user.password,
-            }
-        )
-        response_content = json.loads(response.content.decode("utf-8"))
-        access_token = response_content.get("access_token")
+    async def test_for_not_owner_user(
+            self,
+            test_client: AsyncClient,
+            session: AsyncSession,
+            factory_survey: Survey,
+            access_token_and_user: dict
+    ):
         response = await test_client.patch(
             f"/survey/{factory_survey   .id}",
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"},
             json={"name": fake.name()},
         )
         assert response.status_code == 403
@@ -149,22 +134,16 @@ class TestUpdateSurveyAttribute:
         response = await auth_test_client.patch(f"/survey/attr/{uuid4()}", json={"question": fake.text()})
         assert response.status_code == 404
 
-    async def test_for_not_owner_user(self, test_client: AsyncClient, session: AsyncSession, factory_survey: Survey):
-        user = UserFactory.build()
-        session.add(user)
-        await session.commit()
-        response = await test_client.post(
-            "auth/login/access-token",
-            data={
-                "login": user.username,
-                "password": user.password,
-            }
-        )
-        response_content = json.loads(response.content.decode("utf-8"))
-        access_token = response_content.get("access_token")
+    async def test_for_not_owner_user(
+            self,
+            test_client: AsyncClient,
+            session: AsyncSession,
+            factory_survey: Survey,
+            access_token_and_user: dict
+    ):
         response = await test_client.patch(
             f"/survey/attr/{factory_survey.attrs[0].id}",
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"},
             json={"question": fake.text()},
         )
         assert response.status_code == 403
