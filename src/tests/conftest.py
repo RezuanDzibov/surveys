@@ -149,20 +149,28 @@ async def factory_surveys(
         admin_user: User,
         survey_factory: SurveyFactory,
         survey_attribute_factory: SurveyAttributeFactory
-) -> Union[Survey, List[Survey]]:
-    if hasattr(request, "param"):
-        surveys = survey_factory.build_batch(request.param)
-        for survey in surveys:
-            survey.user_id = admin_user.id
-        session.add_all(surveys)
-        await session.commit()
-        for survey in surveys:
-            survey.__dict__["attrs"] = await create_survey_attrs(
-                session=session,
-                survey_id=survey.id,
-                attrs=[attr.as_dict() for attr in survey_attribute_factory.build_batch(randint(1, 10))]
-            )
-        return surveys
+) -> List[Survey]:
+    surveys = survey_factory.build_batch(request.param)
+    for survey in surveys:
+        survey.user_id = admin_user.id
+    session.add_all(surveys)
+    await session.commit()
+    for survey in surveys:
+        survey.__dict__["attrs"] = await create_survey_attrs(
+            session=session,
+            survey_id=survey.id,
+            attrs=[attr.as_dict() for attr in survey_attribute_factory.build_batch(randint(1, 10))]
+        )
+    return surveys
+
+
+@pytest.fixture(scope="function")
+async def factory_survey(
+        session: AsyncSession,
+        admin_user: User,
+        survey_attribute_factory: SurveyAttributeFactory,
+        survey_factory: SurveyFactory
+) -> Survey:
     attrs = survey_attribute_factory.build_batch(randint(1, 10))
     attrs = list([attr.as_dict() for attr in attrs])
     survey = survey_factory.build()

@@ -75,13 +75,13 @@ class TestGetSurveys:
 
 
 class TestUpdateSurvey:
-    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: Survey):
+    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_survey: Survey):
         name = fake.name()
         to_update = SurveyUpdate(name=name)
         survey = await survey_services.update_survey(
             session=session,
             user=admin_user,
-            id_=factory_surveys.id,
+            id_=factory_survey.id,
             to_update=to_update
         )
         assert survey.name == name
@@ -94,12 +94,12 @@ class TestUpdateSurvey:
 
 
 class TestUpdateSurveyAttribute:
-    async def test_for_exists(self, session: AsyncSession, factory_surveys: Survey, admin_user: User):
+    async def test_for_exists(self, session: AsyncSession, factory_survey: Survey, admin_user: User):
         question = fake.text()
         to_update = SurveyAttributeUpdate(question=question)
         survey_attr = await survey_services.update_survey_attribute(
             session=session,
-            id_=factory_surveys.attrs[0].id,
+            id_=factory_survey.attrs[0].id,
             user=admin_user,
             to_update=to_update,
         )

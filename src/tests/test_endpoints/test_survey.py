@@ -104,9 +104,9 @@ class TestGetSurveys:
 
 
 class TestUpdateSurvey:
-    async def test_for_exists(self, auth_test_client: AsyncClient, factory_surveys: Survey):
+    async def test_for_exists(self, auth_test_client: AsyncClient, factory_survey: Survey):
         to_update = fake.name()
-        response = await auth_test_client.patch(f"/survey/{factory_surveys.id}", json={"name": to_update})
+        response = await auth_test_client.patch(f"/survey/{factory_survey.id}", json={"name": to_update})
         survey = json.loads(response.content.decode("utf-8"))
         assert survey["name"] == to_update
 
@@ -114,7 +114,7 @@ class TestUpdateSurvey:
         response = await auth_test_client.patch(f"/survey/{uuid4()}", json={"name": fake.name()})
         assert response.status_code == 404
 
-    async def test_for_not_owner_user(self, test_client: AsyncClient, session: AsyncSession, factory_surveys: Survey):
+    async def test_for_not_owner_user(self, test_client: AsyncClient, session: AsyncSession, factory_survey: Survey):
         user = UserFactory.build()
         session.add(user)
         await session.commit()
@@ -128,7 +128,7 @@ class TestUpdateSurvey:
         response_content = json.loads(response.content.decode("utf-8"))
         access_token = response_content.get("access_token")
         response = await test_client.patch(
-            f"/survey/{factory_surveys.id}",
+            f"/survey/{factory_survey   .id}",
             headers={"Authorization": f"Bearer {access_token}"},
             json={"name": fake.name()},
         )
@@ -136,9 +136,12 @@ class TestUpdateSurvey:
 
 
 class TestUpdateSurveyAttribute:
-    async def test_for_exists(self, auth_test_client: AsyncClient, factory_surveys: Survey):
+    async def test_for_exists(self, auth_test_client: AsyncClient, factory_survey: Survey):
         to_update = fake.text()
-        response = await auth_test_client.patch(f"/survey/attr/{factory_surveys.attrs[0].id}", json={"question": to_update})
+        response = await auth_test_client.patch(
+            f"/survey/attr/{factory_survey.attrs[0].id}",
+            json={"question": to_update}
+        )
         survey_attr = json.loads(response.content.decode("utf-8"))
         assert survey_attr["question"] == to_update
 
@@ -146,7 +149,7 @@ class TestUpdateSurveyAttribute:
         response = await auth_test_client.patch(f"/survey/attr/{uuid4()}", json={"question": fake.text()})
         assert response.status_code == 404
 
-    async def test_for_not_owner_user(self, test_client: AsyncClient, session: AsyncSession, factory_surveys: Survey):
+    async def test_for_not_owner_user(self, test_client: AsyncClient, session: AsyncSession, factory_survey: Survey):
         user = UserFactory.build()
         session.add(user)
         await session.commit()
@@ -160,7 +163,7 @@ class TestUpdateSurveyAttribute:
         response_content = json.loads(response.content.decode("utf-8"))
         access_token = response_content.get("access_token")
         response = await test_client.patch(
-            f"/survey/attr/{factory_surveys.attrs[0].id}",
+            f"/survey/attr/{factory_survey.attrs[0].id}",
             headers={"Authorization": f"Bearer {access_token}"},
             json={"question": fake.text()},
         )
@@ -374,7 +377,7 @@ class TestGetSurveyAttribute:
         attr_in_db = json.loads(response.content.decode("utf-8"))
         assert SurveyAttributeRetrieve(**expected_attr.as_dict()) == SurveyAttributeRetrieve(**attr_in_db)
 
-    async def test_404(self, session: AsyncSession, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
+    async def test_404(self, session: AsyncSession, auth_test_client: AsyncClient, factory_survey: Survey):
         response = await auth_test_client.get(f"/survey/attr/{uuid4()}")
         assert response.status_code == 404
 
