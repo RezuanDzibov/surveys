@@ -68,7 +68,7 @@ class TestGetUsers:
         assert len(users) == 0
 
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
-    async def       test_with_pagination(self, test_client: AsyncClient, factory_users: List[User]):
+    async def test_with_pagination(self, test_client: AsyncClient, factory_users: List[User]):
         response = await test_client.get("user?size=3")
         users = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
