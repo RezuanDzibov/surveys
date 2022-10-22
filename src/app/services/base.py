@@ -11,9 +11,9 @@ from app.core.exceptions import raise_404
 from app.models.base import BaseModel
 
 
-async def is_object_exists(session: AsyncSession, statement: bool) -> bool:
-    statement = exists(statement).select()
-    result = await session.execute(statement)
+async def is_object_exists(session: AsyncSession, where_statement) -> bool:
+    where_statement = exists(where_statement).select()
+    result = await session.execute(where_statement)
     is_exists = result.one()[0]
     return is_exists
 

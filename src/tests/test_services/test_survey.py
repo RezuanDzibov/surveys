@@ -75,13 +75,13 @@ class TestGetSurveys:
 
 
 class TestUpdateSurvey:
-    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_surveys: Survey):
+    async def test_for_exists(self, session: AsyncSession, admin_user: User, factory_survey: Survey):
         name = fake.name()
         to_update = SurveyUpdate(name=name)
         survey = await survey_services.update_survey(
             session=session,
             user=admin_user,
-            id_=factory_surveys.id,
+            id_=factory_survey.id,
             to_update=to_update
         )
         assert survey.name == name
@@ -94,12 +94,12 @@ class TestUpdateSurvey:
 
 
 class TestUpdateSurveyAttribute:
-    async def test_for_exists(self, session: AsyncSession, factory_surveys: Survey, admin_user: User):
+    async def test_for_exists(self, session: AsyncSession, factory_survey: Survey, admin_user: User):
         question = fake.text()
         to_update = SurveyAttributeUpdate(question=question)
         survey_attr = await survey_services.update_survey_attribute(
             session=session,
-            id_=factory_surveys.attrs[0].id,
+            id_=factory_survey.attrs[0].id,
             user=admin_user,
             to_update=to_update,
         )
@@ -186,7 +186,7 @@ class TestDeleteSurvey:
         assert deleted_survey == factory_surveys[2]
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(Survey).where(Survey.id == factory_surveys[2].id)
+            where_statement=select(Survey).where(Survey.id == factory_surveys[2].id)
         )
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
@@ -194,7 +194,7 @@ class TestDeleteSurvey:
         await survey_services.delete_survey(session=session, user=admin_user, id_=factory_surveys[2].id)
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
+            where_statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
         )
 
     async def test_404(self, session: AsyncSession, admin_user: User):
@@ -223,7 +223,7 @@ class TestDeleteSurveyAttribute:
         )
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
+            where_statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
         )
 
     async def test_404(self, session: AsyncSession, admin_user: User):

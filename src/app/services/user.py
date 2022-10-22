@@ -20,7 +20,7 @@ async def create_user(session: AsyncSession, new_user: UserRegistrationIn, task:
     if new_user.password != new_user.password_repeat:
         raise HTTPException(status_code=400, detail="password and password_repeat doesn't match")
     statement = select(User).where(or_(User.username == new_user.username, User.email == new_user.email))
-    is_object_exists = await base_services.is_object_exists(session=session, statement=statement)
+    is_object_exists = await base_services.is_object_exists(session=session, where_statement=statement)
     if is_object_exists:
         raise HTTPException(
             status_code=409,

@@ -68,7 +68,7 @@ class TestGetUsers:
         assert len(users) == 0
 
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
-    async def test_with_pagination(self, test_client: AsyncClient, factory_users: List[User]):
+    async def       test_with_pagination(self, test_client: AsyncClient, factory_users: List[User]):
         response = await test_client.get("user?size=3")
         users = json.loads(response.content.decode("utf-8"))["items"]
         assert response.status_code == 200
@@ -138,7 +138,7 @@ class TestDeleteUser:
         assert UserRetrieve(**survey) == UserRetrieve.from_orm(user_and_its_pass["user"])
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(User).where(User.id == user_and_its_pass["user"].id)
+            where_statement=select(User).where(User.id == user_and_its_pass["user"].id)
         )
 
     async def test_404(self, session: AsyncSession, test_client: AsyncClient):

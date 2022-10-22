@@ -96,7 +96,7 @@ class TestVerifyRegistrationUser:
         statement = select(Verification).where(Verification.id == verification.id)
         assert not await base_services.is_object_exists(
             session=session,
-            statement=statement,
+            where_statement=statement,
         )
 
     async def test_for_not_exists_verification(self, session):

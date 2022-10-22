@@ -73,7 +73,7 @@ async def session(tables, session_maker) -> AsyncSession:
 
 @pytest.fixture(scope="function")
 async def admin_user(request, session: AsyncSession) -> User:
-    if not await is_object_exists(session=session, statement=User.email == settings.ADMIN_FIXTURE_EMAIL):
+    if not await is_object_exists(session=session, where_statement=User.email == settings.ADMIN_FIXTURE_EMAIL):
         create_admin_user_ = partial(create_admin_user, session)
         if hasattr(request, "param"):
             return await create_admin_user_(data_to_replace=request.param)
@@ -149,20 +149,28 @@ async def factory_surveys(
         admin_user: User,
         survey_factory: SurveyFactory,
         survey_attribute_factory: SurveyAttributeFactory
-) -> Union[Survey, List[Survey]]:
-    if hasattr(request, "param"):
-        surveys = survey_factory.build_batch(request.param)
-        for survey in surveys:
-            survey.user_id = admin_user.id
-        session.add_all(surveys)
-        await session.commit()
-        for survey in surveys:
-            survey.__dict__["attrs"] = await create_survey_attrs(
-                session=session,
-                survey_id=survey.id,
-                attrs=[attr.as_dict() for attr in survey_attribute_factory.build_batch(randint(1, 10))]
-            )
-        return surveys
+) -> List[Survey]:
+    surveys = survey_factory.build_batch(request.param)
+    for survey in surveys:
+        survey.user_id = admin_user.id
+    session.add_all(surveys)
+    await session.commit()
+    for survey in surveys:
+        survey.__dict__["attrs"] = await create_survey_attrs(
+            session=session,
+            survey_id=survey.id,
+            attrs=[attr.as_dict() for attr in survey_attribute_factory.build_batch(randint(1, 10))]
+        )
+    return surveys
+
+
+@pytest.fixture(scope="function")
+async def factory_survey(
+        session: AsyncSession,
+        admin_user: User,
+        survey_attribute_factory: SurveyAttributeFactory,
+        survey_factory: SurveyFactory
+) -> Survey:
     attrs = survey_attribute_factory.build_batch(randint(1, 10))
     attrs = list([attr.as_dict() for attr in attrs])
     survey = survey_factory.build()
