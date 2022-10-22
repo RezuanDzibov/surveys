@@ -73,7 +73,7 @@ async def session(tables, session_maker) -> AsyncSession:
 
 @pytest.fixture(scope="function")
 async def admin_user(request, session: AsyncSession) -> User:
-    if not await is_object_exists(session=session, statement=User.email == settings.ADMIN_FIXTURE_EMAIL):
+    if not await is_object_exists(session=session, where_statement=User.email == settings.ADMIN_FIXTURE_EMAIL):
         create_admin_user_ = partial(create_admin_user, session)
         if hasattr(request, "param"):
             return await create_admin_user_(data_to_replace=request.param)

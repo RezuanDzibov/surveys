@@ -138,7 +138,7 @@ class TestDeleteUser:
         assert UserRetrieve(**survey) == UserRetrieve.from_orm(user_and_its_pass["user"])
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(User).where(User.id == user_and_its_pass["user"].id)
+            where_statement=select(User).where(User.id == user_and_its_pass["user"].id)
         )
 
     async def test_404(self, session: AsyncSession, test_client: AsyncClient):

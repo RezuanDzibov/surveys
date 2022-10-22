@@ -33,11 +33,11 @@ class TestGetObject:
 class TestIsObjectExists:
     async def test_exists_object(self, session: AsyncSession, admin_user: User):
         statement = select(User).where(User.username == admin_user.username)
-        assert await base_services.is_object_exists(session=session, statement=statement)
+        assert await base_services.is_object_exists(session=session, where_statement=statement)
 
     async def test_not_exists_object(self, session):
         statement = select(User).where(User.username == "some username")
-        assert not await base_services.is_object_exists(session=session, statement=statement)
+        assert not await base_services.is_object_exists(session=session, where_statement=statement)
 
 
 class TestUpdateObject:
@@ -90,7 +90,7 @@ class TestDeleteObject:
             where_statements=[User.username == admin_user.username],
         )
         assert admin_user == deleted_object
-        assert not await base_services.is_object_exists(session=session, statement=User.id == admin_user.id)
+        assert not await base_services.is_object_exists(session=session, where_statement=User.id == admin_user.id)
 
     async def test_not_exists_object(self, session: AsyncSession):
         with pytest.raises(HTTPException) as exception_info:

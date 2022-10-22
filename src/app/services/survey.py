@@ -114,7 +114,7 @@ async def get_user_surveys(
         session: AsyncSession,
         user_id: UUID,
 ) -> Union[list, List[Survey]]:
-    if not await base_services.is_object_exists(session=session, statement=select(User).where(User.id == user_id)):
+    if not await base_services.is_object_exists(session=session, where_statement=select(User).where(User.id == user_id)):
         await raise_404()
     statement = select(Survey).order_by(Survey.name, Survey.created_at, Survey.id).where(
         Survey.user_id == user_id,
@@ -142,7 +142,7 @@ async def delete_survey_attribute(session: AsyncSession, user: User, id_: UUID) 
     ).where(SurveyAttribute.id == id_)
     if not await base_services.is_object_exists(
             session=session,
-            statement=statement
+            where_statement=statement
     ):
         await raise_404()
     statement = delete(SurveyAttribute).where(SurveyAttribute.id == id_).returning(SurveyAttribute)

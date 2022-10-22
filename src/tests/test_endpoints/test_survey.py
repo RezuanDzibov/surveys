@@ -303,7 +303,7 @@ class TestDeleteSurvey:
         assert SurveyDelete(**survey) == SurveyDelete.from_orm(factory_surveys[2])
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(Survey).where(Survey.id == factory_surveys[2].id)
+            where_statement=select(Survey).where(Survey.id == factory_surveys[2].id)
         )
 
     async def test_404(self, auth_test_client: AsyncClient):
@@ -318,7 +318,7 @@ class TestDeleteSurvey:
         assert response.status_code == 202
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
+            where_statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
         )
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
@@ -343,7 +343,7 @@ class TestDeleteSurveyAttribute:
         assert response.status_code == 202
         assert not await base_services.is_object_exists(
             session=session,
-            statement=select(SurveyAttribute).where(SurveyAttribute.id == attr.id)
+            where_statement=select(SurveyAttribute).where(SurveyAttribute.id == attr.id)
         )
 
     async def test_404(self, session: AsyncSession, auth_test_client: AsyncClient):
