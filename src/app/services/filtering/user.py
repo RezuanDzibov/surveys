@@ -8,7 +8,7 @@ from app.schemas.user import UserFilter
 from app.services.filtering.common import validate_filter
 
 
-async def search_users(session: AsyncSession, filter: UserFilter) -> List[User]:
+async def filter_users(session: AsyncSession, filter: UserFilter) -> List[User]:
     validated_filter = await validate_filter(filter=filter)
     columns = [column(column_name).contains(column_value) for column_name, column_value in validated_filter.items()]
     statement = select(User).where(*columns)

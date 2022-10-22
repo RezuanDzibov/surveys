@@ -10,7 +10,7 @@ from app.models.user import User
 from app.schemas import user as user_schemas
 from app.schemas.user import UserFilter
 from app.services import user as user_services
-from app.services.filtering.user import search_users
+from app.services.filtering.user import filter_users
 
 router = APIRouter()
 
@@ -42,7 +42,7 @@ async def get_users(session: AsyncSession = Depends(get_session)):
 
 @router.get("/search", response_model=Page[user_schemas.UserList])
 async def get_users_with_filtering(filter: UserFilter = Depends(), session: AsyncSession = Depends(get_session)):
-    users = await search_users(session=session, filter=filter)
+    users = await filter_users(session=session, filter=filter)
     return paginate(users)
 
 

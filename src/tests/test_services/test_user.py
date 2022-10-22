@@ -12,7 +12,7 @@ from app.models import User
 from app.schemas.user import UserRegistrationIn, UserFilter
 from app.services import base as base_services
 from app.services import user as user_services
-from app.services.filtering.user import search_users
+from app.services.filtering.user import filter_users
 
 settings = get_settings()
 
@@ -128,23 +128,23 @@ class TestGetUsers:
 class TestGetUsersWithSearching:
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_searching_by_username(self, session: AsyncSession, factory_users: List[User]):
-        users = await search_users(session=session, filter=UserFilter(username=factory_users[0].username[:5]))
+        users = await filter_users(session=session, filter=UserFilter(username=factory_users[0].username[:5]))
         assert all([user.username.startswith(factory_users[0].username[:5]) for user in users])
 
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_searching_by_email(self, session: AsyncSession, factory_users: List[User]):
-        users = await search_users(session=session, filter=UserFilter(email=factory_users[0].email[:7]))
+        users = await filter_users(session=session, filter=UserFilter(email=factory_users[0].email[:7]))
         assert all([user.email.startswith(factory_users[0].email[:7]) for user in users])
 
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_searching_by_username_and_email(self, session: AsyncSession, factory_users: List[User]):
-        users = await search_users(session=session, filter=UserFilter(username=factory_users[0].username[:5], email=factory_users[0].email[:7]))
+        users = await filter_users(session=session, filter=UserFilter(username=factory_users[0].username[:5], email=factory_users[0].email[:7]))
         assert all([user.username.startswith(factory_users[0].username[:5]) for user in users])
         assert all([user.email.startswith(factory_users[0].email[:7]) for user in users])
 
     @pytest.mark.parametrize("factory_users", [5], indirect=True)
     async def test_for_not_exists(self, session: AsyncSession, factory_users: List[User]):
-        users = await search_users(session=session, filter=UserFilter(username="user"))
+        users = await filter_users(session=session, filter=UserFilter(username="user"))
         assert not users
 
 
