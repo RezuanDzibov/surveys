@@ -9,7 +9,7 @@ from app.api.deps import get_current_user, get_current_active_user, get_current_
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
-    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve, SurveyAttributeRetrieve, SurveyDelete
+    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve, SurveyAttributeRetrieve, SurveyDelete, SurveyUpdateOut
 from app.services import survey as survey_services
 from app.services.filtering.survey import filter_surveys
 
@@ -66,7 +66,7 @@ async def get_surveys(session: AsyncSession = Depends(get_session)):
     return paginate(surveys)
 
 
-@router.patch("/{id_}")
+@router.patch("/{id_}", status_code=200, response_model=SurveyUpdateOut)
 async def update_survey(
         id_: UUID4,
         to_update: SurveyUpdate,

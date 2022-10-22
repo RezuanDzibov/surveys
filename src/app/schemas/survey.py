@@ -53,6 +53,10 @@ class SurveyUpdate(BaseModel):
     description: Optional[str]
 
 
+class SurveyUpdateOut(SurveyOut):
+    available: bool
+
+
 class SurveyAttributeUpdate(BaseModel):
     question: Optional[str]
     required: Optional[bool]
