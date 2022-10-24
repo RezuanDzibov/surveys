@@ -48,11 +48,11 @@ class TestGetSurvey:
             self,
             session: AsyncSession,
             factory_surveys: List[Survey],
-            factory_users: User
+            factory_user: User
     ):
-        survey = await survey_services.get_survey(session=session, user=factory_users, id_=factory_surveys[1].id)
+        survey = await survey_services.get_survey(session=session, user=factory_user, id_=factory_surveys[1].id)
         assert all([attr.available for attr in survey.attrs])
-
+        
     @pytest.mark.parametrize("factory_surveys", [3], indirect=True)
     async def test_without_user(
             self,
@@ -165,7 +165,13 @@ class TestGetSurveysWithFiltering:
 
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_searching_by_name_and_description(self, session: AsyncSession, factory_surveys: List[Survey]):
-        surveys = await filter_surveys(session=session, filter=SurveyFilter(name=factory_surveys[0].name[:5], description=factory_surveys[0].description[:30]))
+        surveys = await filter_surveys(
+            session=session,
+            filter=SurveyFilter(
+                name=factory_surveys[0].name[:5],
+                description=factory_surveys[0].description[:30]
+            )
+        )
         assert all([survey.name.startswith(factory_surveys[0].name[:5]) for survey in surveys])
         assert all([survey.description.startswith(factory_surveys[0].description[:30]) for survey in surveys])
 

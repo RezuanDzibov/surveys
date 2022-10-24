@@ -95,11 +95,14 @@ async def task() -> mock.Mock:
 
 @pytest.fixture(scope="function")
 async def factory_users(request, session: AsyncSession, user_factory: UserFactory) -> Union[User, List[User]]:
-    if hasattr(request, "param"):
-        users: List[User] = user_factory.build_batch(request.param)
-        session.add_all(users)
-        await session.commit()
-        return users
+    users: List[User] = user_factory.build_batch(request.param)
+    session.add_all(users)
+    await session.commit()
+    return users
+
+
+@pytest.fixture(scope="function")
+async def factory_user(session: AsyncSession, user_factory: UserFactory):
     user = user_factory.build()
     session.add(user)
     await session.commit()
