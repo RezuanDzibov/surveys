@@ -8,11 +8,6 @@ from .base import Base, UUIDMixin
 from .user import User
 
 
-class BaseAttribure:
-    question = Column(Text)
-    required = Column(Boolean)
-
-
 class Survey(UUIDMixin, Base):
     name = Column(String(length=255))
     available = Column(Boolean)
