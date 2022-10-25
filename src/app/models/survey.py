@@ -8,11 +8,6 @@ from .base import Base, UUIDMixin
 from .user import User
 
 
-class BaseAttribure:
-    question = Column(Text)
-    required = Column(Boolean)
-
-
 class Survey(UUIDMixin, Base):
     name = Column(String(length=255))
     available = Column(Boolean)
@@ -33,12 +28,15 @@ class Answer(UUIDMixin, Base):
     attrs = relationship("AnswerAttribute")
 
 
-class SurveyAttribute(UUIDMixin, BaseAttribure, Base):
+class SurveyAttribute(UUIDMixin, Base):
+    question = Column(Text)
+    required = Column(Boolean)
     available = Column(Boolean, default=True)
     survey_id = Column(UUID(as_uuid=True), ForeignKey(Survey.id, ondelete="CASCADE"), nullable=False)
     survey = relationship("Survey", back_populates="attrs")
 
 
-class AnswerAttribute(UUIDMixin, BaseAttribure, Base):
-    answer_id = Column(UUID, ForeignKey(Answer.id), nullable=False)
+class AnswerAttribute(UUIDMixin, Base):
+    text = Column(String(length=255))
+    answer_id = Column(UUID(as_uuid=True), ForeignKey(Answer.id), nullable=False)
     answer = relationship("Answer", back_populates="attrs")

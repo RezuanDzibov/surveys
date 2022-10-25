@@ -17,17 +17,19 @@ from app.core.security import get_password_hash
 from app.core.settings import get_settings
 from app.initial_data import create_admin_user, get_admin_user_data
 from app.main import app
-from app.models import Base, User, Survey, SurveyAttribute
+from app.models import Base, User, Survey, SurveyAttribute, Answer
+from app.schemas import survey as survey_schemas
 from app.services.base import is_object_exists
-from app.services.survey import create_survey_attrs
+from app.services.survey import create_survey_attrs, create_answer_attrs
 from app.services.user import get_user
-from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory
+from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory
 
 settings = get_settings()
 
 register(UserFactory)
 register(SurveyAttributeFactory)
 register(SurveyFactory)
+register(AnswerAttributeFactory)
 
 
 @pytest.fixture(scope="session")
@@ -209,3 +211,44 @@ async def access_token_and_user(session: AsyncSession, test_client: AsyncClient,
     response_content = json.loads(response.content.decode("utf-8"))
     access_token = response_content.get("access_token")
     return {"access_token": access_token, "user": user_and_its_pass["user"]}
+
+
+@pytest.fixture(scope="function")
+async def build_answer_attrs(
+        request: SubRequest,
+        session: AsyncSession,
+        answer_attribute_factory: AnswerAttributeFactory
+) -> List[SurveyAttribute]:
+    if hasattr(request, "param") and isinstance(request.param, int):
+        attrs = answer_attribute_factory.build_batch(request.param)
+    else:
+        attrs = answer_attribute_factory.build_batch(randint(1, 10))
+    return attrs
+
+
+@pytest.fixture(scope="function")
+async def factory_answer(
+        request: SubRequest,
+        session: AsyncSession,
+        admin_user: User,
+        factory_survey: Survey
+) -> Answer:
+    answer = Answer()
+    answer.user_id = admin_user.id
+    answer.survey_id = factory_survey.id
+    session.add(answer)
+    await session.commit()
+    if hasattr(request, "param") and request.param is True:
+        attrs = AnswerAttributeFactory.build_batch(randint(1, 10))
+        attrs = list([survey_schemas.AnswerAttribute.from_orm(attr) for attr in attrs])
+        attrs = await create_answer_attrs(session=session, attrs=attrs, answer_id=answer.id)
+        answer.__dict__["attrs"] = attrs
+    return answer
+
+
+@pytest.fixture(scope="function")
+async def user_auth_test_client(access_token_and_user: dict) -> AsyncClient:
+    async with AsyncClient(app=app, base_url="http://testserver", headers={
+        "Authorization": f"Bearer {access_token_and_user['access_token']}"
+    }) as client:
+        yield client

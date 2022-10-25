@@ -9,13 +9,13 @@ from sqlalchemy.orm import subqueryload
 from sqlalchemy.orm.collections import InstrumentedList
 
 from app.core.exceptions import raise_404
-from app.models import Survey, SurveyAttribute, User
-from app.schemas.survey import SurveyCreate, SurveyUpdate, SurveyAttributeUpdate
+from app.models import Survey, SurveyAttribute, User, Answer, AnswerAttribute
+from app.schemas import survey as schemas
 from app.services import base as base_services
 from app.services.base import update_object
 
 
-async def create_survey(session: AsyncSession, user_id: UUID, survey: SurveyCreate):
+async def create_survey(session: AsyncSession, user_id: UUID, survey: schemas.SurveyCreate):
     data = survey.dict()
     attrs = data.pop("attrs")
     data["user_id"] = user_id
@@ -55,7 +55,7 @@ async def get_surveys(session: AsyncSession) -> Union[List, List[Survey]]:
     return surveys
 
 
-async def update_survey(session: AsyncSession, user: User, id_: UUID, to_update: SurveyUpdate) -> Survey:
+async def update_survey(session: AsyncSession, user: User, id_: UUID, to_update: schemas.SurveyUpdate) -> Survey:
     survey = await get_survey(session=session, user=user, id_=id_)
     if user.id != survey.user_id:
         raise HTTPException(status_code=403, detail="You can't edit this survey.")
@@ -72,7 +72,7 @@ async def update_survey_attribute(
         session: AsyncSession,
         user: User,
         id_: UUID,
-        to_update: SurveyAttributeUpdate
+        to_update: schemas.SurveyAttributeUpdate
 ) -> SurveyAttribute:
     statement = select(SurveyAttribute.survey_id).where(SurveyAttribute.id == id_)
     result = await session.execute(statement=statement)
@@ -166,3 +166,35 @@ async def get_survey_attribute(session: AsyncSession, id_: UUID, user: User = No
         return attr
     except NoResultFound:
         await raise_404()
+
+
+async def create_answer_attrs(session: AsyncSession, attrs: List[schemas.AnswerAttribute], answer_id: UUID):
+    to_insert = list()
+    for attr in attrs:
+        attr = attr.dict()
+        attr["answer_id"] = answer_id
+        to_insert.append(AnswerAttribute(**attr))
+    session.add_all(to_insert)
+    await session.commit()
+    return attrs
+
+
+async def create_answer(session: AsyncSession, answer: schemas.BaseAnswer, user_id: UUID, survey_id: UUID) -> Answer:
+    statement = select(Survey).where(Survey.id == survey_id)
+    if not await base_services.is_object_exists(session=session, where_statement=statement):
+        await raise_404()
+    statement = select(Answer).where(Answer.user_id == user_id, Answer.survey_id == survey_id)
+    if await base_services.is_object_exists(session=session, where_statement=statement):
+        raise HTTPException(status_code=409, detail="Answer is already exists")
+    data = answer.dict(exclude={"attrs"})
+    attrs = answer.attrs
+    data["user_id"] = user_id
+    data["survey_id"] = survey_id
+    answer = await base_services.insert_object(
+        session=session,
+        model=Answer,
+        to_insert=data,
+    )
+    attrs = await create_answer_attrs(session=session, attrs=attrs, answer_id=answer.id)
+    answer.__dict__["attrs"] = InstrumentedList(attrs)
+    return answer
