@@ -69,3 +69,21 @@ class SurveyFilter(BaseModel):
 
 class SurveyDelete(SurveyOut):
     available: bool
+
+
+class AnswerAttribute(BaseModel):
+    text: constr(max_length=255)
+
+    class Config:
+        orm_mode = True
+
+
+class BaseAnswer(BaseModel):
+    attrs: List[AnswerAttribute]
+
+    class Config:
+        orm_mode = True
+
+
+class AnswerCreateOut(BaseAnswer):
+    id: UUID4
