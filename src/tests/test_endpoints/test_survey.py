@@ -52,14 +52,12 @@ class TestGetSurvey:
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_for_not_author(
             self,
-            test_client: AsyncClient,
             session: AsyncSession,
             factory_surveys: List[Survey],
-            access_token_and_user: dict
+            user_auth_test_client: AsyncClient
     ):
-        response = await test_client.get(
+        response = await user_auth_test_client.get(
             f"/survey/{random.choice(factory_surveys).id}",
-            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
         surveys = json.loads(response.content.decode("utf-8"))
         factory_surveys = [SurveyOut.from_orm(survey).dict() for survey in factory_surveys]
@@ -107,14 +105,12 @@ class TestUpdateSurvey:
 
     async def test_for_not_owner_user(
             self,
-            test_client: AsyncClient,
             session: AsyncSession,
             factory_survey: Survey,
-            access_token_and_user: dict
+            user_auth_test_client: AsyncClient
     ):
-        response = await test_client.patch(
+        response = await user_auth_test_client.patch(
             f"/survey/{factory_survey   .id}",
-            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"},
             json={"name": fake.name()},
         )
         assert response.status_code == 403
@@ -136,14 +132,12 @@ class TestUpdateSurveyAttribute:
 
     async def test_for_not_owner_user(
             self,
-            test_client: AsyncClient,
             session: AsyncSession,
             factory_survey: Survey,
-            access_token_and_user: dict
+            user_auth_test_client: AsyncClient
     ):
-        response = await test_client.patch(
+        response = await user_auth_test_client.patch(
             f"/survey/attr/{factory_survey.attrs[0].id}",
-            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"},
             json={"question": fake.text()},
         )
         assert response.status_code == 403
@@ -306,13 +300,11 @@ class TestDeleteSurvey:
     @pytest.mark.parametrize("factory_surveys", [5], indirect=True)
     async def test_not_author(
             self,
-            test_client: AsyncClient,
             factory_surveys: List[Survey],
-            access_token_and_user: dict
+            user_auth_test_client: AsyncClient
     ):
-        response = await test_client.delete(
+        response = await user_auth_test_client.delete(
             f"/survey/{random.choice(factory_surveys).id}",
-            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
         assert response.status_code == 404
 
@@ -337,13 +329,10 @@ class TestDeleteSurveyAttribute:
             self,
             session: AsyncSession,
             factory_surveys: List[Survey],
-            access_token_and_user: dict,
-            test_client: AsyncClient
-
+            user_auth_test_client: AsyncClient
     ):
-        response = await test_client.delete(
+        response = await user_auth_test_client.delete(
             f"/survey/{random.choice(factory_surveys).id}",
-            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
         assert response.status_code == 404
 
@@ -385,9 +374,8 @@ class TestGetSurveyAttribute:
     async def test_not_author(
             self,
             session: AsyncSession,
-            test_client: AsyncClient,
             factory_surveys: List[Survey],
-            access_token_and_user: dict
+            user_auth_test_client: AsyncClient
     ):
         expected_attr = None
         while not expected_attr:
@@ -399,9 +387,8 @@ class TestGetSurveyAttribute:
                 )
             except IndexError:
                 continue
-        response = await test_client.delete(
+        response = await user_auth_test_client.delete(
             f"/survey/attr/{expected_attr.id}",
-            headers={"Authorization": f"Bearer {access_token_and_user['access_token']}"}
         )
         assert response.status_code == 404
 
