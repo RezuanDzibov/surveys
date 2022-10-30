@@ -73,6 +73,7 @@ class SurveyDelete(SurveyOut):
 
 class AnswerAttribute(BaseModel):
     text: constr(max_length=255)
+    survey_attr_id: UUID4
 
     class Config:
         orm_mode = True

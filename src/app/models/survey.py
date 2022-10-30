@@ -34,9 +34,11 @@ class SurveyAttribute(UUIDMixin, Base):
     available = Column(Boolean, default=True)
     survey_id = Column(UUID(as_uuid=True), ForeignKey(Survey.id, ondelete="CASCADE"), nullable=False)
     survey = relationship("Survey", back_populates="attrs")
+    answer_attrs = relationship("AnswerAttribute")
 
 
 class AnswerAttribute(UUIDMixin, Base):
     text = Column(String(length=255))
+    survey_attr_id = Column(UUID(as_uuid=True), ForeignKey(SurveyAttribute.id), nullable=False)
     answer_id = Column(UUID(as_uuid=True), ForeignKey(Answer.id), nullable=False)
     answer = relationship("Answer", back_populates="attrs")

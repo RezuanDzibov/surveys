@@ -18,5 +18,10 @@ async def add_answer(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_active_user)
 ):
-    answer = await services.create_answer(session=session, answer=answer, user_id=current_user.id, survey_id=survey_id)
+    answer = await services.CreateAnswer(
+        session=session,
+        answer=answer,
+        user_id=current_user.id,
+        survey_id=survey_id
+    ).execute()
     return answer

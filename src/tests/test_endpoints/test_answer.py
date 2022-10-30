@@ -1,67 +1,72 @@
 import json
-from typing import List
 from uuid import uuid4
 
-import pytest
 from httpx import AsyncClient
 
 from app.core.settings import get_settings
-from app.models import AnswerAttribute, Survey, Answer, User
+from app.models import Survey, Answer
 from app.schemas import survey as schemas
+from tests.factories import AnswerAttributeFactory
+from tests.test_endpoints.utils import uuid_to_str, serialize_uuid_to_str
+from tests.utils import build_answer_attrs_with_survey_attrs
 
 settings = get_settings()
 
 
 class TestAddAnswer:
-    @pytest.mark.parametrize("build_answer_attrs", [3], indirect=True)
     async def test_success(
             self,
             auth_test_client: AsyncClient,
-            build_answer_attrs: List[AnswerAttribute],
             factory_survey: Survey
 
     ):
-        expected_answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
-        response = await auth_test_client.post(f"/answer/{factory_survey.id}", json=expected_answer.dict())
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        expected_answer = await serialize_uuid_to_str(schemas.BaseAnswer(attrs=attrs).dict())
+        response = await auth_test_client.post(f"/answer/{factory_survey.id}", json=expected_answer)
         created_answer = json.loads(response.content.decode("utf-8"))
-        assert expected_answer == schemas.BaseAnswer(**created_answer)
+        assert expected_answer == json.loads(json.dumps(schemas.BaseAnswer(**created_answer).dict(), default=uuid_to_str))
 
-    async def test_409(
+    async def test_not_exist_survey_attr(
             self,
             auth_test_client: AsyncClient,
-            build_answer_attrs: List[AnswerAttribute],
+            factory_survey: Survey
+
+    ):
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        attr = AnswerAttributeFactory.build()
+        attr.survey_attr_id = str(uuid4())
+        attrs.append(attr.as_dict())
+        answer = await serialize_uuid_to_str(schemas.BaseAnswer(attrs=attrs).dict())
+        response = await auth_test_client.post(f"/answer/{factory_survey.id}", json=answer)
+        assert response.status_code == 404
+
+    async def test_user_already_created_answer_for_survey(
+            self,
+            auth_test_client: AsyncClient,
+            factory_survey: Survey,
             factory_answer: Answer
     ):
-        answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
-        response = await auth_test_client.post(f"/answer/{factory_answer.survey_id}", json=answer.dict())
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        answer = await serialize_uuid_to_str(schemas.BaseAnswer(attrs=attrs).dict())
+        response = await auth_test_client.post(f"/answer/{factory_answer.survey_id}", json=answer)
         assert response.status_code == 409
 
     async def test_not_exists_survey(
             self,
             auth_test_client: AsyncClient,
-            build_answer_attrs: List[AnswerAttribute],
+            factory_survey: Survey
     ):
-        answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
-        response = await auth_test_client.post(f"/answer/{uuid4()}", json=answer.dict())
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        answer = await serialize_uuid_to_str(schemas.BaseAnswer(attrs=attrs).dict())
+        response = await auth_test_client.post(f"/answer/{uuid4()}", json=answer)
         assert response.status_code == 404
-
-    @pytest.mark.parametrize("admin_user", [{"is_active": False}], indirect=True)
-    async def test_for_inactive_user(self, tables, admin_user: User, test_client: AsyncClient):
-        response = await test_client.post(
-            "auth/login/access-token",
-            data={
-                "login": admin_user.username,
-                "password": settings.ADMIN_FIXTURE_PASSWORD,
-            }
-        )
-        assert response.status_code == 400
 
     async def test_without_user(
             self,
             factory_survey: Survey,
             test_client: AsyncClient,
-            build_answer_attrs: List[AnswerAttribute]
     ):
-        answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
-        response = await test_client.post(f"/answer/{factory_survey.id}", json=answer.dict())
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        answer = await serialize_uuid_to_str(schemas.BaseAnswer(attrs=attrs).dict())
+        response = await test_client.post(f"/answer/{factory_survey.id}", json=answer)
         assert response.status_code == 401
