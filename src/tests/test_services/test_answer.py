@@ -28,6 +28,26 @@ class TestCreateAnswer:
         )
         assert expected_answer == schemas.BaseAnswer.from_orm(created_answer)
 
+    async def test_404_not_exist_survey_attr(
+            self,
+            admin_user: User,
+            session: AsyncSession,
+            factory_survey: Survey
+    ):
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        attr = AnswerAttributeFactory.build()
+        attr.survey_attr_id = uuid4()
+        attrs.append(attr.as_dict())
+        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        with pytest.raises(HTTPException) as exception:
+            await survey_services.CreateAnswer(
+                session=session,
+                answer=expected_answer,
+                user_id=admin_user.id,
+                survey_id=factory_survey.id
+            ).execute()
+            assert exception.value.status_code == 404
+
     async def test_409(
             self,
             admin_user: User,
