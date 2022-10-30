@@ -179,22 +179,56 @@ async def create_answer_attrs(session: AsyncSession, attrs: List[schemas.AnswerA
     return attrs
 
 
-async def create_answer(session: AsyncSession, answer: schemas.BaseAnswer, user_id: UUID, survey_id: UUID) -> Answer:
-    statement = select(Survey).where(Survey.id == survey_id)
-    if not await base_services.is_object_exists(session=session, where_statement=statement):
-        await raise_404()
-    statement = select(Answer).where(Answer.user_id == user_id, Answer.survey_id == survey_id)
-    if await base_services.is_object_exists(session=session, where_statement=statement):
-        raise HTTPException(status_code=409, detail="Answer is already exists")
-    data = answer.dict(exclude={"attrs"})
-    attrs = answer.attrs
-    data["user_id"] = user_id
-    data["survey_id"] = survey_id
-    answer = await base_services.insert_object(
-        session=session,
-        model=Answer,
-        to_insert=data,
-    )
-    attrs = await create_answer_attrs(session=session, attrs=attrs, answer_id=answer.id)
-    answer.__dict__["attrs"] = InstrumentedList(attrs)
-    return answer
+class CreateAnswer:
+    def __init__(self, session: AsyncSession, answer: schemas.BaseAnswer, user_id: UUID, survey_id: UUID):
+        self._session = session
+        self._answer = answer
+        self._user_id = user_id
+        self._survey_id = survey_id
+
+    async def execute(self) -> Answer:
+        await self._validate_answer()
+        attrs = self._answer.attrs
+        data = await self._prepare_data()
+        inserted_answer = await self._insert_answer(data=data, attrs=attrs)
+        return inserted_answer
+
+    async def _validate_answer(self):
+        statement = select(Survey).where(Survey.id == self._survey_id)
+        if not await base_services.is_object_exists(session=self._session, where_statement=statement):
+            await raise_404()
+        statement = select(Answer).where(Answer.user_id == self._user_id, Answer.survey_id == self._survey_id)
+        if await base_services.is_object_exists(session=self._session, where_statement=statement):
+            raise HTTPException(status_code=409, detail="Answer is already exists")
+        survey_attr_ids = [answer_attr.survey_attr_id for answer_attr in self._answer.attrs]
+        statement = select(SurveyAttribute).where(
+            SurveyAttribute.id.in_(
+                survey_attr_ids
+            )
+        )
+        result = await self._session.execute(statement)
+        attrs = result.scalars().all()
+        if len(self._answer.attrs) != len(attrs):
+            not_exist_survey_attrs = ", ".join(
+                [str(id_) for id_ in (set(survey_attr_ids).difference([attr.id for attr in attrs]))]
+            )
+            raise HTTPException(
+                status_code=404,
+                detail=f"Got not exist survey attributes with ids: [{not_exist_survey_attrs}]"
+            )
+
+    async def _prepare_data(self) -> dict:
+        data = self._answer.dict(exclude={"attrs"})
+        data["user_id"] = self._user_id
+        data["survey_id"] = self._survey_id
+        return data
+
+    async def _insert_answer(self, data: dict, attrs: List[schemas.AnswerAttribute]) -> Answer:
+        answer = await base_services.insert_object(
+            session=self._session,
+            model=Answer,
+            to_insert=data,
+        )
+        attrs = await create_answer_attrs(session=self._session, attrs=attrs, answer_id=answer.id)
+        answer.__dict__["attrs"] = InstrumentedList(attrs)
+        return answer
