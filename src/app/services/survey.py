@@ -177,7 +177,7 @@ async def create_answer_attrs(session: AsyncSession, attrs: List[schemas.AnswerA
         to_insert.append(AnswerAttribute(**attr))
     session.add_all(to_insert)
     await session.commit()
-    return attrs
+    return to_insert
 
 
 class CreateAnswer:
@@ -233,3 +233,17 @@ class CreateAnswer:
         attrs = await create_answer_attrs(session=self._session, attrs=attrs, answer_id=answer.id)
         answer.__dict__["attrs"] = InstrumentedList(attrs)
         return answer
+
+
+async def delete_answer(session: AsyncSession, user: User, answer_id: UUID) -> None:
+    try:
+        statement = select(Answer.user_id).where(Answer.id == answer_id)
+        result = await session.execute(statement)
+        answer_user_id = result.one()[0]
+        if answer_user_id != user.id:
+            raise HTTPException(status_code=403, detail="You aren't author of this answer")
+        statement = delete(Answer).where(Answer.id == answer_id)
+        await session.execute(statement)
+        await session.commit()
+    except NoResultFound:
+        await raise_404()
