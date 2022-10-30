@@ -25,3 +25,17 @@ async def add_answer(
         survey_id=survey_id
     ).execute()
     return answer
+
+
+@router.delete("/{answer_id}", status_code=204)
+async def delete_answer(
+        answer_id: UUID4,
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_active_user)
+):
+    await services.delete_answer(
+        session=session,
+        user=current_user,
+        answer_id=answer_id
+
+    )
