@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, SurveyAttribute, Survey
-from app.schemas.survey import SurveyCreate, SurveyBase, SurveyUpdate, SurveyAttributeUpdate, SurveyFilter
+from app.schemas.survey import SurveyCreate, SurveyUpdate, SurveyAttributeUpdate, SurveyFilter
 from app.services import base as base_services
 from app.services import survey as survey_services
 from app.services.filtering.survey import filter_surveys
@@ -28,8 +28,8 @@ class TestCreateSurvey:
     ):
         attrs = list(attr.as_dict() for attr in build_survey_attrs)
         survey = SurveyCreate(**build_surveys.as_dict(), attrs=attrs)
-        survey = await survey_services.create_survey(session=session, survey=survey, user_id=admin_user.id)
-        assert SurveyBase(**build_surveys.as_dict()) == SurveyBase(**survey.as_dict())
+        created_survey = await survey_services.create_survey(session=session, survey=survey, user_id=admin_user.id)
+        assert survey == SurveyCreate(**created_survey.as_dict())
 
 
 class TestGetSurvey:

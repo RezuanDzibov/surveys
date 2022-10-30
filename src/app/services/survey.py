@@ -15,7 +15,7 @@ from app.services import base as base_services
 from app.services.base import update_object
 
 
-async def create_survey(session: AsyncSession, user_id: UUID, survey: schemas.SurveyCreate):
+async def create_survey(session: AsyncSession, user_id: UUID, survey: schemas.SurveyCreate) -> Survey:
     data = survey.dict()
     attrs = data.pop("attrs")
     data["user_id"] = user_id
@@ -24,7 +24,8 @@ async def create_survey(session: AsyncSession, user_id: UUID, survey: schemas.Su
         model=Survey,
         to_insert=data,
     )
-    await create_survey_attrs(session=session, survey_id=survey.id, attrs=attrs)
+    attrs = await create_survey_attrs(session=session, survey_id=survey.id, attrs=attrs)
+    survey.__dict__["attrs"] = InstrumentedList(attrs)
     return survey
 
 
