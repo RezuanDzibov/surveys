@@ -8,24 +8,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import AnswerAttribute, User, Survey, Answer
 from app.schemas import survey as schemas
 from app.services import survey as survey_services
+from tests.factories import AnswerAttributeFactory
+from tests.utils import build_answer_attrs_with_survey_attrs
 
 
 class TestCreateAnswer:
-    @pytest.mark.parametrize("build_answer_attrs", [3], indirect=True)
     async def test_success(
             self,
             admin_user: User,
             session: AsyncSession,
-            build_answer_attrs: List[AnswerAttribute],
             factory_survey: Survey
     ):
-        expected_answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
-        created_answer = await survey_services.create_answer(
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        created_answer = await survey_services.CreateAnswer(
             session=session,
             answer=expected_answer,
             user_id=admin_user.id,
             survey_id=factory_survey.id
-        )
+        ).execute()
         assert expected_answer == schemas.BaseAnswer.from_orm(created_answer)
 
     async def test_404_not_exist_survey_attr(
@@ -53,16 +54,18 @@ class TestCreateAnswer:
             admin_user: User,
             session: AsyncSession,
             build_answer_attrs: List[AnswerAttribute],
-            factory_answer: Answer
+            factory_answer: Answer,
+            factory_survey: Survey
     ):
-        answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        expected_answer = schemas.BaseAnswer(attrs=attrs)
         with pytest.raises(HTTPException) as exception:
-            await survey_services.create_answer(
+            await survey_services.CreateAnswer(
                 session=session,
-                answer=answer,
+                answer=expected_answer,
                 user_id=admin_user.id,
                 survey_id=factory_answer.survey_id
-            )
+            ).execute()
             assert exception.value.status_code == 409
 
     async def test_not_exists_survey(
@@ -70,16 +73,21 @@ class TestCreateAnswer:
             admin_user: User,
             session: AsyncSession,
             build_answer_attrs: List[AnswerAttribute],
-            factory_answer: Answer
+            factory_survey: Survey
     ):
-        answer = schemas.BaseAnswer(attrs=[attr.as_dict() for attr in build_answer_attrs])
+        attrs = list()
+        for survey_attr, answer_attr in zip(factory_survey.attrs,
+                                            AnswerAttributeFactory.build_batch(len(factory_survey.attrs))):
+            answer_attr.survey_attr_id = survey_attr.id
+            attrs.append(answer_attr.as_dict())
+        expected_answer = schemas.BaseAnswer(attrs=attrs)
         with pytest.raises(HTTPException) as exception:
-            await survey_services.create_answer(
+            await survey_services.CreateAnswer(
                 session=session,
-                answer=answer,
+                answer=expected_answer,
                 user_id=admin_user.id,
                 survey_id=uuid4()
-            )
+            ).execute()
             assert exception.value.status_code == 404
 
 
@@ -89,9 +97,15 @@ class TestCreateAnswerAttributes:
             self,
             session: AsyncSession,
             factory_answer: Answer,
-            build_answer_attrs: List[AnswerAttribute]
+            build_answer_attrs: List[AnswerAttribute],
+            factory_survey: Survey
     ):
-        expected_attrs = [schemas.AnswerAttribute.from_orm(attr) for attr in build_answer_attrs]
+        attrs = list()
+        for survey_attr, answer_attr in zip(factory_survey.attrs,
+                                            AnswerAttributeFactory.build_batch(len(factory_survey.attrs))):
+            answer_attr.survey_attr_id = str(survey_attr.id)
+            attrs.append(answer_attr.as_dict())
+        expected_attrs = [schemas.AnswerAttribute(**attr) for attr in attrs]
         created_attrs = await survey_services.create_answer_attrs(
             session=session,
             attrs=expected_attrs,
