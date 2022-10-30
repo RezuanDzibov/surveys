@@ -23,6 +23,7 @@ from app.services.base import is_object_exists
 from app.services.survey import create_survey_attrs, create_answer_attrs
 from app.services.user import get_user
 from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory
+from tests.utils import build_answer_attrs_with_survey_attrs
 
 settings = get_settings()
 
@@ -239,8 +240,8 @@ async def factory_answer(
     session.add(answer)
     await session.commit()
     if hasattr(request, "param") and request.param is True:
-        attrs = AnswerAttributeFactory.build_batch(randint(1, 10))
-        attrs = list([survey_schemas.AnswerAttribute.from_orm(attr) for attr in attrs])
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+        attrs = list([survey_schemas.AnswerAttribute(**attr) for attr in attrs])
         attrs = await create_answer_attrs(session=session, attrs=attrs, answer_id=answer.id)
         answer.__dict__["attrs"] = attrs
     return answer
