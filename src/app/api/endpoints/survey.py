@@ -5,7 +5,7 @@ from fastapi_pagination import Page, paginate
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_current_active_user, get_current_active_user_or_none
+from app.api.deps import get_current_active_user, get_current_active_user_or_none
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
@@ -20,7 +20,7 @@ router = APIRouter()
 async def add_survey(
         survey_create: SurveyCreate,
         session: AsyncSession = Depends(get_session),
-        current_user: User = Depends(get_current_user)
+        current_user: User = Depends(get_current_active_user)
 ):
     survey = await survey_services.create_survey(survey=survey_create, user_id=current_user.id, session=session)
     return survey
@@ -30,7 +30,7 @@ async def add_survey(
 async def get_current_user_surveys(
         available: Optional[bool] = None,
         session: AsyncSession = Depends(get_session),
-        current_user: User = Depends(get_current_user),
+        current_user: User = Depends(get_current_active_user),
 ):
     surveys = await survey_services.get_current_user_surveys(session=session, user=current_user, available=available)
     return paginate(surveys)
