@@ -6,7 +6,7 @@ from app.api.deps import get_current_active_user
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import BaseAnswer, AnswerCreateOut
-from app.services import survey as services
+from app.services import answer as services
 
 router = APIRouter()
 

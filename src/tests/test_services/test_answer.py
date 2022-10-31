@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AnswerAttribute, User, Survey, Answer
 from app.schemas import survey as schemas
+from app.services import answer as answer_services
 from app.services import base as base_services
-from app.services import survey as survey_services
 from tests.factories import AnswerAttributeFactory
 from tests.utils import build_answer_attrs_with_survey_attrs
 
@@ -23,7 +23,7 @@ class TestCreateAnswer:
     ):
         attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
         expected_answer = schemas.BaseAnswer(attrs=attrs)
-        created_answer = await survey_services.CreateAnswer(
+        created_answer = await answer_services.CreateAnswer(
             session=session,
             answer=expected_answer,
             user_id=admin_user.id,
@@ -43,7 +43,7 @@ class TestCreateAnswer:
         attrs.append(attr.as_dict())
         expected_answer = schemas.BaseAnswer(attrs=attrs)
         with pytest.raises(HTTPException) as exception:
-            await survey_services.CreateAnswer(
+            await answer_services.CreateAnswer(
                 session=session,
                 answer=expected_answer,
                 user_id=admin_user.id,
@@ -62,7 +62,7 @@ class TestCreateAnswer:
         attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
         expected_answer = schemas.BaseAnswer(attrs=attrs)
         with pytest.raises(HTTPException) as exception:
-            await survey_services.CreateAnswer(
+            await answer_services.CreateAnswer(
                 session=session,
                 answer=expected_answer,
                 user_id=admin_user.id,
@@ -77,14 +77,10 @@ class TestCreateAnswer:
             build_answer_attrs: List[AnswerAttribute],
             factory_survey: Survey
     ):
-        attrs = list()
-        for survey_attr, answer_attr in zip(factory_survey.attrs,
-                                            AnswerAttributeFactory.build_batch(len(factory_survey.attrs))):
-            answer_attr.survey_attr_id = survey_attr.id
-            attrs.append(answer_attr.as_dict())
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
         expected_answer = schemas.BaseAnswer(attrs=attrs)
         with pytest.raises(HTTPException) as exception:
-            await survey_services.CreateAnswer(
+            await answer_services.CreateAnswer(
                 session=session,
                 answer=expected_answer,
                 user_id=admin_user.id,
@@ -102,13 +98,9 @@ class TestCreateAnswerAttributes:
             build_answer_attrs: List[AnswerAttribute],
             factory_survey: Survey
     ):
-        attrs = list()
-        for survey_attr, answer_attr in zip(factory_survey.attrs,
-                                            AnswerAttributeFactory.build_batch(len(factory_survey.attrs))):
-            answer_attr.survey_attr_id = str(survey_attr.id)
-            attrs.append(answer_attr.as_dict())
+        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
         expected_attrs = [schemas.AnswerAttribute(**attr) for attr in attrs]
-        created_attrs = await survey_services.create_answer_attrs(
+        created_attrs = await answer_services.create_answer_attrs(
             session=session,
             attrs=expected_attrs,
             answer_id=factory_answer.id
@@ -119,7 +111,7 @@ class TestCreateAnswerAttributes:
 class TestDeleteAnswer:
     @pytest.mark.parametrize("factory_answer", [True], indirect=True)
     async def test_success(self, session: AsyncSession, admin_user: User, factory_answer: Answer):
-        await survey_services.delete_answer(
+        await answer_services.delete_answer(
             session=session,
             user=admin_user,
             answer_id=factory_answer.id
@@ -140,7 +132,7 @@ class TestDeleteAnswer:
 
     async def test_404(self, session: AsyncSession, admin_user: User):
         with pytest.raises(HTTPException) as exception:
-            await survey_services.delete_answer(
+            await answer_services.delete_answer(
                 session=session,
                 user=admin_user,
                 answer_id=uuid4()
@@ -150,7 +142,7 @@ class TestDeleteAnswer:
     @pytest.mark.parametrize("factory_answer", [True], indirect=True)
     async def test_for_not_author(self, session: AsyncSession, factory_answer: Answer, user_and_its_pass: dict):
         with pytest.raises(HTTPException) as exception:
-            await survey_services.delete_answer(
+            await answer_services.delete_answer(
                 session=session,
                 user=user_and_its_pass["user"],
                 answer_id=uuid4()

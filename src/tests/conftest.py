@@ -19,8 +19,9 @@ from app.initial_data import create_admin_user, get_admin_user_data
 from app.main import app
 from app.models import Base, User, Survey, SurveyAttribute, Answer
 from app.schemas import survey as survey_schemas
+from app.services.answer import create_answer_attrs
 from app.services.base import is_object_exists
-from app.services.survey import create_survey_attrs, create_answer_attrs
+from app.services.survey import create_survey_attrs
 from app.services.user import get_user
 from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory
 from tests.utils import build_answer_attrs_with_survey_attrs
