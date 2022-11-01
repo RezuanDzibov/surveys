@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, Survey, SurveyAttribute
-from app.schemas.survey import SurveyOut, SurveyAttributeRetrieve, SurveyDelete
+from app.schemas.survey import SurveyOut, SurveyAttributeRetrieve
 from app.services import base as base_services
 
 fake = Faker()
@@ -274,9 +274,7 @@ class TestDeleteSurvey:
         response = await auth_test_client.delete(
             f"/survey/{factory_surveys[2].id}"
         )
-        survey = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 202
-        assert SurveyDelete(**survey) == SurveyDelete.from_orm(factory_surveys[2])
+        assert response.status_code == 204
         assert not await base_services.is_object_exists(
             session=session,
             where_statement=select(Survey).where(Survey.id == factory_surveys[2].id)
@@ -291,7 +289,7 @@ class TestDeleteSurvey:
         response = await auth_test_client.delete(
             f"/survey/{factory_surveys[2].id}"
         )
-        assert response.status_code == 202
+        assert response.status_code == 204
         assert not await base_services.is_object_exists(
             session=session,
             where_statement=select(SurveyAttribute).where(SurveyAttribute.id == factory_surveys[2].attrs[0].id)
@@ -314,7 +312,7 @@ class TestDeleteSurveyAttribute:
     async def test_success(self, session: AsyncSession, auth_test_client: AsyncClient, factory_surveys: List[Survey]):
         attr = factory_surveys[2].attrs[0]
         response = await auth_test_client.delete(f"survey/attr/{attr.id}")
-        assert response.status_code == 202
+        assert response.status_code == 204
         assert not await base_services.is_object_exists(
             session=session,
             where_statement=select(SurveyAttribute).where(SurveyAttribute.id == attr.id)

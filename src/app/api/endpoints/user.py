@@ -52,14 +52,13 @@ async def get_user(user_id: UUID4, session: AsyncSession = Depends(get_session))
     return user
 
 
-@router.delete("", response_model=user_schemas.UserRetrieve)
+@router.delete("", status_code=204)
 async def delete_user(
     login_form: LoginForm = Depends(),
     session: AsyncSession = Depends(get_session),
 ):
-    user = await user_services.delete_user(
+    await user_services.delete_user(
         session=session,
         login=login_form.login,
         password=login_form.password
     )
-    return user
