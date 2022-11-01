@@ -80,6 +80,7 @@ class AnswerAttribute(BaseModel):
 
 
 class BaseAnswer(BaseModel):
+    available: bool
     attrs: List[AnswerAttribute]
 
     class Config:
@@ -88,3 +89,21 @@ class BaseAnswer(BaseModel):
 
 class AnswerCreateOut(BaseAnswer):
     id: UUID4
+
+
+class AnswerAttributeRetrieve(BaseModel):
+    id: UUID4
+    text: constr(max_length=255)
+    survey_attr_id: UUID4
+
+    class Config:
+        orm_mode = True
+
+
+class AnswerRetrieve(BaseModel):
+    id: UUID4
+    available: bool
+    attrs: List[AnswerAttributeRetrieve]
+
+    class Config:
+        orm_mode = True

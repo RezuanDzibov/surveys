@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import subqueryload
 from sqlalchemy.orm.collections import InstrumentedList
 
 from app.core.exceptions import raise_404
@@ -89,5 +90,18 @@ async def delete_answer(session: AsyncSession, user: User, answer_id: UUID) -> N
         statement = delete(Answer).where(Answer.id == answer_id)
         await session.execute(statement)
         await session.commit()
+    except NoResultFound:
+        await raise_404()
+
+
+async def get_answer(session: AsyncSession, answer_id: UUID, user: Optional[User] = None) -> Answer:
+    try:
+        statement = select(Answer).options(subqueryload(Answer.attrs)).where(Answer.id == answer_id)
+        result = await session.execute(statement)
+        answer = result.one()[0]
+        if not answer.available:
+            if not user or answer.user_id != user.id:
+                raise HTTPException(status_code=403, detail="You aren't author of this answer")
+        return answer
     except NoResultFound:
         await raise_404()

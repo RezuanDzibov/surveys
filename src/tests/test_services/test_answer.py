@@ -1,3 +1,4 @@
+import random
 from typing import List
 from uuid import uuid4
 
@@ -19,10 +20,10 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         created_answer = await answer_services.CreateAnswer(
             session=session,
             answer=expected_answer,
@@ -35,13 +36,13 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
         attr = AnswerAttributeFactory.build()
         attr.survey_attr_id = uuid4()
-        attrs.append(attr.as_dict())
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        build_answer.attrs.append(attr)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         with pytest.raises(HTTPException) as exception:
             await answer_services.CreateAnswer(
                 session=session,
@@ -55,12 +56,11 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            build_answer_attrs: List[AnswerAttribute],
             factory_answer: Answer,
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         with pytest.raises(HTTPException) as exception:
             await answer_services.CreateAnswer(
                 session=session,
@@ -74,11 +74,10 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            build_answer_attrs: List[AnswerAttribute],
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         with pytest.raises(HTTPException) as exception:
             await answer_services.CreateAnswer(
                 session=session,
@@ -148,3 +147,64 @@ class TestDeleteAnswer:
                 answer_id=uuid4()
             )
             assert exception.value.status_code == 403
+
+
+class TestGetAnswer:
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_success(self, session: AsyncSession, admin_user: User, factory_answers: List[Answer]):
+        random_answer = random.choice(factory_answers)
+        answer = await answer_services.get_answer(session=session, answer_id=random_answer.id, user=admin_user)
+        assert random_answer == answer
+
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_with_not_author(self, session: AsyncSession, factory_answers: List[Answer], user_and_its_pass: dict):
+        random_answer = random.choice(factory_answers)
+        if random_answer.available:
+            answer = await answer_services.get_answer(
+                session=session,
+                answer_id=random_answer.id,
+                user=user_and_its_pass["user"]
+            )
+            assert random_answer == answer
+        else:
+            with pytest.raises(HTTPException) as exception:
+                await answer_services.get_answer(
+                    session=session,
+                    answer_id=random_answer.id,
+                    user=user_and_its_pass["user"]
+                )
+                assert exception.value.status_code == 403
+
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_without_user(self, session: AsyncSession, factory_answers: List[Answer]):
+        random_answer = random.choice(factory_answers)
+        if random_answer.available:
+            answer = await answer_services.get_answer(
+                session=session,
+                answer_id=random_answer.id,
+            )
+            assert random_answer == answer
+        else:
+            with pytest.raises(HTTPException) as exception:
+                await answer_services.get_answer(
+                    session=session,
+                    answer_id=random_answer.id,
+                )
+                assert exception.value.status_code == 403
+
+    async def test_not_exists_answer(self, session: AsyncSession, admin_user: User):
+        with pytest.raises(HTTPException) as exception:
+            await answer_services.get_answer(
+                session=session,
+                answer_id=uuid4(),
+                user=admin_user
+            )
+            assert exception.value.status_code == 404
+
+    async def test_not_exists_answer_and_without_user(self, session: AsyncSession):
+        with pytest.raises(HTTPException) as exception:
+            await answer_services.get_answer(
+                session=session,
+                answer_id=uuid4(),
+            )
+            assert exception.value.status_code == 404

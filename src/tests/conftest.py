@@ -23,7 +23,7 @@ from app.services.answer import create_answer_attrs
 from app.services.base import is_object_exists
 from app.services.survey import create_survey_attrs
 from app.services.user import get_user
-from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory
+from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory, AnswerFactory
 from tests.utils import build_answer_attrs_with_survey_attrs
 
 settings = get_settings()
@@ -32,6 +32,7 @@ register(UserFactory)
 register(SurveyAttributeFactory)
 register(SurveyFactory)
 register(AnswerAttributeFactory)
+register(AnswerFactory)
 
 
 @pytest.fixture(scope="session")
@@ -157,7 +158,10 @@ async def factory_surveys(
         survey_factory: SurveyFactory,
         survey_attribute_factory: SurveyAttributeFactory
 ) -> List[Survey]:
-    surveys = survey_factory.build_batch(request.param)
+    if hasattr(request, "param"):
+        surveys = survey_factory.build_batch(request.param)
+    else:
+        surveys = survey_factory.build_batch(randint(1, 10))
     for survey in surveys:
         survey.user_id = admin_user.id
     session.add_all(surveys)
@@ -249,8 +253,47 @@ async def factory_answer(
 
 
 @pytest.fixture(scope="function")
+async def factory_answers(
+        request: SubRequest,
+        session: AsyncSession,
+        admin_user: User,
+        factory_surveys: List[Survey],
+        answer_factory: AnswerFactory
+) -> List[Answer]:
+    answers = list()
+    for answer, survey in zip(answer_factory.build_batch(len(factory_surveys)), factory_surveys):
+        answer.user_id = admin_user.id
+        answer.survey_id = survey.id
+        session.add(answer)
+        await session.commit()
+        if hasattr(request, "param") and request.param is True:
+            attrs = await build_answer_attrs_with_survey_attrs(survey=survey)
+            attrs = list([survey_schemas.AnswerAttribute(**attr) for attr in attrs])
+            attrs = await create_answer_attrs(session=session, attrs=attrs, answer_id=answer.id)
+            answer.__dict__["attrs"] = attrs
+        answers.append(answer)
+    return answers
+
+
+@pytest.fixture(scope="function")
 async def user_auth_test_client(access_token_and_user: dict) -> AsyncClient:
     async with AsyncClient(app=app, base_url="http://testserver", headers={
         "Authorization": f"Bearer {access_token_and_user['access_token']}"
     }) as client:
         yield client
+
+
+@pytest.fixture(scope="function")
+async def user_auth_test_client(access_token_and_user: dict) -> AsyncClient:
+    async with AsyncClient(app=app, base_url="http://testserver", headers={
+        "Authorization": f"Bearer {access_token_and_user['access_token']}"
+    }) as client:
+        yield client
+
+
+@pytest.fixture(scope="function")
+async def build_answer(factory_survey: Survey, answer_factory: AnswerFactory) -> Answer:
+    attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
+    answer = answer_factory.build()
+    answer.__dict__["attrs"] = attrs
+    return answer
