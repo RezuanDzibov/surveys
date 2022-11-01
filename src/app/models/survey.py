@@ -21,6 +21,7 @@ class Survey(UUIDMixin, Base):
 
 class Answer(UUIDMixin, Base):
     created_at = Column(DateTime, default=datetime.now)
+    available = Column(Boolean)
     survey_id = Column(UUID(as_uuid=True), ForeignKey(Survey.id), nullable=False)
     survey = relationship("Survey", back_populates="answers")
     user_id = Column(UUID(as_uuid=True), ForeignKey(User.id), nullable=False)
