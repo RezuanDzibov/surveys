@@ -80,6 +80,7 @@ class AnswerAttribute(BaseModel):
 
 
 class BaseAnswer(BaseModel):
+    available: bool
     attrs: List[AnswerAttribute]
 
     class Config:
