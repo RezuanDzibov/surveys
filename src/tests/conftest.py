@@ -158,7 +158,10 @@ async def factory_surveys(
         survey_factory: SurveyFactory,
         survey_attribute_factory: SurveyAttributeFactory
 ) -> List[Survey]:
-    surveys = survey_factory.build_batch(request.param)
+    if hasattr(request, "param"):
+        surveys = survey_factory.build_batch(request.param)
+    else:
+        surveys = survey_factory.build_batch(randint(1, 10))
     for survey in surveys:
         survey.user_id = admin_user.id
     session.add_all(surveys)
