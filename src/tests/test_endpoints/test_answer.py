@@ -1,4 +1,6 @@
 import json
+import random
+from typing import List
 from uuid import uuid4
 
 import pytest
@@ -9,10 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.settings import get_settings
 from app.models import Survey, Answer, AnswerAttribute
 from app.schemas import survey as schemas
+from app.schemas.survey import AnswerRetrieve
 from app.services import base as base_services
 from tests.factories import AnswerAttributeFactory
 from tests.test_endpoints.utils import uuid_to_str, serialize_uuid_to_str
-from tests.utils import build_answer_attrs_with_survey_attrs
 
 settings = get_settings()
 
@@ -101,3 +103,52 @@ class TestDeleteAnswer:
     async def test_for_not_author(self, factory_answer: Answer, user_auth_test_client: AsyncClient, ):
         response = await user_auth_test_client.delete(f"/answer/{factory_answer.id}")
         assert response.status_code == 403
+
+
+class TestGetAnswer:
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_success(self, session: AsyncSession, auth_test_client: AsyncClient, factory_answers: List[Answer]):
+        random_answer = random.choice(factory_answers)
+        response = await auth_test_client.get(f"/answer/{random_answer.id}")
+        answer = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert answer == await serialize_uuid_to_str(AnswerRetrieve.from_orm(random_answer).dict())
+
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_with_not_author(
+            self,
+            factory_answers: List[Answer],
+            user_auth_test_client: AsyncClient
+    ):
+        random_answer = random.choice(factory_answers)
+        response = await user_auth_test_client.get(f"/answer/{random_answer.id}")
+        if random_answer.available:
+            answer = json.loads(response.content.decode("utf-8"))
+            assert response.status_code == 200
+            assert answer == await serialize_uuid_to_str(AnswerRetrieve.from_orm(random_answer).dict())
+        else:
+            assert response.status_code == 403
+
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_without_user(
+            self,
+            session: AsyncSession,
+            factory_answers: List[Answer],
+            test_client: AsyncClient
+    ):
+        random_answer = random.choice(factory_answers)
+        response = await test_client.get(f"/answer/{random_answer.id}")
+        if random_answer.available:
+            answer = json.loads(response.content.decode("utf-8"))
+            assert response.status_code == 200
+            assert answer == await serialize_uuid_to_str(AnswerRetrieve.from_orm(random_answer).dict())
+        else:
+            assert response.status_code == 403
+
+    async def test_not_exists_answer(self, session: AsyncSession, auth_test_client: AsyncClient):
+        response = await auth_test_client.get(f"/answer/{uuid4()}")
+        assert response.status_code == 404
+
+    async def test_not_exists_answer_and_without_user(self, session: AsyncSession, test_client: AsyncClient):
+        response = await test_client.get(f"/answer/{uuid4()}")
+        assert response.status_code == 404
