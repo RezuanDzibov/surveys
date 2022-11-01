@@ -1,3 +1,4 @@
+import random
 from typing import List
 from uuid import uuid4
 
@@ -146,3 +147,64 @@ class TestDeleteAnswer:
                 answer_id=uuid4()
             )
             assert exception.value.status_code == 403
+
+
+class TestGetAnswer:
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_success(self, session: AsyncSession, admin_user: User, factory_answers: List[Answer]):
+        random_answer = random.choice(factory_answers)
+        answer = await answer_services.get_answer(session=session, answer_id=random_answer.id, user=admin_user)
+        assert random_answer == answer
+
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_with_not_author(self, session: AsyncSession, factory_answers: List[Answer], user_and_its_pass: dict):
+        random_answer = random.choice(factory_answers)
+        if random_answer.available:
+            answer = await answer_services.get_answer(
+                session=session,
+                answer_id=random_answer.id,
+                user=user_and_its_pass["user"]
+            )
+            assert random_answer == answer
+        else:
+            with pytest.raises(HTTPException) as exception:
+                await answer_services.get_answer(
+                    session=session,
+                    answer_id=random_answer.id,
+                    user=user_and_its_pass["user"]
+                )
+                assert exception.value.status_code == 403
+
+    @pytest.mark.parametrize("factory_answers", [True], indirect=True)
+    async def test_without_user(self, session: AsyncSession, factory_answers: List[Answer]):
+        random_answer = random.choice(factory_answers)
+        if random_answer.available:
+            answer = await answer_services.get_answer(
+                session=session,
+                answer_id=random_answer.id,
+            )
+            assert random_answer == answer
+        else:
+            with pytest.raises(HTTPException) as exception:
+                await answer_services.get_answer(
+                    session=session,
+                    answer_id=random_answer.id,
+                )
+                assert exception.value.status_code == 403
+
+    async def test_not_exists_answer(self, session: AsyncSession, admin_user: User):
+        with pytest.raises(HTTPException) as exception:
+            await answer_services.get_answer(
+                session=session,
+                answer_id=uuid4(),
+                user=admin_user
+            )
+            assert exception.value.status_code == 404
+
+    async def test_not_exists_answer_and_without_user(self, session: AsyncSession):
+        with pytest.raises(HTTPException) as exception:
+            await answer_services.get_answer(
+                session=session,
+                answer_id=uuid4(),
+            )
+            assert exception.value.status_code == 404
