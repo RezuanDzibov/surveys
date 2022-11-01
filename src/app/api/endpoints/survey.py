@@ -9,7 +9,7 @@ from app.api.deps import get_current_active_user, get_current_active_user_or_non
 from app.db.base import get_session
 from app.models import User
 from app.schemas.survey import SurveyCreate, SurveyOut, SurveyUpdate, SurveyAttributeUpdate, \
-    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve, SurveyAttributeRetrieve, SurveyDelete, SurveyUpdateOut
+    SurveyFilter, SurveyRetrieve, SurveyOwnerRetrieve, SurveyAttributeRetrieve, SurveyUpdateOut
 from app.services import survey as survey_services
 from app.services.filtering.survey import filter_surveys
 
@@ -77,14 +77,13 @@ async def update_survey(
     return survey
 
 
-@router.delete("/{id_}", status_code=202, response_model=SurveyDelete)
+@router.delete("/{id_}", status_code=204)
 async def delete_survey(
         id_: UUID4,
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_active_user)
 ):
-    survey = await survey_services.delete_survey(session=session, user=current_user, id_=id_)
-    return survey
+    await survey_services.delete_survey(session=session, user=current_user, id_=id_)
 
 
 @router.patch("/attr/{id_}")
@@ -103,14 +102,13 @@ async def update_survey_attr(
     return survey_attr
 
 
-@router.delete("/attr/{id_}",  response_model=SurveyAttributeRetrieve, status_code=202)
+@router.delete("/attr/{id_}", status_code=204)
 async def delete_survey_attr(
         id_: UUID4,
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_active_user),
 ):
-    survey_attr = await survey_services.delete_survey_attribute(session=session, user=current_user, id_=id_)
-    return survey_attr
+    await survey_services.delete_survey_attribute(session=session, user=current_user, id_=id_)
 
 
 @router.get("/attr/{id_}", response_model=SurveyAttributeRetrieve, status_code=200)

@@ -134,8 +134,7 @@ class TestDeleteUser:
             "user",
             data={"login": user_and_its_pass["user"].username, "password": user_and_its_pass["password"]}
         )
-        survey = json.loads(response.content.decode("utf-8"))
-        assert UserRetrieve(**survey) == UserRetrieve.from_orm(user_and_its_pass["user"])
+        assert response.status_code == 204
         assert not await base_services.is_object_exists(
             session=session,
             where_statement=select(User).where(User.id == user_and_its_pass["user"].id)
