@@ -19,10 +19,10 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         created_answer = await answer_services.CreateAnswer(
             session=session,
             answer=expected_answer,
@@ -35,13 +35,13 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
         attr = AnswerAttributeFactory.build()
         attr.survey_attr_id = uuid4()
-        attrs.append(attr.as_dict())
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        build_answer.attrs.append(attr)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         with pytest.raises(HTTPException) as exception:
             await answer_services.CreateAnswer(
                 session=session,
@@ -55,12 +55,11 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            build_answer_attrs: List[AnswerAttribute],
             factory_answer: Answer,
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         with pytest.raises(HTTPException) as exception:
             await answer_services.CreateAnswer(
                 session=session,
@@ -74,11 +73,10 @@ class TestCreateAnswer:
             self,
             admin_user: User,
             session: AsyncSession,
-            build_answer_attrs: List[AnswerAttribute],
-            factory_survey: Survey
+            factory_survey: Survey,
+            build_answer: Answer
     ):
-        attrs = await build_answer_attrs_with_survey_attrs(survey=factory_survey)
-        expected_answer = schemas.BaseAnswer(attrs=attrs)
+        expected_answer = schemas.BaseAnswer.from_orm(build_answer)
         with pytest.raises(HTTPException) as exception:
             await answer_services.CreateAnswer(
                 session=session,
