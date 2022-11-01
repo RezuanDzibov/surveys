@@ -23,7 +23,7 @@ from app.services.answer import create_answer_attrs
 from app.services.base import is_object_exists
 from app.services.survey import create_survey_attrs
 from app.services.user import get_user
-from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory
+from tests.factories import UserFactory, SurveyAttributeFactory, SurveyFactory, AnswerAttributeFactory, AnswerFactory
 from tests.utils import build_answer_attrs_with_survey_attrs
 
 settings = get_settings()
@@ -32,6 +32,7 @@ register(UserFactory)
 register(SurveyAttributeFactory)
 register(SurveyFactory)
 register(AnswerAttributeFactory)
+register(AnswerFactory)
 
 
 @pytest.fixture(scope="session")
